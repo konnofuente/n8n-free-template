@@ -1,0 +1,225 @@
+{
+  "updatedAt": "2025-12-10T00:39:52.000Z",
+  "createdAt": "2025-11-04T16:42:08.127Z",
+  "id": "7OhFTkAHDkh9Tshs",
+  "name": "Faith weathermap",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🤖 Automated Weather Bot\n\n**This workflow:**\n1. Triggers on schedule (daily)\n2. Fetches weather from OpenWeatherMap\n3. Formats data with emojis\n4. Sends to Telegram chat\n\n**Setup needed:**\n- OpenWeatherMap API key\n- Telegram bot token\n- Your chat ID",
+        "height": 392,
+        "width": 300
+      },
+      "id": "e6b01b95-8d79-42b5-b697-77815e4b815c",
+      "name": "Workflow Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -432,
+        -368
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hour": 9,
+              "minute": 33
+            }
+          ]
+        }
+      },
+      "id": "8d8b3f00-0689-4a7a-890e-10a97c6ca5bf",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.cron",
+      "position": [
+        -288,
+        192
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "⏰ **SCHEDULE TRIGGER**\n\nSet when to send weather reports:\n- Default: 8:00 AM daily\n- Change cron: 0 8 * * *\n- Every 6h: 0 */6 * * *\n- Twice daily: 0 8,18 * * *",
+        "height": 296,
+        "width": 280
+      },
+      "id": "7862ecc6-39dc-45c2-81ce-7b6038b21312",
+      "name": "Schedule Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -432,
+        352
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "cityName": "Yaounde",
+        "language": "en"
+      },
+      "id": "b9b9d56c-f9d7-4d80-84d7-09d03269c96b",
+      "name": "Get Weather",
+      "type": "n8n-nodes-base.openWeatherMap",
+      "position": [
+        -32,
+        192
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "vXcW6EZsTvU5tQKi",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🌤️ **WEATHER DATA**\n\n**Required:**\n- OpenWeatherMap credentials\n- Change city: \"YourCity,CountryCode\"\n- Language: en, es, fr, de, pl\n\n**Gets:** temp, humidity, wind, etc.",
+        "height": 296,
+        "width": 248
+      },
+      "id": "b1031b86-5d5b-4f96-b450-5f8ab74a1d65",
+      "name": "Weather API",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        352
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "functionCode": "const weather = items[0].json;\n\nfunction formatTime(timestamp, timezoneOffset) {\n  const date = new Date((timestamp + timezoneOffset) * 1000);\n  return date.toISOString().substr(11, 5);\n}\n\nconst city = weather.name;\nconst temp = weather.main.temp.toFixed(1);\nconst tempMin = weather.main.temp_min.toFixed(1);\nconst tempMax = weather.main.temp_max.toFixed(1);\nconst feelsLike = weather.main.feels_like.toFixed(1);\nconst description = weather.weather[0].description;\nconst rain = weather.rain ? weather.rain[\"1h\"] : 0;\nconst windSpeed = weather.wind.speed.toFixed(1);\nconst windDeg = weather.wind.deg;\nconst clouds = weather.clouds.all;\nconst sunrise = formatTime(weather.sys.sunrise, weather.timezone);\nconst sunset = formatTime(weather.sys.sunset, weather.timezone);\n\nconst message = `Weather in ${city}:\n🌡 Temperature: ${temp}°C (feels like: ${feelsLike}°C)\n📉 Min: ${tempMin}°C, 📈 Max: ${tempMax}°C\n🌧 Precipitation: ${description}, ${rain} mm in the last hour\n💨 Wind: ${windSpeed} m/s, direction ${windDeg}°\n☁️ Cloudiness: ${clouds}%\n🌅 Sunrise: ${sunrise}\n🌇 Sunset: ${sunset}`;\n\nreturn [{ json: { message } }];"
+      },
+      "id": "f6ed2a37-874a-452f-a3b8-0bb7070d44fe",
+      "name": "Format Weather",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        256,
+        192
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "📝 **FORMAT MESSAGE**\n\n**Converts raw data to:**\n- Human-readable text\n- Emojis for visual appeal\n- Organized layout\n- Local time zones\n\n**Customize:** Edit the message template in function code",
+        "height": 288,
+        "width": 200
+      },
+      "id": "540ab4bd-f04f-4041-a710-3e109f82ee56",
+      "name": "Message Formatting",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        240,
+        384
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.message }}",
+        "additionalFields": {}
+      },
+      "id": "aea6052a-2665-443d-80d3-367d1ca7de8f",
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        512,
+        192
+      ],
+      "webhookId": "a1a10685-f8eb-4b97-897f-3c9031e8de55",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "IlZ59a8OZp9tuHrb",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📱 **SEND TO TELEGRAM**\n\n**Required setup:**\n1. Create bot via @BotFather\n2. Get bot token\n3. Get your chat ID\n4. Replace XXXXXXX with your chat ID\n\n**Result:** Weather report in your chat!",
+        "height": 296,
+        "width": 200
+      },
+      "id": "5d51fad0-d3e9-4c97-aea2-17717233f083",
+      "name": "Telegram Delivery",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        464,
+        352
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "🚀 **QUICK START:**\n\n1. **Get OpenWeatherMap API key** (free at openweathermap.org)\n2. **Create Telegram bot** (message @BotFather)\n3. **Find your chat ID** (send message to bot, visit api URL)\n4. **Configure nodes** (add credentials, update chat ID)\n5. **Test workflow** (click test button)\n6. **Activate** (toggle switch ON)\n\n✅ Done! You'll get daily weather reports!",
+        "height": 324,
+        "width": 350
+      },
+      "id": "a8a80d3b-1d6b-4b2e-a8f5-f43bba48a2ab",
+      "name": "Quick Start Guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        112,
+        -352
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Get Weather": {
+      "main": [
+        [
+          {
+            "node": "Format Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Weather": {
+      "main": [
+        []
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "d2de0e8d-1e83-4c58-870b-682abf4c2695",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-04T16:42:08.133Z",
+      "createdAt": "2025-11-04T16:42:08.133Z",
+      "role": "workflow:owner",
+      "workflowId": "7OhFTkAHDkh9Tshs",
+      "projectId": "ene3OLMtB0nh9ppE"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
