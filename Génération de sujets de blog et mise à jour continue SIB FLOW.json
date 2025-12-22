@@ -1,0 +1,977 @@
+{
+  "updatedAt": "2025-12-10T14:09:37.000Z",
+  "createdAt": "2025-12-10T14:09:37.917Z",
+  "id": "9k9Zsgx4CnPbijMM",
+  "name": "Génération de sujets de blog et mise à jour continue SIB FLOW",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "fieldToSplitOut": " keyword",
+        "options": {}
+      },
+      "id": "08369199-a2da-4299-bb8e-c0265e7956c1",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -672,
+        576
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 4,
+              "triggerAtMinute": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -672,
+        -32
+      ],
+      "id": "cd227a6b-5ca6-4296-b77b-8a806d7d2d7d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://sibflow.com/sitemap.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -16,
+        -32
+      ],
+      "id": "3bafd402-a4c9-4948-9f27-c5c58c437535",
+      "name": "HTTP Request - Fetch Sitemap",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "dataPropertyName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        352,
+        -16
+      ],
+      "id": "11918274-cdd4-4558-9fa1-6ffba2245687",
+      "name": "XML"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "loc",
+              "renameField": true,
+              "outputFieldName": "URL list"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        864,
+        -16
+      ],
+      "id": "611fe5b7-0e70-4587-a9d7-aaadaa5faa1a",
+      "name": "Aggregate",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "urlset.url",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        608,
+        -16
+      ],
+      "id": "1cb63686-b7d1-47b2-929e-0bf99324e5d7",
+      "name": "Split Out - array format",
+      "executeOnce": false,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Assuming the input JSON is an array with a field 'URL list' that contains the URLs\nconst urlList = $json['URL list'];\n\n// Check if 'URL list' exists and is an array\nif (Array.isArray(urlList)) {\n    return urlList.map(url => {\n        // You can add further transformations here if necessary\n        return { json: { url: url } };\n    });\n} else {\n    throw new Error('URL list is missing or not an array.');\n}\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        -16
+      ],
+      "id": "99a03027-3f38-457e-953e-a5217dc34968",
+      "name": "Function - parse the sitemap and extract the URLs",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// Make sure there's at least one URL\nif (\n  items.length === 0 ||\n  !Array.isArray(items[0].json.sitemapUrls) ||\n  items[0].json.sitemapUrls.length === 0\n) {\n  throw new Error(\"No sitemap URLs found in input.\");\n}\n\n// Use the first URL from the sitemap\nconst postUrl = items[0].json.sitemapUrls[0];\nconst homepageUrl = postUrl.split('/').slice(0, 3).join('/');\n\nreturn [{ json: { homepageUrl } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -656,
+        288
+      ],
+      "id": "5474e0a7-3c48-4325-8f3e-845a9135a3c9",
+      "name": "post url to homepageUrl"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.homepageUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -432,
+        288
+      ],
+      "id": "3dc1d61e-cd7c-4b4a-a236-84201679889c",
+      "name": "Fetch Web Page Content1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const urls = items.map(item => item.json.url).filter(Boolean);\nreturn [{ json: { \"sitemapUrls\": urls } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        -16
+      ],
+      "id": "abe06455-a965-45b0-a7f5-cf8804c67bdf",
+      "name": "Combine Sitemap URLs"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Voici le titre et la description de la page d'accueil du site web :\nTitre : {{ $json.title }}\nDescription : {{ $json.description }}\n\nVeuillez maintenant analyser ce contenu afin de comprendre le profil client idéal (ICP - Ideal Customer Profile).\n\nExpliquez de quoi il s'agit pour ce business.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        144,
+        288
+      ],
+      "id": "fef902d4-9861-47b9-8850-44a45c129546",
+      "name": "About Business",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Maintenant, veuillez créer un profil client idéal (ICP) détaillé à partir des informations du site web fournies dans {{ $json.output }}.\n\nAssurez-vous que toutes les informations soient hautement pertinentes pour la niche de l’entreprise.\n\nNom de l’entreprise ou du site web :\n\nSecteur d’activité / Niche :\n\nProduit ou service proposé :\n\nTranche d’âge du public cible :\n\nLocalisation(s) du public cible :\n\nPrincipaux points de douleur du public cible :\n\nNiveau de revenu (ex. : moyen, supérieur-moyen) :\n\nTraits comportementaux ou centres d’intérêt :\n\nAutres informations utiles pour comprendre le client idéal :",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        592,
+        288
+      ],
+      "id": "8729ee5c-8cf6-4244-a65d-249d050270c9",
+      "name": "ICP (Ideal Customer Profile)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Utilisateur :\nVoici quelques règles importantes à suivre :\n<règles>\n\nAnalyse attentivement les informations du profil client idéal (ICP).\n\nGénère 15 à 20 mots-clés de base pertinents pour les besoins, défis, objectifs et comportements de recherche de l’ICP.\n\nLes mots-clés doivent être suffisamment larges pour être considérés comme des « mots-clés principaux », mais assez spécifiques pour cibler efficacement l’ICP.\n\nPrends en compte les différentes étapes du parcours de l’ICP : sensibilisation, considération, décision.\n\nInclue un mélange de mots-clés liés aux services ou produits, aux problèmes, et aux solutions.\n\nVa au-delà du service ou produit : considère les tendances du secteur, les technologies connexes, et les concepts commerciaux plus larges qui peuvent intéresser l’ICP.\n\nÉvite les termes trop génériques susceptibles d’attirer un trafic non qualifié.\n\nVise un mélange de difficultés de mots-clés, y compris des termes compétitifs et d’autres moins concurrentiels.\n\nInclue des mots-clés correspondant à différentes intentions de recherche : informationnelle, navigationnelle, commerciale et transactionnelle.\n\nConsidère les outils ou plateformes que l’ICP pourrait utiliser, et inclue des mots-clés liés aux intégrations pertinentes.\n\nSi pertinent, ajoute des mots-clés spécifiques à une localisation géographique, selon les données de l’ICP.\n\nIntègre la terminologie spécifique à l’industrie ou le jargon que l’ICP est susceptible d’utiliser dans ses recherches.\n\nPrends en compte les tendances émergentes ou les points de douleur actuels dans le secteur de l’ICP, susceptibles de susciter des recherches.\n\nFormate les mots-clés en minuscules, sans ponctuation. Supprime les espaces inutiles au début ou à la fin.\n</règles>\n\nTon résultat doit être un tableau de chaînes de caractères, chaque élément représentant un mot-clé de base :\n<exemple>\n['génération de leads b2b', 'stratégies marketing startup', 'entonnoir de vente saas', ...]\n</exemple>\n\nVoici les informations du profil client idéal (ICP) :\n<entrée>\n{{ $json.output }}\n</entrée>\n\nEt voici les informations sur mon entreprise :\n{{ $('About Business').item.json.output }}\n\nMaintenant :\nÀ partir de l’ICP fourni, génère un tableau de 15 à 20 mots-clés de base qui serviront de fondement à une stratégie SEO complète pour cette entreprise SaaS B2B. Ces mots-clés doivent refléter une compréhension approfondie des besoins, des défis et des comportements de recherche de l’ICP, tout en tenant compte des tendances du secteur et des concepts associés.",
+        "options": {}
+      },
+      "id": "9328e867-2154-4f2e-9f22-a4f37c5b6214",
+      "name": "Find Seed keywords",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        992,
+        288
+      ],
+      "typeVersion": 1.6
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0f17c0e5-c3a0-40f6-a8d8-d959ecf65163",
+              "leftValue": "={{ $json.DuplicateStatus }}",
+              "rightValue": "Unique",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        1024
+      ],
+      "id": "2c5e617d-6c34-4364-979e-739d1f745275",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all items from the input\nconst items = $input.all();\n\n// Extract Blog Topics\nconst blogTopics = items.map(item => item.json[\"Blog Topic\"]);\n\n// Find duplicates\nconst duplicates = blogTopics.filter((item, index) => \n  blogTopics.indexOf(item) !== index\n);\n\n// Mark items as duplicate or unique\nconst result = items.map(item => {\n  const isDuplicate = duplicates.includes(item.json[\"Blog Topic\"]);\n  return {\n    json: {\n      ...item.json,\n      DuplicateStatus: isDuplicate ? \"Duplicate\" : \"Unique\"\n    }\n  };\n});\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        992
+      ],
+      "id": "924bea23-9c81-4247-b72d-3739b2d70f78",
+      "name": "Function"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "title",
+              "cssSelector": "title"
+            },
+            {
+              "key": "description",
+              "cssSelector": "meta[name=\"description\"]",
+              "returnValue": "attribute",
+              "attribute": "content"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -128,
+        288
+      ],
+      "id": "daa4c39e-4433-4827-afb1-47641e2ba222",
+      "name": "HTML Extract : find title & description"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 1400,
+        "width": 2360
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -816,
+        -144
+      ],
+      "id": "dc10ef4e-039e-4462-bfae-6bc0b23c0b83",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0fee2757-5e13-47b5-b056-82649f2a420a",
+              "name": "Seed Keyword",
+              "value": "={{ $json.seedKeyword }}",
+              "type": "string"
+            },
+            {
+              "id": "9ad23873-8eaf-4026-98f7-4bab6b78c9c8",
+              "name": "Buyer Intent Keyword",
+              "value": "={{ $json.buyerIntentKeyword }}",
+              "type": "string"
+            },
+            {
+              "id": "4efaf2fb-c3d9-45d4-995c-4dbaea7513a0",
+              "name": "LSI Keywords",
+              "value": "={{ $json.lsiKeywords }}",
+              "type": "string"
+            },
+            {
+              "id": "b1952619-6cd8-42f7-ab4e-61e5e971b54c",
+              "name": "Blog Topic",
+              "value": "={{ $json.blogTopic }}",
+              "type": "string"
+            },
+            {
+              "id": "c42dec4c-31f2-444b-8aa1-115d0aa6ca36",
+              "name": "Search Intent",
+              "value": "={{ $json.searchIntent }}",
+              "type": "string"
+            },
+            {
+              "id": "f79d1bde-10ea-40bd-98e9-8b9ffab139f4",
+              "name": "Target Audience",
+              "value": "={{ $json.targetAudience }}",
+              "type": "string"
+            },
+            {
+              "id": "6d584636-c66d-402e-a2c2-574ab2073269",
+              "name": "Content Type",
+              "value": "={{ $json.contentType }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1056,
+        592
+      ],
+      "id": "9ce020a4-a8d0-42f1-bd4b-c215a58c1d6a",
+      "name": "set node to get blog topic column"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -640,
+        944
+      ],
+      "id": "8720febc-33a4-477c-93a5-e3e505854ebf",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        1008
+      ],
+      "id": "7f13eea4-a6a3-4251-bcfd-457e9ce6d2a3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = items[0].json.output;\nconst clean = raw.replace(/^\\[|\\]$/g, ''); // remove square brackets\nconst keywords = clean.split(/',\\s*'/).map(s => s.replace(/^'/, '').replace(/'$/, '')); // split and remove extra quotes\n\nreturn keywords.map(keyword => ({\n  json: { keyword }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        288
+      ],
+      "id": "a06557ff-f6ab-4765-bde4-bced0fc8543d",
+      "name": "arrange this list"
+    },
+    {
+      "parameters": {
+        "content": "## If you want to generate 5 blog topics daily, just change the \"Generate complete info for table\" node and edit the prompt as needed. Right now, it is set to generate 2 blog topics daily.\n",
+        "height": 120,
+        "width": 980,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        -176
+      ],
+      "id": "d34b90dc-784e-4e06-a458-e01cc01be453",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const seenRows = new Set();\nconst uniqueItems = [];\n\nfor (const item of items) {\n  const rowNum = item.json.row_number;\n\n  if (!seenRows.has(rowNum)) {\n    seenRows.add(rowNum);\n    uniqueItems.push(item);\n  }\n}\n\nreturn uniqueItems;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        592
+      ],
+      "id": "7b03d727-9839-427b-ac05-95552055e5fc",
+      "name": "Remove duplicate row"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Génère deux sujets de blog uniques en te basant sur les instructions fournies dans le message système.",
+        "options": {
+          "systemMessage": "=You are an expert SEO content strategist specializing in high-buying intent blog topics that drive conversions. Your task is to generate exactly two unique blog topic ideas based on the provided business information and ideal customer profile (ICP). Follow the instructions precisely.\n\nBusiness Information: {{ $('About Business').item.json.output }}\nIdeal Customer Profile (ICP): {{ $('ICP (Ideal Customer Profile)').item.json.output }}\n\nInstructions:\n1. Generate exactly two unique blog topics that:\n   - Are fresh, relevant, and distinct from existing topics listed in the sitemap: {{ $('Combine Sitemap URLs').item.json.sitemapUrls.join('\\n') }}\n   - Do not cover this topic, as it’s already in use: {{ $json['Blog Topic'] }}\n   - Focus on high-buying intent keywords with strong search volume to attract users ready to buy, compare, or act.\n   - Are short, catchy, and SEO-optimized for high-intent traffic.\n2. Distribute intent as follows:\n   - Topic 1: Transactional (35%)\n   - Topic 2: Commercial (35%)\n3. Output exactly two table rows in the format:\n   Seed Keyword | Buyer Intent Keyword | LSI Keywords | Blog Topic | Search Intent | Target Audience | Content Type\n4. Ensure:\n   - Each row is a single line of text with columns separated by a pipe (|) character.\n   - The two rows are separated by a single newline (\\n).\n   - LSI Keywords are comma-separated within the column (e.g., keyword1, keyword2, keyword3).\n   - Blog topics are unique and distinct from each other.\n   - Do not wrap the output in quotation marks, square brackets, or any other characters.\n   - Do not output the rows as a single string (e.g., do not output \"row1 | row2 \\\\n row3 | row4\").\n   - Do not include any JSON structure (e.g., do not output [{\"output\": \"...\"}]).\n   - Do not include any extra text, explanations, headers, markdown, bullets, or special symbols (e.g., *, #, -, >).\n   - Do not include quotation marks around blog topics or any other field.\n\nExample of Correct Output:\neco friendly products | buy eco friendly products | sustainable living, green products, eco conscious | Top 5 Eco-Friendly Products to Buy in 2025 | Transactional | Eco-conscious consumers | Listicle\nsolar panels | best solar panels 2025 | renewable energy, solar power, energy savings | Best Solar Panels for Home Use in 2025 | Commercial | Homeowners | Review\n\nOutput:\n[Generate exactly two rows as raw text in the specified format, separated by a single newline, with no additional text, string encapsulation, or JSON structure.]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        112,
+        592
+      ],
+      "id": "6a0e522a-3ba6-4d09-bedc-2bc385eade31",
+      "name": "Generate complete info for table1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9ff4977b-448c-452c-b653-813fecc86406",
+              "name": "Date To Be Published",
+              "value": "={{ $('extract_today_date').first().json.todayDate }}",
+              "type": "string"
+            },
+            {
+              "id": "0fee2757-5e13-47b5-b056-82649f2a420a",
+              "name": "Seed Keyword",
+              "value": "={{ $json[\"Seed Keyword\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "9ad23873-8eaf-4026-98f7-4bab6b78c9c8",
+              "name": "Buyer Intent Keyword",
+              "value": "={{ $json[\"Buyer Intent Keyword\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "4efaf2fb-c3d9-45d4-995c-4dbaea7513a0",
+              "name": "LSI Keywords",
+              "value": "={{ $json[\"LSI Keywords\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "b1952619-6cd8-42f7-ab4e-61e5e971b54c",
+              "name": "Blog Topic",
+              "value": "={{ $json[\"Blog Topic\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "c42dec4c-31f2-444b-8aa1-115d0aa6ca36",
+              "name": "Search Intent",
+              "value": "={{ $json[\"Search Intent\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "f79d1bde-10ea-40bd-98e9-8b9ffab139f4",
+              "name": "Target Audience",
+              "value": "={{ $json[\"Target Audience\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "3b253378-84c9-4226-83cb-099c5eed07df",
+              "name": "Word Count",
+              "value": "1500",
+              "type": "string"
+            },
+            {
+              "id": "11ad8322-e5ba-427f-a0d9-99ce12795c88",
+              "name": "Website",
+              "value": "={{ $('post url to homepageUrl').first().json.homepageUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "6d584636-c66d-402e-a2c2-574ab2073269",
+              "name": "Content Type",
+              "value": "={{ $json[\"Content Type\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "ed3274cc-e3ce-4f4d-9cde-e29609331064",
+              "name": "Status",
+              "value": "=Pending",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1072,
+        1024
+      ],
+      "id": "31b46281-c784-41ac-88d3-999b8b4684fa",
+      "name": "set node to get blog topic column1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const date = new Date();\nconst formattedDate1 = $input.first().json[\"Readable date\"]\n const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}-${date.getFullYear()}`;\n \nreturn [{ json: { formattedDate } }];\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -496,
+        -32
+      ],
+      "id": "561c89b3-96f8-4e67-8666-0de2202b4dac",
+      "name": "getdatefrompreviousnode"
+    },
+    {
+      "parameters": {
+        "jsCode": "const today = new Date();\nconst todayStr = `${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}-${today.getFullYear()}`;\n\nconst matchingItems = items.filter(item => {\n  const sheetDate = item.json['Date To Be Published']?.trim();\n  return sheetDate === todayStr;\n});\n\nreturn matchingItems.length ? matchingItems : [{ json: { message: 'No blog scheduled for today', todayDate: todayStr } }];\n\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        -32
+      ],
+      "id": "8a24677f-e55b-46d5-af38-9ca9a27b4ff4",
+      "name": "extract_today_date"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input data\nconst input = $input.first();\n\n// Check if input exists\nif (!input || !input.json) {\n  throw new Error('No input data received or input is not in the expected JSON format');\n}\n\n// Get the raw string from the Open AI node's output (try 'output' field)\nconst rawOutput = input.json.output || input.json.cleanedOutput;\n\n// Check if rawOutput exists\nif (!rawOutput) {\n  throw new Error('No output or cleanedOutput field found in the input data');\n}\n\n// Split the string on newlines and filter out empty lines\nconst rows = rawOutput.split(/\\n+/).filter(row => row.trim() !== '');\n\n// Define the column names for the table\nconst columnNames = [\n  'seedKeyword',\n  'buyerIntentKeyword',\n  'lsiKeywords',\n  'blogTopic',\n  'searchIntent',\n  'targetAudience',\n  'contentType'\n];\n\n// Map each row to an object with named fields\nconst outputItems = rows.map(row => {\n  // Split the row into columns using the pipe (|) separator\n  const columns = row.split('|').map(col => col.trim());\n\n  // Ensure the row has the correct number of columns\n  if (columns.length !== columnNames.length) {\n    throw new Error(`Row does not have the expected number of columns (${columnNames.length}): ${row}`);\n  }\n\n  // Create an object with named fields\n  const rowObject = {};\n  columnNames.forEach((colName, index) => {\n    rowObject[colName] = columns[index];\n  });\n\n  return { json: rowObject };\n});\n\n// Return the result as an array of objects\nreturn outputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        592
+      ],
+      "id": "2c39e2e8-abff-44b8-825e-8cbf6a867397",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        112,
+        496
+      ],
+      "id": "f25dfa1e-90e4-4d2a-b9b3-d8ad3434af30",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        544,
+        480
+      ],
+      "id": "8cdeb2a8-9e0b-4aab-9d93-5ec837107203",
+      "name": "Google Gemini Chat Model1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        960,
+        464
+      ],
+      "id": "a0d3467d-117c-4dd6-b9eb-1bc1816845fd",
+      "name": "Google Gemini Chat Model2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        144,
+        816
+      ],
+      "id": "747fce62-23f2-43ac-b034-52608a588ee9",
+      "name": "Google Gemini Chat Model3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        1024
+      ],
+      "id": "0d85b9f2-c2db-4ec1-b117-45d4257d26b0",
+      "name": "Save Extracted Data to Google Sheets1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        576
+      ],
+      "id": "9a222e4d-b684-4498-b8e0-d0e4ff5e9004",
+      "name": "Get row(s)"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "getdatefrompreviousnode",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - Fetch Sitemap": {
+      "main": [
+        [
+          {
+            "node": "XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XML": {
+      "main": [
+        [
+          {
+            "node": "Split Out - array format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Function - parse the sitemap and extract the URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out - array format": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function - parse the sitemap and extract the URLs": {
+      "main": [
+        [
+          {
+            "node": "Combine Sitemap URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "post url to homepageUrl": {
+      "main": [
+        [
+          {
+            "node": "Fetch Web Page Content1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Web Page Content1": {
+      "main": [
+        [
+          {
+            "node": "HTML Extract : find title & description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Sitemap URLs": {
+      "main": [
+        [
+          {
+            "node": "post url to homepageUrl",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "About Business": {
+      "main": [
+        [
+          {
+            "node": "ICP (Ideal Customer Profile)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ICP (Ideal Customer Profile)": {
+      "main": [
+        [
+          {
+            "node": "Find Seed keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Seed keywords": {
+      "main": [
+        [
+          {
+            "node": "arrange this list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "set node to get blog topic column1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML Extract : find title & description": {
+      "main": [
+        [
+          {
+            "node": "About Business",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set node to get blog topic column": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Function",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "arrange this list": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove duplicate row": {
+      "main": [
+        [
+          {
+            "node": "Generate complete info for table1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate complete info for table1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getdatefrompreviousnode": {
+      "main": [
+        [
+          {
+            "node": "extract_today_date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract_today_date": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Fetch Sitemap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "set node to get blog topic column",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "About Business",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "ICP (Ideal Customer Profile)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Find Seed keywords",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate complete info for table1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "6d9dfe1f-3f39-4f59-9c57-35bc7f74e372",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-10T14:09:37.920Z",
+      "createdAt": "2025-12-10T14:09:37.920Z",
+      "role": "workflow:owner",
+      "workflowId": "9k9Zsgx4CnPbijMM",
+      "projectId": "ene3OLMtB0nh9ppE"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
