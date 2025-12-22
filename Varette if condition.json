@@ -1,0 +1,142 @@
+{
+  "updatedAt": "2025-12-10T00:39:56.000Z",
+  "createdAt": "2025-11-21T13:18:34.178Z",
+  "id": "KfuenKUl2cvMJAkp",
+  "name": "Varette if condition",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Request an installation",
+        "formDescription": "Fill out this form to request an installation.We'll reach out via email to finalize your appointment.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Email Address",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Preferred install date ",
+              "fieldType": "date"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e99dac86-757b-4267-b0c6-e7cf0f20ae47",
+      "name": "On form submission",
+      "webhookId": "e01de9f5-2c95-4a8a-99ca-7b5e2911feac"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0f8a947c-b113-4af6-a5aa-b3b7611f01df",
+              "leftValue": "={{ $json['Preferred install date '].toDateTime() }}",
+              "rightValue": "={{ $now.plus(7,'days') }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "beforeOrEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d12bd319-20d1-404a-a442-5ae304cbf76c",
+      "name": "within 7 days1"
+    },
+    {
+      "parameters": {
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        96
+      ],
+      "id": "5ee5657e-8528-4169-b1b4-1fec8ddbdaf3",
+      "name": "Send a message",
+      "webhookId": "536c6081-609a-4fa7-96d9-09a9e4cad4c9"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "within 7 days1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "within 7 days1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "Email Address": "varettetchamake@gmail.com",
+          "Preferred install date ": "2025-11-26",
+          "submittedAt": "2025-11-21T15:26:20.544+01:00",
+          "formMode": "test"
+        }
+      }
+    ]
+  },
+  "versionId": "0a679420-5ee8-43a4-9114-900c8eeacc6b",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-11-21T13:18:34.182Z",
+      "createdAt": "2025-11-21T13:18:34.182Z",
+      "role": "workflow:owner",
+      "workflowId": "KfuenKUl2cvMJAkp",
+      "projectId": "ene3OLMtB0nh9ppE"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
