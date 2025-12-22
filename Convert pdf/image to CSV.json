@@ -1,0 +1,563 @@
+{
+  "updatedAt": "2025-09-13T07:48:06.000Z",
+  "createdAt": "2025-09-01T11:48:59.580Z",
+  "id": "Kg8NvaJhynxj2owf",
+  "name": "Convert pdf/image to CSV",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1zzrZ1qrorrfKKoMTABgjbQ5K0eR8MXlf",
+          "mode": "list",
+          "cachedResultName": "RAW PDF/IMAGE",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1zzrZ1qrorrfKKoMTABgjbQ5K0eR8MXlf"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "216476d0-2143-4327-9b45-cbaf6a9aeef3",
+      "name": "Get PDF or Images",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "position": [
+        -960,
+        352
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "jfnYdFvxcqTavUul",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{$json.mimeType}}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "application/pdf",
+              "outputKey": "pdf"
+            },
+            {
+              "operation": "contains",
+              "value2": "image/",
+              "outputKey": "image"
+            }
+          ]
+        }
+      },
+      "id": "3c84c015-f2a9-46f7-9eaf-7b66df3a9b05",
+      "name": "Route based on PDF or Image",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        -624,
+        352
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Get PDF or Images').item.json.id }}"
+        },
+        "options": {}
+      },
+      "id": "2fc874a9-a394-42d3-9fee-8be3e4906eb8",
+      "name": "Download PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -368,
+        240
+      ],
+      "executeOnce": true,
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Get PDF or Images').item.json.id }}"
+        },
+        "options": {}
+      },
+      "id": "db614930-738d-4aca-8b24-7f5ae74e8392",
+      "name": "Download Image",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -368,
+        672
+      ],
+      "executeOnce": true,
+      "retryOnFail": false,
+      "typeVersion": 3,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "jfnYdFvxcqTavUul",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "dbeada71-1d02-4735-8d63-d0b117b2f863",
+      "name": "Extract data from PDF",
+      "type": "n8n-nodes-base.extractFromFile",
+      "position": [
+        -128,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"meta-llama/llama-3.1-70b-instruct:free\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"You are given a bank statement.{{encodeURIComponent($json.text)}}. Read the PDF and export all the transactions as CSV. Add a column called category and based on the information assign a category name. Return only the CSV data starting with the header row.\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "92a838f3-e27a-4ca3-87c5-54bcc7953bf6",
+      "name": "Send data to A.I.",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        64,
+        240
+      ],
+      "typeVersion": 4.2,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "9bae11f0-0c1c-4b18-8b9c-f17be3a20e0d",
+      "name": "Convert to CSV",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        384,
+        240
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "=data",
+        "options": {
+          "headerRow": true
+        }
+      },
+      "id": "ce03a396-3338-4d2a-bb35-2b29e7b9164b",
+      "name": "Convert to CSV2",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        816,
+        672
+      ],
+      "typeVersion": 1.1,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "content": "## How to extract PDF and image text into CSV using n8n (without manual data entry)\n\nThis workflow will extract text data from PDF and images, then store it as CSV.\n\n[💡 You can read more about this workflow here](https://rumjahn.com/how-to-create-an-a-i-agent-to-analyze-matomo-analytics-using-n8n-for-free/)",
+        "height": 163.2468619246862,
+        "width": 589.0376569037658
+      },
+      "id": "3c21ed3b-7c10-49b2-a9d6-81ccc40f29f8",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -896,
+        -128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Get PDF or image\nYou need to create a new folder inside Google Drive for uploading your PDF and images.\n\nOnce you create a folder, you need to add your Google cloud user by going to Share -> Add user. The user email should be like: n8n-server@n8n-server-435232.iam.gserviceaccount.com",
+        "height": 432.7364016736402,
+        "width": 248.11715481171547,
+        "color": 4
+      },
+      "id": "40e888ba-e493-49db-8e6e-310605b4b67d",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -944,
+        80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Send to Openrouter\nYou need to set up an Openrouter account to use this. It sends the data to openrouter to extract text.\n\nUse Header Auth. Name is \"Authorization\" and value is \"Bearer {API token}\".",
+        "height": 446.3929762816575,
+        "color": 5
+      },
+      "id": "0acfdf5f-52cc-4316-b625-2c56133143cb",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        16,
+        -32
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Open AI Image Recognition node \n\nWe use the chatgpt image recognition in other to extract text from our image download from the drive we have \n",
+        "height": 485,
+        "width": 367,
+        "color": 6
+      },
+      "id": "3798ee34-982a-48e0-81be-d1a2bd569154",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        496
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "name": "={{$today}}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1Zo4OFCv1qWRX1jo0VL_iqUBf4v0fZEXe",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1Zo4OFCv1qWRX1jo0VL_iqUBf4v0fZEXe",
+          "cachedResultName": "CSV Exports"
+        },
+        "options": {}
+      },
+      "id": "6ab76fdb-f538-403a-9abf-c9915227b0a0",
+      "name": "Upload to Google Drive2",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        688,
+        240
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        960
+      ],
+      "id": "e3ab9dd5-a79c-466b-a0db-ea5202000dc4",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "CbsD1JY0EilCzfq6",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=This is the  plein text {{ $json.content }} convert it to the menu json with the intruction provided to you",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a data extraction assistant. \nYour task is to transform provided plain text into structured JSON objects.\n\nSchema:\n\n  {\n    \"Image\": \"\",\n    \"Title\": \"<string>\",\n    \"Category\": \"<string>\",\n    \"Description\": \"<string>\",\n    \"Price\": \"<number as string>\",\n    \"Status\": \"Active\"\n  }\n\n\nRules:\n- Always return a JSON array of objects.\n- \"Image\" must always be \"\" (empty string).\n- \"Status\" must always be \"Active\".\n- \"Title\" = the name of the meal/item.\n- \"Category\" = if the text includes section headings (like \"Drinks\", \"Starters\", \"Main Course\"), then all items under that heading belong to that category until a new heading is encountered.\n- \"Description\" = if an item line includes details (ingredients, portion size, serving notes, preparation style), extract them into this field.\n- \"Price\":\n   - If only one price is present → set it as string without currency symbols (e.g., \"4500\").\n   - If multiple prices are listed for the same item (e.g., \"4500 / 5000 / 6500 frs\") → create multiple JSON objects, one per price, keeping all other fields identical.\n   - Always strip any currency symbols like \"frs\", \"$\", \"€\", etc. Keep only the numeric value.\n- If any field is missing, fill it with \"\".\n- Do not output anything except valid JSON.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        672
+      ],
+      "id": "0ae2408b-69fc-455d-b729-60630bb3ca61",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "Extract all visible text from this image. \nReturn only plain text, no explanations.\n",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -48,
+        672
+      ],
+      "id": "fda5fd9d-d676-482f-97ff-315ddd873546",
+      "name": "Analyze image",
+      "credentials": {
+        "openAiApi": {
+          "id": "CbsD1JY0EilCzfq6",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "\n  {\n    \"Image\": \"\",\n    \"Title\": \"<string>\",\n    \"Category\": \"<string>\",\n    \"Description\": \"<string>\",\n    \"Price\": \"<number as string>\",\n    \"Status\": \"Active\"\n  }\n\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        880
+      ],
+      "id": "4384c6f7-6bac-4648-a1ea-2292f954652a",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "14A0OsSJhWPNLYHKjqTiaAQlYWKHO8086",
+          "mode": "list",
+          "cachedResultName": "RESULT CSV",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/14A0OsSJhWPNLYHKjqTiaAQlYWKHO8086"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1024,
+        672
+      ],
+      "id": "3c123e75-4aa5-41ef-b54a-e3207c19f888",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "jfnYdFvxcqTavUul",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Download PDF": {
+      "main": [
+        [
+          {
+            "node": "Extract data from PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to CSV": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to CSV2": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get PDF or Images": {
+      "main": [
+        [
+          {
+            "node": "Route based on PDF or Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send data to A.I.": {
+      "main": [
+        [
+          {
+            "node": "Convert to CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract data from PDF": {
+      "main": [
+        [
+          {
+            "node": "Send data to A.I.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route based on PDF or Image": {
+      "main": [
+        [
+          {
+            "node": "Download PDF",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Convert to CSV2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "d6bab34b-0737-4c4f-902e-f061074d19ed",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-01T11:48:59.583Z",
+      "createdAt": "2025-09-01T11:48:59.583Z",
+      "role": "workflow:owner",
+      "workflowId": "Kg8NvaJhynxj2owf",
+      "projectId": "ene3OLMtB0nh9ppE"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
