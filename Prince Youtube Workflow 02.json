@@ -1,0 +1,1008 @@
+{
+  "updatedAt": "2025-12-10T00:39:30.000Z",
+  "createdAt": "2025-11-05T11:38:56.983Z",
+  "id": "PGL6cT6PVkjame1r",
+  "name": "Prince Youtube Workflow 02",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1424,
+        784
+      ],
+      "id": "40dfbd01-f72a-4fad-a40e-c10b6810abf4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1gu28LpJG_Hu6r8M6zn2Ea3vZnYagN4I2kuVNI1ZYYjY",
+          "mode": "list",
+          "cachedResultName": "Youtube Schedule",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gu28LpJG_Hu6r8M6zn2Ea3vZnYagN4I2kuVNI1ZYYjY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gu28LpJG_Hu6r8M6zn2Ea3vZnYagN4I2kuVNI1ZYYjY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Date",
+              "lookupValue": "={{ DateTime.now().format('yyyy-MM-dd') }}"
+            },
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Scheduled"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1216,
+        784
+      ],
+      "id": "c9a05fee-2b04-4ee5-b398-2816762df2f3",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3SSoCxNN6iCtxiGb",
+          "name": "Prince credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "Videos - Posted",
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2416,
+        256
+      ],
+      "id": "f855839a-1882-43d7-8912-69499448da95",
+      "name": "Get Folder Name",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "jKQgp6qmL8Ti5tcW",
+          "name": "Prince Drive Credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Download Video Data').item.json.id }}",
+          "mode": "id"
+        },
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2624,
+        256
+      ],
+      "id": "dd5a97b4-4b28-4cc9-9faa-b4c79c839302",
+      "name": "Move Video File to Folder",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "jKQgp6qmL8Ti5tcW",
+          "name": "Prince Drive Credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1gu28LpJG_Hu6r8M6zn2Ea3vZnYagN4I2kuVNI1ZYYjY",
+          "mode": "list",
+          "cachedResultName": "Youtube Schedule",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gu28LpJG_Hu6r8M6zn2Ea3vZnYagN4I2kuVNI1ZYYjY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gu28LpJG_Hu6r8M6zn2Ea3vZnYagN4I2kuVNI1ZYYjY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get row(s) in sheet').item.json.row_number }}",
+            "Status": "Uploaded"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video Filename",
+              "displayName": "Video Filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Titre",
+              "displayName": "Titre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2208,
+        256
+      ],
+      "id": "66db27af-a6c4-4e28-b42f-8e5ea4e715e5",
+      "name": "Update Status",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3SSoCxNN6iCtxiGb",
+          "name": "Prince credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "title": "={{ $('Get row(s) in sheet').item.json.Titre }}",
+        "regionCode": "CM",
+        "categoryId": "27",
+        "options": {
+          "description": "={{ $('Get row(s) in sheet').item.json.Description }}",
+          "privacyStatus": "private"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        256
+      ],
+      "id": "ec748580-2fcd-4c73-ab5a-c062ee34de18",
+      "name": "Upload to YouTube",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "2tfjYaAI9guGkjq4",
+          "name": "Prince YouTube 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1792,
+        256
+      ],
+      "id": "83272c21-8b39-4d49-8a63-9ebe3f1c5c6b",
+      "name": "Download Video Data",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "jKQgp6qmL8Ti5tcW",
+          "name": "Prince Drive Credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a world-class LinkedIn content strategist and ghostwriter. Your job is to transform a transcript (and an optional short instruction) into a high-quality LinkedIn post in French.\n\nYou will receive two inputs:\n- \"transcript\": the raw transcript text ()\n- \"instruction\" (optional): a short instruction from the user that modifies tone, focus, or structure ({{ $('Extract TikTok URL').item.json.post_instructions }})\n\nRules:\n1. If \"instruction\" is present and not empty, follow it as the primary brief for the post (tone, angle, focus). If it conflicts with defaults below, follow the user instruction.\n2. If \"instruction\" is missing or empty, create the post using only the transcript and the default brief below.\n3. Default brief when no instruction:\n   - Hook: start with a bold, attention-grabbing opening line with 3 line space from the next paragraph.\n   - Structure: very readable — short paragraphs (1–3 sentences), generous line breaks. Do NOT use markdown or text-decorator characters (no *bold*, _italic_, etc.).\n   - Tone: authoritative, professional, actionable — oriented to business/freelance/startup audiences.\n   - Key takeaways: summarize core insights.\n   - CTA: end with a clear question or instruction that invites comments.\n   - Hashtags: include 5–7 relevant hashtags in lowercase around freelance advice, startup advice, project management, and global/business topics.\n4. Always strip filler, obvious transcript errors, and repair obvious OCR/transcription mistakes silently before writing.\n5. Output ONLY the final LinkedIn post text in French. No explanations, no metadata, no extra JSON.\n6. If the transcript is extremely short or empty, produce a short post (2–3 lines) and still include hashtags.\n7. Maximum length: 1400 characters.\n\n\nLanguage Mandate: The entire final LinkedIn post must be written exclusively in French.\n\n[CRITICAL INSTRUCTION] Transcript Validation:\n\nAcknowledge Potential Errors: You must assume that the provided transcript {{ $json.transcript_text }} contains inaccuracies, misspellings, and words out of context.\n\nReasoning Step: Before writing the post, silently analyze the transcript for common conversational filler words, sentence fragments, and words that are obviously incorrect (e.g., \"sea ice\" instead of \"C-suite,\" or \"grooves\" instead of \"grows\").\n\nContextual Correction: Use the surrounding text and your general knowledge of business/professional topics to deduce the intended meaning and correct any glaring errors. The final LinkedIn post must be based on this corrected, coherent version of the text.",
+        "options": {
+          "systemMessage": "You are a world-class professional LinkedIn content strategist and ghostwriter. Your goal is to transform a raw, unedited transcript into an engaging, high-quality, thought-leadership post for a business-focused audience."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1088,
+        672
+      ],
+      "id": "85c9e217-c323-4440-b730-55e767ef56d0",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        896
+      ],
+      "id": "0adc75bd-bbd6-4565-b815-62fd004846f8",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "yy4WHEcDoSGYURAS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "name": "Wait1",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        -32,
+        784
+      ],
+      "id": "728cc55e-cb26-46bf-86e0-1ebe7c4b501b",
+      "typeVersion": 1.1,
+      "webhookId": "0b0adfaf-522e-424e-982d-3048d72d2b4b"
+    },
+    {
+      "parameters": {
+        "url": "=https://tiktok-transcripting-api.onrender.com/api/v1/status/{{ $('Tiktok Transcript1').item.json.job_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "n7LEAGlMPyzGmSRgGBkdpz-rxjPl_3uo2BVDU0Wv9Fk"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Check Status1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        176,
+        784
+      ],
+      "id": "27884519-46a9-47e1-b487-26975280142a",
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9b8f0643-cb4a-4c05-92c8-587d600466e9",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Status Check1",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        400,
+        784
+      ],
+      "id": "bff2e184-449c-4696-84f6-8d0fd921b65f",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "url": "=https://tiktok-transcripting-api.onrender.com/api/v1/result/{{ $('Tiktok Transcript1').item.json.job_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "n7LEAGlMPyzGmSRgGBkdpz-rxjPl_3uo2BVDU0Wv9Fk"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Get Result1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        832,
+        688
+      ],
+      "id": "c18dd082-f23c-4db8-ae5e-f52841c04136",
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://tiktok-transcripting-api.onrender.com/api/v1/transcribe",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-API-Key",
+              "value": "n7LEAGlMPyzGmSRgGBkdpz-rxjPl_3uo2BVDU0Wv9Fk"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "tiktok_url",
+              "value": "={{ $json.Lien }}"
+            },
+            {
+              "name": "language",
+              "value": "fr_FR"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9e2facad-9b48-44f8-ae5a-109107667bc2",
+      "name": "Tiktok Transcript1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -528,
+        784
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.job_id }}",
+        "contextWindowLength": 1005
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1200,
+        1056
+      ],
+      "id": "97fccd3c-06de-42fd-9396-6f27c53df6ee",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1gu28LpJG_Hu6r8M6zn2Ea3vZnYagN4I2kuVNI1ZYYjY",
+          "mode": "list",
+          "cachedResultName": "Youtube Schedule",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gu28LpJG_Hu6r8M6zn2Ea3vZnYagN4I2kuVNI1ZYYjY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gu28LpJG_Hu6r8M6zn2Ea3vZnYagN4I2kuVNI1ZYYjY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get row(s) in sheet').item.json.row_number }}",
+            "Status": "Uploaded"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video Filename",
+              "displayName": "Video Filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Titre",
+              "displayName": "Titre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1536,
+        656
+      ],
+      "id": "a1418ab0-1e9e-4605-b071-98d47e592379",
+      "name": "Update Status1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3SSoCxNN6iCtxiGb",
+          "name": "Prince credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json['Video Filename'] }}",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1XwXDsO3010mkRGqwBiA6YICwD-HkdMAq",
+            "mode": "list",
+            "cachedResultName": "N8N",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1XwXDsO3010mkRGqwBiA6YICwD-HkdMAq"
+          }
+        },
+        "options": {
+          "fields": "=name, \nwebContentLink, \nparents"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -864,
+        1248
+      ],
+      "id": "7473cd62-9c71-47ab-8a5c-076cb2e4e9d9",
+      "name": "Search files and folders1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "jKQgp6qmL8Ti5tcW",
+          "name": "Prince Drive Credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5ff16ff6-1268-4294-8f92-6faaf3506f9a",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "failed",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        1040
+      ],
+      "id": "5f9ee353-2a49-4303-8205-bb7ab6e522ff",
+      "name": "If Status1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1gu28LpJG_Hu6r8M6zn2Ea3vZnYagN4I2kuVNI1ZYYjY",
+          "mode": "list",
+          "cachedResultName": "Youtube Schedule",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gu28LpJG_Hu6r8M6zn2Ea3vZnYagN4I2kuVNI1ZYYjY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gu28LpJG_Hu6r8M6zn2Ea3vZnYagN4I2kuVNI1ZYYjY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Error": "=Error during transcription {{ $('Check Status1').item.json.message }}",
+            "row_number": "={{ $('Get row(s) in sheet').item.json.row_number }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video Filename",
+              "displayName": "Video Filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Lien",
+              "displayName": "Lien",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Titre",
+              "displayName": "Titre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Titre_IA",
+              "displayName": "Titre_IA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description_IA",
+              "displayName": "Description_IA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hashtags_IA",
+              "displayName": "Hashtags_IA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Error",
+              "displayName": "Error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        1056
+      ],
+      "id": "eee6e3e5-d145-4e64-aea4-50fefddc47de",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3SSoCxNN6iCtxiGb",
+          "name": "Prince credentials"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Tiktok Transcript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Folder Name": {
+      "main": [
+        [
+          {
+            "node": "Move Video File to Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status": {
+      "main": [
+        [
+          {
+            "node": "Get Folder Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to YouTube": {
+      "main": [
+        [
+          {
+            "node": "Update Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Video Data": {
+      "main": [
+        [
+          {
+            "node": "Upload to YouTube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Check Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Status1": {
+      "main": [
+        [
+          {
+            "node": "Status Check1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status Check1": {
+      "main": [
+        [
+          {
+            "node": "Get Result1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Result1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tiktok Transcript1": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Update Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status1": {
+      "main": [
+        [
+          {
+            "node": "Download Video Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Status1": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "1428e793-dbe8-45b1-be92-8b8719feedd8",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-05T11:38:56.986Z",
+      "createdAt": "2025-11-05T11:38:56.986Z",
+      "role": "workflow:owner",
+      "workflowId": "PGL6cT6PVkjame1r",
+      "projectId": "ene3OLMtB0nh9ppE"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
