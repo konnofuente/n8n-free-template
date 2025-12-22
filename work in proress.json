@@ -1,0 +1,105 @@
+{
+  "updatedAt": "2025-12-10T07:46:40.000Z",
+  "createdAt": "2025-11-26T10:51:24.777Z",
+  "id": "P7kJHURrOdvEYmyb",
+  "name": "work in proress",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFile",
+        "fileToWatch": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3b995239-8798-4c09-872a-84b9399ecd7b",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GsPzjouPzFD7BRMK",
+          "name": "Varette Tchamake"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "messages": {
+          "values": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "172a75c4-d1d8-4387-adc4-9eb7c719a109",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "bi7CwD0nLFwIOfVS",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "39330fc8-783b-4ca3-bae2-c81022cccc7a",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-26T10:51:24.779Z",
+      "createdAt": "2025-11-26T10:51:24.779Z",
+      "role": "workflow:owner",
+      "workflowId": "P7kJHURrOdvEYmyb",
+      "projectId": "ene3OLMtB0nh9ppE"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
