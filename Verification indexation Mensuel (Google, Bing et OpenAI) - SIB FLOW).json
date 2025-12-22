@@ -1,0 +1,194 @@
+{
+  "updatedAt": "2025-12-10T14:03:06.000Z",
+  "createdAt": "2025-12-10T14:01:22.090Z",
+  "id": "OGuC8nn0OG3O1qeO",
+  "name": "Verification indexation Mensuel (Google, Bing et OpenAI) - SIB FLOW)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -960,
+        240
+      ],
+      "id": "44d3965d-dce1-4472-b039-5982e649dad9",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2ca4843c-d415-4a8a-99a6-8adbc8687b50",
+              "leftValue": "={{ $json.Indexer }}",
+              "rightValue": "NON",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -256,
+        240
+      ],
+      "id": "d08599f4-3056-4cba-8f1b-3ac59c282afe",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.indexjump.com/index?url={{ $json.link }}&token=aa81cdcd418f3d29afec4cd0c436d87f&bot=1",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8bfefd97-f2ab-4255-bc89-503b77707625",
+      "name": "Indexation OpenAI",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "=https://api.indexjump.com/index?url={{ $json.link }}&token=aa81cdcd418f3d29afec4cd0c436d87f&bot=2",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        480
+      ],
+      "id": "314d6968-4aa4-452b-af53-a099afc4dfc0",
+      "name": "Indexation Bing",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        240
+      ],
+      "id": "f032b55b-431c-40e8-a57b-c40ba8280572",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        304,
+        240
+      ],
+      "id": "377ed09f-122a-406c-b24f-bf7a75d5d3ac",
+      "name": "Update row(s)"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.indexjump.com/index?url={{ $json.link }}&token=aa81cdcd418f3d29afec4cd0c436d87f&bot=0",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        240
+      ],
+      "id": "1f7ce0e6-a42a-44fa-96ee-80bdb05175da",
+      "name": "Indexation Google",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    }
+  ],
+  "connections": {
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Indexation OpenAI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Indexation Bing",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Indexation Google",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "be22745c-9b03-4ba6-9c09-ec111aad865e",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-10T14:01:22.169Z",
+      "createdAt": "2025-12-10T14:01:22.169Z",
+      "role": "workflow:owner",
+      "workflowId": "OGuC8nn0OG3O1qeO",
+      "projectId": "ene3OLMtB0nh9ppE"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
