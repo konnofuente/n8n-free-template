@@ -1,0 +1,285 @@
+{
+  "updatedAt": "2025-12-10T00:40:06.000Z",
+  "createdAt": "2025-11-20T10:25:16.117Z",
+  "id": "K6xKl1zXeb8HzQRU",
+  "name": "AI VIDEO GENERATION",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ecdc7f1f-6a5c-4409-b213-56d49af7e393",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "e0d38439-b7e8-4dd6-b062-51bc2430fc4e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "bi7CwD0nLFwIOfVS",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        352,
+        208
+      ],
+      "id": "c45b6392-87c5-4afa-99ca-f6bc495daba3",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"Caption\": \"Diver rescues whale tangled in net, sunlight piercing through blue ocean, cinematic moment\",\n  \"Idea\": \"Diver carefully frees whale trapped in net in open sea\",\n  \"Environment\": \"Open ocean, sunlight beams through water, diver and whale, cinematic realism\",\n  \"Status\": \"for production\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        208
+      ],
+      "id": "21d19099-662c-46b9-966e-ab9fefd6a49d",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1W5FvGgYud2Zu4gP8ikIFJmDlf6vT0TTlQO6yl2WpLDE",
+          "mode": "list",
+          "cachedResultName": "veo 3 n8n automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W5FvGgYud2Zu4gP8ikIFJmDlf6vT0TTlQO6yl2WpLDE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W5FvGgYud2Zu4gP8ikIFJmDlf6vT0TTlQO6yl2WpLDE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "caption ": "={{ $json.output.Caption }}",
+            "idea": "={{ $json.output.Idea }}",
+            "environment": "={{ $json.output.Environment }}",
+            "status": "={{ $json.output.Status }}"
+          },
+          "matchingColumns": [
+            "idea"
+          ],
+          "schema": [
+            {
+              "id": "caption ",
+              "displayName": "caption ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "idea",
+              "displayName": "idea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "environment",
+              "displayName": "environment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        576,
+        0
+      ],
+      "id": "9685b5a3-dc2b-4298-b0be-c279f654c1ce",
+      "name": "Append or update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TSBbSxxMzwckuQ2f",
+          "name": "AI VIDEO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        784,
+        0
+      ],
+      "id": "e44cf56d-c570-45a0-a25b-d700022a386e",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "system message:\nYou are an AI designed to generate 1 cinematic, creative, and viral-worthy AI video idea based on a user-provided topic.\nYour output must be formatted as a single JSON array on one line.\n\nRULES:\n\t•\tReturn only 1 idea.\n\t•\tMust be under 20 words.\n\t•\tMust describe a clear visual moment suitable for AI video generation.\n\t•\tInclude at least one of: a character, action, location, or emotion.\n\t•\tCan be surreal or realistic.\n\t•\tThe final output must look exactly like this:\nExample:\n\n[\"A girl floating in slow motion as golden light rises behind her like a sunrise\"]",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "cb2c7070-9c48-4543-9085-bfc0f5c63fec",
+      "name": "idea ai agent"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "idea ai agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "idea ai agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "idea ai agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "idea ai agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "idea ai agent": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "aaa68c89-059d-4d8e-8510-7d3ff89290e9",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-11-20T10:25:16.125Z",
+      "createdAt": "2025-11-20T10:25:16.125Z",
+      "role": "workflow:owner",
+      "workflowId": "K6xKl1zXeb8HzQRU",
+      "projectId": "ene3OLMtB0nh9ppE"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
