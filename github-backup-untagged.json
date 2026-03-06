@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-03-05T01:15:25.109Z",
+  "updatedAt": "2026-03-05T01:27:44.002Z",
   "createdAt": "2025-12-16T13:58:21.388Z",
   "id": "4rwPWxirFIad6SL4",
   "name": "Github Backup",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
@@ -11,39 +11,20 @@
         "rule": {
           "interval": [
             {
-              "field": "minutes"
+              "field": "cronExpression",
+              "expression": "0 2 * * *"
             }
           ]
         }
       },
-      "id": "8bebca0f-b409-4e9f-bc09-ecf6405f0716",
-      "name": "Schedule Trigger2",
+      "id": "1643fc3c-e66e-48e7-95c9-b947209507f1",
+      "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "position": [
-        4576,
-        2320
+        6272,
+        2656
       ],
       "typeVersion": 1.2
-    },
-    {
-      "parameters": {
-        "fieldsToAggregate": {
-          "fieldToAggregate": [
-            {
-              "fieldToAggregate": "name"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "434e93d2-d85d-4ab7-84f8-58647960bf66",
-      "name": "Aggregate2",
-      "type": "n8n-nodes-base.aggregate",
-      "position": [
-        4896,
-        2320
-      ],
-      "typeVersion": 1
     },
     {
       "parameters": {
@@ -63,12 +44,12 @@
         },
         "filePath": "="
       },
-      "id": "57983555-20a3-4163-8180-a4512a7ccc05",
-      "name": "List files from repo2",
+      "id": "4352f3c6-66e2-44f6-b948-d7c9c5368a2e",
+      "name": "List files from repo",
       "type": "n8n-nodes-base.github",
       "position": [
-        4736,
-        2320
+        6480,
+        2656
       ],
       "webhookId": "354d699e-44b0-4444-9d31-af7fd4ff5561",
       "typeVersion": 1,
@@ -79,6 +60,152 @@
           "name": "GitHub account"
         }
       }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "75bf9bd5-9413-47be-bace-9ffdef1ed19c",
+      "name": "Aggregate repo files",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        6704,
+        2656
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://n8n.srv842116.hstgr.cloud/api/v1/workflows?limit=250",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "3db84ddf-b581-47d2-b90b-c46e62fed456",
+      "name": "Get all workflows",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        6928,
+        2656
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6TWR9qstns4hczRL",
+          "name": "N8N_Credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "id": "7e6d0fb3-7afe-4ae4-a869-fd256281d2b8",
+      "name": "Split Out workflows",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        7152,
+        2656
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ new Date($json.updatedAt).getTime() }}",
+              "operation": "larger",
+              "value2": "={{ Date.now() - 25 * 60 * 60 * 1000 }}"
+            }
+          ]
+        }
+      },
+      "id": "b8b90e39-1a08-4c65-a68c-7a4a831f5888",
+      "name": "Changed in last 24h?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        7360,
+        2656
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "const workflow = $input.item.json;\n\n// Deep clone and sanitize credentials from nodes\nconst sanitized = JSON.parse(JSON.stringify(workflow));\nif (sanitized.nodes && Array.isArray(sanitized.nodes)) {\n  sanitized.nodes = sanitized.nodes.map(node => {\n    if (node.credentials) {\n      // Keep credential names/ids but strip any inline secrets\n      const cleanCreds = {};\n      for (const [key, val] of Object.entries(node.credentials)) {\n        cleanCreds[key] = { id: val.id, name: val.name };\n      }\n      node.credentials = cleanCreds;\n    }\n    return node;\n  });\n}\n\nconst jsonString = JSON.stringify(sanitized, null, 2);\nconst base64 = Buffer.from(jsonString).toString('base64');\n\nconst tag = (workflow.tags && workflow.tags.length > 0)\n  ? workflow.tags[0].name.replace(/\\s+/g, '-').toLowerCase()\n  : 'untagged';\n\nconst slug = workflow.name.replace(/\\s+/g, '-').toLowerCase();\nconst fileName = `${slug}-${tag}.json`;\n\nreturn [{\n  json: {\n    workflowName: workflow.name,\n    fileName: fileName,\n    base64Content: base64,\n    updatedAt: workflow.updatedAt\n  }\n}];"
+      },
+      "id": "ff5af258-f90e-4086-97c9-57cad2413e78",
+      "name": "Prepare backup data",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        7584,
+        2576
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fe4a36ef-9f04-40e3-99bd-cc517a49b440",
+              "name": "commitDate",
+              "type": "string",
+              "value": "={{ $now.format('dd-MM-yyyy HH:mm') }}"
+            },
+            {
+              "id": "b0fe1bcc-e79c-4a6b-b8b4-44222c8bf4e8",
+              "name": "fileName",
+              "type": "string",
+              "value": "={{ $json.fileName }}"
+            },
+            {
+              "id": "d1e2f3a4-b5c6-7890-def0-123456789abc",
+              "name": "base64Content",
+              "type": "string",
+              "value": "={{ $json.base64Content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e552ad0e-f292-49dd-a488-d5957f7e305f",
+      "name": "Commit date & file name",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        7808,
+        2576
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $('Aggregate repo files').first().json.name }}",
+              "operation": "contains",
+              "value2": "={{ $json.fileName }}"
+            }
+          ]
+        }
+      },
+      "id": "2e22b8f3-a73c-44fd-b865-bf65c09bb629",
+      "name": "File already in repo?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        8032,
+        2576
+      ],
+      "typeVersion": 1
     },
     {
       "parameters": {
@@ -96,16 +223,16 @@
           "cachedResultName": "n8n-free-template",
           "cachedResultUrl": "https://github.com/konnofuente/n8n-free-template"
         },
-        "filePath": "={{ $json.name.replace(/\\s+/g, '-').toLowerCase() }}-{{ ($json.tags && $json.tags.length > 0) ? $json.tags[0].name : 'untagged' }}.json",
-        "fileContent": "={{ $('To base1').json.data }}",
-        "commitMessage": "=backup-{{ $('Commit date & file name2').json.commitDate }}"
+        "filePath": "={{ $('Commit date & file name').item.json.fileName }}",
+        "fileContent": "={{ $('Commit date & file name').item.json.base64Content }}",
+        "commitMessage": "=chore: backup {{ $('Commit date & file name').item.json.fileName }} @ {{ $('Commit date & file name').item.json.commitDate }}"
       },
-      "id": "dd4d9327-784d-4d63-9cae-f7de96630ee9",
-      "name": "Update file2",
+      "id": "0a9ddb68-00de-4e7c-9eba-3610f9bc7dc2",
+      "name": "Update file",
       "type": "n8n-nodes-base.github",
       "position": [
-        5856,
-        2240
+        8240,
+        2496
       ],
       "webhookId": "27218087-8df7-474d-a39f-70cfa9c34ec8",
       "typeVersion": 1,
@@ -131,16 +258,16 @@
           "cachedResultName": "n8n-free-template",
           "cachedResultUrl": "https://github.com/konnofuente/n8n-free-template"
         },
-        "filePath": "={{ $json.name.replace(/\\s+/g, '-').toLowerCase() }}-{{ ($json.tags && $json.tags.length > 0) ? $json.tags[0].name : 'untagged' }}.json",
-        "fileContent": "={{ $('To base1').json.data }}",
-        "commitMessage": "=backup-{{ $node['Commit date & file name2'].json.commitDate }}"
+        "filePath": "={{ $('Commit date & file name').item.json.fileName }}",
+        "fileContent": "={{ $('Commit date & file name').item.json.base64Content }}",
+        "commitMessage": "=chore: backup {{ $('Commit date & file name').item.json.fileName }} @ {{ $('Commit date & file name').item.json.commitDate }}"
       },
-      "id": "85740b66-7f8c-4db7-8f96-8db6e4d11d51",
-      "name": "Upload file2",
+      "id": "da7be0b9-0f49-4299-83b7-e31c0305a037",
+      "name": "Upload file",
       "type": "n8n-nodes-base.github",
       "position": [
-        5856,
-        2400
+        8240,
+        2656
       ],
       "webhookId": "ce4b561b-acb9-4cd8-b76f-4928dada9674",
       "typeVersion": 1,
@@ -153,255 +280,154 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $('Aggregate2').item.json.name }}",
-              "operation": "contains",
-              "value2": "={{ $json.name.replace(/\\s+/g, '-').toLowerCase() }}-{{ ($json.tags && $json.tags.length > 0) ? $json.tags[0].name : 'untagged' }}.json"
-            }
-          ]
-        }
-      },
-      "id": "d31dc5af-8afe-4954-bdb8-ff326bd874b9",
-      "name": "Check if file exists2",
-      "type": "n8n-nodes-base.if",
-      "position": [
-        5696,
-        2320
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "operation": "toJson",
-        "mode": "each",
-        "options": {
-          "format": true
-        }
-      },
-      "id": "815b3a67-c4bd-40f8-b7c9-fae1d53c24e8",
-      "name": "Json file2",
-      "type": "n8n-nodes-base.convertToFile",
-      "position": [
-        5216,
-        2320
-      ],
-      "typeVersion": 1.1
-    },
-    {
-      "parameters": {
-        "operation": "binaryToPropery",
-        "options": {}
-      },
-      "id": "030a5fde-b413-4ecb-9327-870f19377c13",
-      "name": "To base1",
-      "type": "n8n-nodes-base.extractFromFile",
-      "position": [
-        5376,
-        2320
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "content": "### Retrieve previous file names from Github",
-        "height": 380,
-        "width": 300,
+        "content": "## ① Snapshot GitHub repo\nLists all files already backed up in the repo so we can decide whether to **create** or **update** each workflow.",
+        "height": 200,
+        "width": 500,
         "color": 5
       },
-      "id": "268a5136-2218-42ec-afa8-bedcfb08a724",
-      "name": "Sticky Note6",
+      "id": "13d2f8eb-39ca-4c42-8279-7e1fb9a0c86c",
+      "name": "Sticky Note1",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        4704,
-        2176
+        6448,
+        2480
       ],
       "typeVersion": 1
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "fe4a36ef-9f04-40e3-99bd-cc517a49b440",
-              "name": "commitDate",
-              "type": "string",
-              "value": "={{ $now.format('dd-MM-yyyy/H:mm') }}"
-            },
-            {
-              "id": "b0fe1bcc-e79c-4a6b-b8b4-44222c8bf4e8",
-              "name": "fileName",
-              "type": "string",
-              "value": "={{ $json.name.replace(/\\s+/g, '-').toLowerCase() }}-{{ ($json.tags && $json.tags.length > 0) ? $json.tags[0].name : 'untagged' }}.json"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "b6a80d46-4309-4c40-ac1d-10e200ea6ffb",
-      "name": "Commit date & file name2",
-      "type": "n8n-nodes-base.set",
-      "position": [
-        5536,
-        2320
-      ],
-      "typeVersion": 3.4
-    },
-    {
-      "parameters": {
-        "content": "### Retrieve and process workflows from n8n",
-        "height": 380,
-        "width": 460,
+        "content": "## ② Fetch & filter workflows\n- Calls n8n API for all workflows\n- **Splits** the `data[]` array into individual items\n- **Filters** to only workflows updated in the last 24 h\n- Code node converts to base64 & builds the filename",
+        "height": 200,
+        "width": 760,
         "color": 3
       },
-      "id": "437e8307-006d-49f1-a97d-0dcc108f8293",
-      "name": "Sticky Note7",
+      "id": "ee33f072-e728-4c51-a28d-3af0afc485c7",
+      "name": "Sticky Note2",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        5024,
-        2176
+        6896,
+        2480
       ],
       "typeVersion": 1
     },
     {
       "parameters": {
-        "content": "### Commit + edit/create files if needed",
-        "height": 380,
-        "width": 460,
+        "content": "## ③ Commit to GitHub\n- **True branch** → file already exists → **Update** it\n- **False branch** → new workflow → **Create** it\n\nRuns every day at 02:00 AM server time.",
+        "height": 200,
+        "width": 600,
         "color": 4
       },
-      "id": "905a5f3d-90e0-4ce1-9a84-b9b2063e1319",
-      "name": "Sticky Note8",
+      "id": "e1d943fd-fae3-4c3e-8662-0ff58a05a029",
+      "name": "Sticky Note3",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        5504,
-        2176
+        7776,
+        2480
       ],
       "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "url": "https://n8n.srv842116.hstgr.cloud/api/v1/workflows",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
-      "position": [
-        5056,
-        2272
-      ],
-      "id": "835219a9-da63-470e-b752-50e72f48f3e1",
-      "name": "HTTP Request1",
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "6TWR9qstns4hczRL",
-          "name": "N8N_Credentials"
-        }
-      }
     }
   ],
   "connections": {
-    "Schedule Trigger2": {
+    "Schedule Trigger": {
       "main": [
         [
           {
-            "node": "List files from repo2",
+            "node": "List files from repo",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Aggregate2": {
+    "List files from repo": {
       "main": [
         [
           {
-            "node": "HTTP Request1",
+            "node": "Aggregate repo files",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "List files from repo2": {
+    "Aggregate repo files": {
       "main": [
         [
           {
-            "node": "Aggregate2",
+            "node": "Get all workflows",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Check if file exists2": {
+    "Get all workflows": {
       "main": [
         [
           {
-            "node": "Update file2",
+            "node": "Split Out workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out workflows": {
+      "main": [
+        [
+          {
+            "node": "Changed in last 24h?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changed in last 24h?": {
+      "main": [
+        [
+          {
+            "node": "Prepare backup data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare backup data": {
+      "main": [
+        [
+          {
+            "node": "Commit date & file name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Commit date & file name": {
+      "main": [
+        [
+          {
+            "node": "File already in repo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File already in repo?": {
+      "main": [
+        [
+          {
+            "node": "Update file",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Upload file2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Json file2": {
-      "main": [
-        [
-          {
-            "node": "To base1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "To base1": {
-      "main": [
-        [
-          {
-            "node": "Commit date & file name2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Commit date & file name2": {
-      "main": [
-        [
-          {
-            "node": "Check if file exists2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "HTTP Request1": {
-      "main": [
-        [
-          {
-            "node": "Json file2",
+            "node": "Upload file",
             "type": "main",
             "index": 0
           }
@@ -418,14 +444,18 @@
     "availableInMCP": false,
     "timeSavedPerExecution": 10
   },
-  "staticData": null,
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "d5df09ea-5869-41fc-8d69-c97a8d530b40",
-  "activeVersionId": null,
-  "triggerCount": 0,
+  "versionId": "f332a3e6-d6ab-48e2-973c-89ce60882fe1",
+  "activeVersionId": "f332a3e6-d6ab-48e2-973c-89ce60882fe1",
+  "triggerCount": 1,
   "shared": [
     {
       "updatedAt": "2025-12-16T13:58:21.391Z",
@@ -435,6 +465,444 @@
       "projectId": "ene3OLMtB0nh9ppE"
     }
   ],
-  "activeVersion": null,
+  "activeVersion": {
+    "updatedAt": "2026-03-05T04:45:19.000Z",
+    "createdAt": "2026-03-05T01:27:44.005Z",
+    "versionId": "f332a3e6-d6ab-48e2-973c-89ce60882fe1",
+    "workflowId": "4rwPWxirFIad6SL4",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 2 * * *"
+              }
+            ]
+          }
+        },
+        "id": "1643fc3c-e66e-48e7-95c9-b947209507f1",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          6272,
+          2656
+        ],
+        "typeVersion": 1.2
+      },
+      {
+        "parameters": {
+          "resource": "file",
+          "operation": "list",
+          "owner": {
+            "__rl": true,
+            "value": "konnofuente",
+            "mode": "name"
+          },
+          "repository": {
+            "__rl": true,
+            "value": "n8n-free-template",
+            "mode": "list",
+            "cachedResultName": "n8n-free-template",
+            "cachedResultUrl": "https://github.com/konnofuente/n8n-free-template"
+          },
+          "filePath": "="
+        },
+        "id": "4352f3c6-66e2-44f6-b948-d7c9c5368a2e",
+        "name": "List files from repo",
+        "type": "n8n-nodes-base.github",
+        "position": [
+          6480,
+          2656
+        ],
+        "webhookId": "354d699e-44b0-4444-9d31-af7fd4ff5561",
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "credentials": {
+          "githubApi": {
+            "id": "z8h44D4OqbDOXai8",
+            "name": "GitHub account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "fieldsToAggregate": {
+            "fieldToAggregate": [
+              {
+                "fieldToAggregate": "name"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "75bf9bd5-9413-47be-bace-9ffdef1ed19c",
+        "name": "Aggregate repo files",
+        "type": "n8n-nodes-base.aggregate",
+        "position": [
+          6704,
+          2656
+        ],
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "url": "https://n8n.srv842116.hstgr.cloud/api/v1/workflows?limit=250",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {}
+        },
+        "id": "3db84ddf-b581-47d2-b90b-c46e62fed456",
+        "name": "Get all workflows",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          6928,
+          2656
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6TWR9qstns4hczRL",
+            "name": "N8N_Credentials"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "data",
+          "options": {}
+        },
+        "id": "7e6d0fb3-7afe-4ae4-a869-fd256281d2b8",
+        "name": "Split Out workflows",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          7152,
+          2656
+        ],
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{ new Date($json.updatedAt).getTime() }}",
+                "operation": "larger",
+                "value2": "={{ Date.now() - 25 * 60 * 60 * 1000 }}"
+              }
+            ]
+          }
+        },
+        "id": "b8b90e39-1a08-4c65-a68c-7a4a831f5888",
+        "name": "Changed in last 24h?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          7360,
+          2656
+        ],
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "jsCode": "const workflow = $input.item.json;\n\n// Deep clone and sanitize credentials from nodes\nconst sanitized = JSON.parse(JSON.stringify(workflow));\nif (sanitized.nodes && Array.isArray(sanitized.nodes)) {\n  sanitized.nodes = sanitized.nodes.map(node => {\n    if (node.credentials) {\n      // Keep credential names/ids but strip any inline secrets\n      const cleanCreds = {};\n      for (const [key, val] of Object.entries(node.credentials)) {\n        cleanCreds[key] = { id: val.id, name: val.name };\n      }\n      node.credentials = cleanCreds;\n    }\n    return node;\n  });\n}\n\nconst jsonString = JSON.stringify(sanitized, null, 2);\nconst base64 = Buffer.from(jsonString).toString('base64');\n\nconst tag = (workflow.tags && workflow.tags.length > 0)\n  ? workflow.tags[0].name.replace(/\\s+/g, '-').toLowerCase()\n  : 'untagged';\n\nconst slug = workflow.name.replace(/\\s+/g, '-').toLowerCase();\nconst fileName = `${slug}-${tag}.json`;\n\nreturn [{\n  json: {\n    workflowName: workflow.name,\n    fileName: fileName,\n    base64Content: base64,\n    updatedAt: workflow.updatedAt\n  }\n}];"
+        },
+        "id": "ff5af258-f90e-4086-97c9-57cad2413e78",
+        "name": "Prepare backup data",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          7584,
+          2576
+        ],
+        "typeVersion": 2
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "fe4a36ef-9f04-40e3-99bd-cc517a49b440",
+                "name": "commitDate",
+                "type": "string",
+                "value": "={{ $now.format('dd-MM-yyyy HH:mm') }}"
+              },
+              {
+                "id": "b0fe1bcc-e79c-4a6b-b8b4-44222c8bf4e8",
+                "name": "fileName",
+                "type": "string",
+                "value": "={{ $json.fileName }}"
+              },
+              {
+                "id": "d1e2f3a4-b5c6-7890-def0-123456789abc",
+                "name": "base64Content",
+                "type": "string",
+                "value": "={{ $json.base64Content }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "e552ad0e-f292-49dd-a488-d5957f7e305f",
+        "name": "Commit date & file name",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          7808,
+          2576
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $('Aggregate repo files').first().json.name }}",
+                "operation": "contains",
+                "value2": "={{ $json.fileName }}"
+              }
+            ]
+          }
+        },
+        "id": "2e22b8f3-a73c-44fd-b865-bf65c09bb629",
+        "name": "File already in repo?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          8032,
+          2576
+        ],
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "resource": "file",
+          "operation": "edit",
+          "owner": {
+            "__rl": true,
+            "value": "konnofuente",
+            "mode": "name"
+          },
+          "repository": {
+            "__rl": true,
+            "value": "n8n-free-template",
+            "mode": "list",
+            "cachedResultName": "n8n-free-template",
+            "cachedResultUrl": "https://github.com/konnofuente/n8n-free-template"
+          },
+          "filePath": "={{ $('Commit date & file name').item.json.fileName }}",
+          "fileContent": "={{ $('Commit date & file name').item.json.base64Content }}",
+          "commitMessage": "=chore: backup {{ $('Commit date & file name').item.json.fileName }} @ {{ $('Commit date & file name').item.json.commitDate }}"
+        },
+        "id": "0a9ddb68-00de-4e7c-9eba-3610f9bc7dc2",
+        "name": "Update file",
+        "type": "n8n-nodes-base.github",
+        "position": [
+          8240,
+          2496
+        ],
+        "webhookId": "27218087-8df7-474d-a39f-70cfa9c34ec8",
+        "typeVersion": 1,
+        "credentials": {
+          "githubApi": {
+            "id": "z8h44D4OqbDOXai8",
+            "name": "GitHub account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "file",
+          "owner": {
+            "__rl": true,
+            "value": "konnofuente",
+            "mode": "name"
+          },
+          "repository": {
+            "__rl": true,
+            "value": "n8n-free-template",
+            "mode": "list",
+            "cachedResultName": "n8n-free-template",
+            "cachedResultUrl": "https://github.com/konnofuente/n8n-free-template"
+          },
+          "filePath": "={{ $('Commit date & file name').item.json.fileName }}",
+          "fileContent": "={{ $('Commit date & file name').item.json.base64Content }}",
+          "commitMessage": "=chore: backup {{ $('Commit date & file name').item.json.fileName }} @ {{ $('Commit date & file name').item.json.commitDate }}"
+        },
+        "id": "da7be0b9-0f49-4299-83b7-e31c0305a037",
+        "name": "Upload file",
+        "type": "n8n-nodes-base.github",
+        "position": [
+          8240,
+          2656
+        ],
+        "webhookId": "ce4b561b-acb9-4cd8-b76f-4928dada9674",
+        "typeVersion": 1,
+        "credentials": {
+          "githubApi": {
+            "id": "z8h44D4OqbDOXai8",
+            "name": "GitHub account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "content": "## ① Snapshot GitHub repo\nLists all files already backed up in the repo so we can decide whether to **create** or **update** each workflow.",
+          "height": 200,
+          "width": 500,
+          "color": 5
+        },
+        "id": "13d2f8eb-39ca-4c42-8279-7e1fb9a0c86c",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          6448,
+          2480
+        ],
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "content": "## ② Fetch & filter workflows\n- Calls n8n API for all workflows\n- **Splits** the `data[]` array into individual items\n- **Filters** to only workflows updated in the last 24 h\n- Code node converts to base64 & builds the filename",
+          "height": 200,
+          "width": 760,
+          "color": 3
+        },
+        "id": "ee33f072-e728-4c51-a28d-3af0afc485c7",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          6896,
+          2480
+        ],
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "content": "## ③ Commit to GitHub\n- **True branch** → file already exists → **Update** it\n- **False branch** → new workflow → **Create** it\n\nRuns every day at 02:00 AM server time.",
+          "height": 200,
+          "width": 600,
+          "color": 4
+        },
+        "id": "e1d943fd-fae3-4c3e-8662-0ff58a05a029",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          7776,
+          2480
+        ],
+        "typeVersion": 1
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "List files from repo",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "List files from repo": {
+        "main": [
+          [
+            {
+              "node": "Aggregate repo files",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Aggregate repo files": {
+        "main": [
+          [
+            {
+              "node": "Get all workflows",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get all workflows": {
+        "main": [
+          [
+            {
+              "node": "Split Out workflows",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Split Out workflows": {
+        "main": [
+          [
+            {
+              "node": "Changed in last 24h?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Changed in last 24h?": {
+        "main": [
+          [
+            {
+              "node": "Prepare backup data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare backup data": {
+        "main": [
+          [
+            {
+              "node": "Commit date & file name",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Commit date & file name": {
+        "main": [
+          [
+            {
+              "node": "File already in repo?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "File already in repo?": {
+        "main": [
+          [
+            {
+              "node": "Update file",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Upload file",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Konno Meli Arnaud Desire",
+    "name": "Version f332a3e6",
+    "description": ""
+  },
   "tags": []
 }
