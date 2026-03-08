@@ -87,6 +87,7 @@
                 220
             ],
             "typeVersion": 4.3,
+            "continueOnFail": true,
             "credentials": {
                 "httpHeaderAuth": {
                     "id": "z8h44D4OqbDOXai8",
@@ -96,7 +97,7 @@
         },
         {
             "parameters": {
-                "jsCode": "// Decode base64 content from GitHub and extract workflow data\nconst item = $input.item.json;\n\n// GitHub returns content with newlines in the base64 — strip them\nconst raw = (item.content || '').replace(/\\n/g, '');\nif (!raw) {\n  throw new Error(`No content returned for file: ${item.name}`);\n}\n\nconst decoded = Buffer.from(raw, 'base64').toString('utf8');\nlet workflow;\ntry {\n  workflow = JSON.parse(decoded);\n} catch (e) {\n  throw new Error(`Failed to parse JSON for file: ${item.name} — ${e.message}`);\n}\n\nif (!workflow.id) {\n  throw new Error(`Workflow file ${item.name} has no id field — cannot update.`);\n}\n\nreturn [{\n  json: {\n    workflowId: workflow.id,\n    workflowName: workflow.name,\n    workflowData: workflow,\n    filePath: item.path\n  }\n}];"
+                "jsCode": "// Decode base64 content from GitHub and extract workflow data\nconst item = $input.item.json;\n\n// GitHub returns content with newlines in the base64 — strip them\nconst raw = (item.content || '').replace(/\\n/g, '');\nif (!raw) {\n  // No content — skip silently\n  return [{ json: { skipped: true, reason: 'No content', file: item.name } }];\n}\n\nlet workflow;\ntry {\n  const decoded = Buffer.from(raw, 'base64').toString('utf8');\n  workflow = JSON.parse(decoded);\n} catch (e) {\n  // Not valid JSON — skip (e.g. README, package files)\n  return [{ json: { skipped: true, reason: 'Invalid JSON', file: item.name } }];\n}\n\nif (!workflow.id) {\n  // No n8n workflow id — skip template files like Github Restore.json\n  return [{ json: { skipped: true, reason: 'No workflow id', file: item.name } }];\n}\n\nreturn [{\n  json: {\n    skipped: false,\n    workflowId: workflow.id,\n    workflowName: workflow.name,\n    workflowData: workflow,\n    filePath: item.path\n  }\n}];"
             },
             "id": "a1000006-0000-0000-0000-000000000006",
             "name": "Decode & extract workflow",
@@ -106,6 +107,26 @@
                 220
             ],
             "typeVersion": 2
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{ $json.skipped }}",
+                            "value2": false
+                        }
+                    ]
+                }
+            },
+            "id": "a1000015-0000-0000-0000-000000000015",
+            "name": "Has workflow id?",
+            "type": "n8n-nodes-base.if",
+            "position": [
+                1190,
+                220
+            ],
+            "typeVersion": 1
         },
         {
             "parameters": {
@@ -145,6 +166,49 @@
         },
         {
             "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json.error?.message || '' }}",
+                            "operation": "isNotEmpty"
+                        }
+                    ]
+                }
+            },
+            "id": "a1000016-0000-0000-0000-000000000016",
+            "name": "Did update fail?",
+            "type": "n8n-nodes-base.if",
+            "position": [
+                1520,
+                220
+            ],
+            "typeVersion": 1
+        },
+        {
+            "parameters": {
+                "chatId": "YOUR_TELEGRAM_CHAT_ID",
+                "text": "=❌ *n8n Restore ERROR*\n\nA workflow failed to update from GitHub.\n\n📁 *File:* {{ $('Decode & extract workflow').item.json.filePath || 'unknown' }}\n🔴 *Error:* {{ $json.error?.message || $json.message || 'Unknown error' }}\n\n🕐 *Time:* {{ $now.format('dd-MM-yyyy HH:mm') }}\n\nPlease check your n8n execution logs.",
+                "additionalFields": {
+                    "parse_mode": "Markdown"
+                }
+            },
+            "id": "a1000017-0000-0000-0000-000000000017",
+            "name": "Telegram error alert",
+            "type": "n8n-nodes-base.telegram",
+            "position": [
+                1740,
+                140
+            ],
+            "typeVersion": 1.2,
+            "credentials": {
+                "telegramApi": {
+                    "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
                 "fieldsToAggregate": {
                     "fieldToAggregate": [
                         {
@@ -158,8 +222,8 @@
             "name": "Collect updated names",
             "type": "n8n-nodes-base.aggregate",
             "position": [
-                1520,
-                220
+                1740,
+                300
             ],
             "typeVersion": 1
         },
@@ -319,15 +383,45 @@
             "main": [
                 [
                     {
-                        "node": "Update workflow via API",
+                        "node": "Has workflow id?",
                         "type": "main",
                         "index": 0
                     }
                 ]
             ]
         },
+        "Has workflow id?": {
+            "main": [
+                [
+                    {
+                        "node": "Update workflow via API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
         "Update workflow via API": {
             "main": [
+                [
+                    {
+                        "node": "Did update fail?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Did update fail?": {
+            "main": [
+                [
+                    {
+                        "node": "Telegram error alert",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
                 [
                     {
                         "node": "Collect updated names",

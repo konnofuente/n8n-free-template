@@ -1,0 +1,651 @@
+{
+  "name": "Geskap - Create Content Social Media",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 18 * * 1-5"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-200, 300],
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Rotate content pillars based on day of week\nconst pillars = [\n  {\n    name: 'DOULEURS',\n    description: 'Les problèmes quotidiens des PME africaines',\n    examples: 'gestion manuelle, perte d\\'argent, factures oubliées, stock incontrôlé, pas de visibilité sur les finances'\n  },\n  {\n    name: 'SOLUTIONS',\n    description: 'Les fonctionnalités de Geskap qui résolvent ces problèmes',\n    examples: 'facturation automatique, gestion de stock, tableau de bord, comptabilité simplifiée, rapports financiers'\n  },\n  {\n    name: 'ÉDUCATION',\n    description: 'Conseils business et astuces de gestion pour entrepreneurs africains',\n    examples: 'comment fixer ses prix, gérer sa trésorerie, fidéliser ses clients, organiser son entreprise'\n  },\n  {\n    name: 'INSPIRATION',\n    description: 'Motivation entrepreneuriale et success stories africaines',\n    examples: 'histoires de réussite, citations motivantes, parcours d\\'entrepreneurs africains'\n  },\n  {\n    name: 'ENGAGEMENT',\n    description: 'Contenus interactifs pour créer de l\\'engagement',\n    examples: 'questions ouvertes, sondages, \"et toi?\", débats, quiz business'\n  }\n];\n\nconst dayOfWeek = new Date().getDay(); // 0=Sun, 1=Mon ... 5=Fri\nconst pillarIndex = (dayOfWeek - 1) % pillars.length; // Mon=0, Tue=1...\nconst pillar = pillars[Math.max(0, pillarIndex)];\n\nconst prompt = `Génère du contenu pour les réseaux sociaux de Geskap pour le pilier \"${pillar.name}\".\n\nDescription du pilier: ${pillar.description}\nExemples de sujets: ${pillar.examples}\n\nGénère un post adapté à CHAQUE plateforme (TikTok, Instagram, Facebook).\n\nRetourne UNIQUEMENT un JSON valide (sans markdown, sans backticks) avec cette structure exacte:\n{\n  \"tiktok\": {\n    \"caption\": \"Le texte complet du post TikTok avec emojis et hashtags inclus\"\n  },\n  \"instagram\": {\n    \"caption\": \"Le texte complet du post Instagram avec emojis et hashtags inclus\"\n  },\n  \"facebook\": {\n    \"caption\": \"Le texte complet du post Facebook avec emojis et hashtags inclus\"\n  },\n  \"image_prompt\": \"A detailed English prompt to generate a branded social media visual for this post. The image should feature Geskap brand colors (dark green #194E2F and white), modern flat design, African business context, clean typography. NO text in the image.\"\n}`;\n\nreturn [{ json: { prompt, pillar: pillar.name } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [20, 300],
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Select Content Pillar"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.prompt }}",
+        "options": {
+          "systemMessage": "Tu es un expert en marketing digital et community management pour Geskap.\n\nÀ propos de Geskap:\n- SaaS de gestion d'entreprise cloud conçu pour les PME africaines\n- Fonctionnalités: facturation, gestion de stock, comptabilité, tableau de bord, rapports\n- Comptes: TikTok @geskap_app, Instagram @geskap_app, Facebook Geskap\n- Audience: Entrepreneurs et gérants de PME en Afrique francophone (Cameroun, Côte d'Ivoire, Sénégal, RDC), 25-45 ans\n- Ton: Professionnel mais accessible, motivant, direct, avec des références culturelles africaines\n- Langue: Français\n\nRègles STRICTES:\n1. Commence TOUJOURS par un hook percutant (question choc ou affirmation forte)\n2. Utilise des emojis avec modération (2-4 par post)\n3. Termine par un call-to-action clair (télécharger Geskap, visiter le site, commenter)\n4. Hashtags obligatoires: #Geskap #PMEAfrique #GestionEntreprise + 3-5 hashtags contextuels\n5. TikTok: court, percutant, casual, max 150 mots\n6. Instagram: moyen, visuel, storytelling, max 200 mots\n7. Facebook: plus détaillé, éducatif, max 300 mots\n8. JAMAIS de contenu générique — toujours ancré dans la réalité des PME africaines\n9. Retourne UNIQUEMENT du JSON valide, sans backticks ni markdown"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [260, 300],
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "name": "Generate Content"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "temperature": 0.8
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [260, 520],
+      "id": "a1b2c3d4-0004-4000-8000-000000000004",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "c4V2SVICUD0wA3QJ",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the AI response into structured content\nconst output = $input.first().json.output || $input.first().json.text || '';\n\nlet content;\ntry {\n  // Try to parse JSON directly\n  const jsonMatch = output.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    content = JSON.parse(jsonMatch[0]);\n  } else {\n    throw new Error('No JSON found in AI response');\n  }\n} catch (e) {\n  // Fallback: use the raw output as a generic caption\n  content = {\n    tiktok: { caption: output.substring(0, 500) },\n    instagram: { caption: output.substring(0, 800) },\n    facebook: { caption: output },\n    image_prompt: 'Modern flat design social media visual with dark green #194E2F background, African business context, clean and professional'\n  };\n}\n\nreturn [{\n  json: {\n    tiktok_caption: content.tiktok?.caption || '',\n    instagram_caption: content.instagram?.caption || '',\n    facebook_caption: content.facebook?.caption || '',\n    image_prompt: content.image_prompt || 'Modern flat design social media visual with dark green #194E2F background, African business context, clean and professional',\n    pillar: $('Select Content Pillar').first().json.pillar\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300],
+      "id": "a1b2c3d4-0005-4000-8000-000000000005",
+      "name": "Parse AI Response"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"google/nano-banana-edit\",\n  \"input\": {\n    \"prompt\": \"{{ $json.image_prompt }}\",\n    \"output_format\": \"png\",\n    \"image_size\": \"1:1\"\n  }\n}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 300],
+      "id": "a1b2c3d4-0006-4000-8000-000000000006",
+      "name": "Create Image Task",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6TWR9qstns4hczRL",
+          "name": "N8N_Credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 15,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [940, 300],
+      "id": "a1b2c3d4-0007-4000-8000-000000000007",
+      "name": "Wait for Image",
+      "webhookId": "geskap-wait-image"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.kie.ai/api/v1/jobs/recordInfo?taskId={{ $('Create Image Task').first().json.data?.taskId || $('Create Image Task').first().json.taskId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1160, 300],
+      "id": "a1b2c3d4-0008-4000-8000-000000000008",
+      "name": "Get Image Result",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6TWR9qstns4hczRL",
+          "name": "N8N_Credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "image-ready-check",
+              "leftValue": "={{ $json.data?.status || $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1380, 300],
+      "id": "a1b2c3d4-0009-4000-8000-000000000009",
+      "name": "Image Ready?"
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1380, 520],
+      "id": "a1b2c3d4-0010-4000-8000-000000000010",
+      "name": "Wait More",
+      "webhookId": "geskap-wait-more"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract image URL and combine with content data\nconst imageData = $('Get Image Result').first().json;\nconst contentData = $('Parse AI Response').first().json;\n\nconst imageUrl = imageData.data?.output?.image_url \n  || imageData.data?.output?.images?.[0] \n  || imageData.output?.image_url \n  || imageData.output?.images?.[0] \n  || '';\n\nreturn [{\n  json: {\n    ...contentData,\n    image_url: imageUrl,\n    execution_id: $execution.id\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1600, 300],
+      "id": "a1b2c3d4-0011-4000-8000-000000000011",
+      "name": "Prepare Preview"
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "REPLACE_WITH_YOUR_TELEGRAM_CHAT_ID",
+        "file": "={{ $json.image_url }}",
+        "additionalFields": {
+          "caption": "=📱 *GESKAP — Nouveau Post ({{ $json.pillar }})*\n\n━━━━━━━━━━━━━━━━━\n🎵 *TikTok:*\n{{ $json.tiktok_caption }}\n\n━━━━━━━━━━━━━━━━━\n📸 *Instagram:*\n{{ $json.instagram_caption }}\n\n━━━━━━━━━━━━━━━━━\n📘 *Facebook:*\n{{ $json.facebook_caption }}\n\n━━━━━━━━━━━━━━━━━\n✅ Approuver = publier sur les 3 plateformes\n❌ Rejeter = annuler la publication",
+          "parse_mode": "Markdown",
+          "replyMarkup": "inlineKeyboard",
+          "inlineKeyboard": {
+            "rows": [
+              {
+                "row": [
+                  {
+                    "text": "✅ Approuver",
+                    "additionalFields": {
+                      "callbackData": "=approve:{{ $json.execution_id }}"
+                    }
+                  },
+                  {
+                    "text": "❌ Rejeter",
+                    "additionalFields": {
+                      "callbackData": "=reject:{{ $json.execution_id }}"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1820, 300],
+      "id": "a1b2c3d4-0012-4000-8000-000000000012",
+      "name": "Send Telegram Preview",
+      "credentials": {
+        "telegramApi": {
+          "id": "Zc5UMtLg91RaTekA",
+          "name": "Telegram account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2040, 300],
+      "id": "a1b2c3d4-0013-4000-8000-000000000013",
+      "name": "Wait for Approval",
+      "webhookId": "geskap-approval"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "approval-check",
+              "leftValue": "={{ $json.body?.action || $json.query?.action }}",
+              "rightValue": "approve",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [2260, 300],
+      "id": "a1b2c3d4-0014-4000-8000-000000000014",
+      "name": "Approved?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v21.0/REPLACE_WITH_YOUR_FACEBOOK_PAGE_ID/photos",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{ $('Prepare Preview').first().json.image_url }}\",\n  \"message\": \"{{ $('Prepare Preview').first().json.facebook_caption }}\",\n  \"access_token\": \"REPLACE_WITH_YOUR_FACEBOOK_PAGE_ACCESS_TOKEN\"\n}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2500, 100],
+      "id": "a1b2c3d4-0015-4000-8000-000000000015",
+      "name": "Post to Facebook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v21.0/REPLACE_WITH_YOUR_INSTAGRAM_BUSINESS_ACCOUNT_ID/media",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"image_url\": \"{{ $('Prepare Preview').first().json.image_url }}\",\n  \"caption\": \"{{ $('Prepare Preview').first().json.instagram_caption }}\",\n  \"access_token\": \"REPLACE_WITH_YOUR_FACEBOOK_PAGE_ACCESS_TOKEN\"\n}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2500, 300],
+      "id": "a1b2c3d4-0016-4000-8000-000000000016",
+      "name": "Create Instagram Media"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v21.0/REPLACE_WITH_YOUR_INSTAGRAM_BUSINESS_ACCOUNT_ID/media_publish",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"creation_id\": \"{{ $json.id }}\",\n  \"access_token\": \"REPLACE_WITH_YOUR_FACEBOOK_PAGE_ACCESS_TOKEN\"\n}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2720, 300],
+      "id": "a1b2c3d4-0017-4000-8000-000000000017",
+      "name": "Publish Instagram Media"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://open.tiktokapis.com/v2/post/publish/content/init/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REPLACE_WITH_YOUR_TIKTOK_ACCESS_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json; charset=UTF-8"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post_info\": {\n    \"title\": \"{{ $('Prepare Preview').first().json.tiktok_caption.substring(0, 150) }}\",\n    \"privacy_level\": \"SELF_ONLY\",\n    \"disable_duet\": false,\n    \"disable_comment\": false,\n    \"disable_stitch\": false\n  },\n  \"source_info\": {\n    \"source\": \"PULL_FROM_URL\",\n    \"photo_cover_index\": 0,\n    \"photo_images\": [\n      \"{{ $('Prepare Preview').first().json.image_url }}\"\n    ]\n  },\n  \"post_mode\": \"DIRECT_POST\",\n  \"media_type\": \"PHOTO\"\n}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2500, 500],
+      "id": "a1b2c3d4-0018-4000-8000-000000000018",
+      "name": "Post to TikTok"
+    },
+    {
+      "parameters": {
+        "chatId": "REPLACE_WITH_YOUR_TELEGRAM_CHAT_ID",
+        "text": "=✅ *Post Geskap publié avec succès!*\n\n📱 Pilier: {{ $('Prepare Preview').first().json.pillar }}\n📘 Facebook: ✅\n📸 Instagram: ✅\n🎵 TikTok: ✅\n\n🕐 {{ new Date().toLocaleString('fr-FR', { timeZone: 'Africa/Douala' }) }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [2940, 300],
+      "id": "a1b2c3d4-0019-4000-8000-000000000019",
+      "name": "Notify Posted",
+      "credentials": {
+        "telegramApi": {
+          "id": "Zc5UMtLg91RaTekA",
+          "name": "Telegram account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "REPLACE_WITH_YOUR_TELEGRAM_CHAT_ID",
+        "text": "=❌ *Post Geskap rejeté*\n\n📱 Pilier: {{ $('Prepare Preview').first().json.pillar }}\n\nLe contenu ne sera pas publié. Le prochain post sera généré demain.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [2500, 700],
+      "id": "a1b2c3d4-0020-4000-8000-000000000020",
+      "name": "Notify Rejected",
+      "credentials": {
+        "telegramApi": {
+          "id": "Zc5UMtLg91RaTekA",
+          "name": "Telegram account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Error handler - notify via Telegram if anything fails\nconst error = $input.first().json;\nreturn [{\n  json: {\n    error_message: JSON.stringify(error).substring(0, 500),\n    timestamp: new Date().toLocaleString('fr-FR', { timeZone: 'Africa/Douala' })\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1600, 700],
+      "id": "a1b2c3d4-0021-4000-8000-000000000021",
+      "name": "Handle Error"
+    },
+    {
+      "parameters": {
+        "chatId": "REPLACE_WITH_YOUR_TELEGRAM_CHAT_ID",
+        "text": "=⚠️ *Erreur Workflow Geskap*\n\nUne erreur est survenue lors de la génération du contenu:\n\n```{{ $json.error_message }}```\n\n🕐 {{ $json.timestamp }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1820, 700],
+      "id": "a1b2c3d4-0022-4000-8000-000000000022",
+      "name": "Notify Error",
+      "credentials": {
+        "telegramApi": {
+          "id": "Zc5UMtLg91RaTekA",
+          "name": "Telegram account 4"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Select Content Pillar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Content Pillar": {
+      "main": [
+        [
+          {
+            "node": "Generate Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Content",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Content": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response": {
+      "main": [
+        [
+          {
+            "node": "Create Image Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image Task": {
+      "main": [
+        [
+          {
+            "node": "Wait for Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Image": {
+      "main": [
+        [
+          {
+            "node": "Get Image Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image Result": {
+      "main": [
+        [
+          {
+            "node": "Image Ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Ready?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Preview",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait More",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait More": {
+      "main": [
+        [
+          {
+            "node": "Get Image Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Preview": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Preview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Telegram Preview": {
+      "main": [
+        [
+          {
+            "node": "Wait for Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Approval": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Post to Facebook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Instagram Media",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Post to TikTok",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Facebook": {
+      "main": [
+        [
+          {
+            "node": "Notify Posted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Instagram Media": {
+      "main": [
+        [
+          {
+            "node": "Publish Instagram Media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish Instagram Media": {
+      "main": [
+        [
+          {
+            "node": "Notify Posted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to TikTok": {
+      "main": [
+        [
+          {
+            "node": "Notify Posted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Error": {
+      "main": [
+        [
+          {
+            "node": "Notify Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "tags": [
+    {
+      "name": "Geskap"
+    },
+    {
+      "name": "Social Media"
+    }
+  ]
+}
