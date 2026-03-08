@@ -1,6 +1,5 @@
 {
     "name": "Github Restore",
-    "description": "Restores n8n workflows from GitHub pushes. Supports both UPDATE (existing workflows with id) and CREATE (new workflows without id). v2.0 - 2026-03-08",
     "nodes": [
         {
             "parameters": {
@@ -36,7 +35,7 @@
         },
         {
             "parameters": {
-                "jsCode": "// Extract all .json files added or modified in this push\nconst payload = $input.item.json.body;\nconst commits = payload.commits || [];\n\nconst changedFiles = new Set();\nfor (const commit of commits) {\n  for (const file of [...(commit.added || []), ...(commit.modified || [])]) {\n    if (file.endsWith('.json')) {\n      changedFiles.add(file);\n    }\n  }\n}\n\nif (changedFiles.size === 0) {\n  return [{ json: { skipped: true, reason: 'No .json files changed' } }];\n}\n\n// Pass ref (commit SHA) so we fetch the exact version pushed\nconst ref = payload.after || 'main';\nconst pusher = payload.pusher ? payload.pusher.name : 'unknown';\nconst repoFullName = payload.repository ? payload.repository.full_name : 'konnofuente/n8n-free-template';\n\nreturn [...changedFiles].map(filePath => ({\n  json: { filePath, ref, pusher, repoFullName }\n}));"
+                "jsCode": "// Extract all .json files added or modified in this push\n// Handle both payload structures: $json.body (webhook v2) and $json directly\nconst raw = $input.item.json;\nconst payload = raw.body || raw;\n\n// Debug: log what we received so we can inspect in execution\nconst debugInfo = {\n  hasBody: !!raw.body,\n  payloadKeys: Object.keys(payload),\n  commitsCount: (payload.commits || []).length,\n  hasHeadCommit: !!payload.head_commit\n};\n\nconst commits = payload.commits || [];\nconst changedFiles = new Set();\n\n// Method 1: Check commits array\nfor (const commit of commits) {\n  for (const file of [...(commit.added || []), ...(commit.modified || [])]) {\n    if (file.endsWith('.json')) {\n      changedFiles.add(file);\n    }\n  }\n}\n\n// Method 2: Fallback to head_commit if commits array was empty\nif (changedFiles.size === 0 && payload.head_commit) {\n  const hc = payload.head_commit;\n  for (const file of [...(hc.added || []), ...(hc.modified || [])]) {\n    if (file.endsWith('.json')) {\n      changedFiles.add(file);\n    }\n  }\n}\n\nif (changedFiles.size === 0) {\n  return [{ json: { skipped: true, reason: 'No .json files changed', debug: debugInfo } }];\n}\n\n// Pass ref (commit SHA) so we fetch the exact version pushed\nconst ref = payload.after || 'main';\nconst pusher = payload.pusher ? payload.pusher.name : 'unknown';\nconst repoFullName = payload.repository ? payload.repository.full_name : 'konnofuente/n8n-free-template';\n\nreturn [...changedFiles].map(filePath => ({\n  json: { filePath, ref, pusher, repoFullName, debug: debugInfo }\n}));"
             },
             "id": "a1000003-0000-0000-0000-000000000003",
             "name": "Extract changed files",
