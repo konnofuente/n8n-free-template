@@ -1,5 +1,6 @@
 {
     "name": "Github Restore",
+    "description": "Restores n8n workflows from GitHub pushes. Supports both UPDATE (existing workflows with id) and CREATE (new workflows without id). v2.0 - 2026-03-08",
     "nodes": [
         {
             "parameters": {
