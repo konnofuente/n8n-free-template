@@ -1,5 +1,6 @@
 {
   "name": "Geskap - Create Content Social Media",
+  "description": "Auto-generates French social media content for Geskap (TikTok, Instagram, Facebook) with Telegram approval flow. v1.0 - 2026-03-08",
   "nodes": [
     {
       "parameters": {

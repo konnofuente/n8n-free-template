@@ -1,5 +1,6 @@
 {
   "name": "Geskap - Telegram Approval Handler",
+  "description": "Handles Telegram inline button callbacks to approve/reject Geskap social media posts. v1.0 - 2026-03-08",
   "nodes": [
     {
       "parameters": {
