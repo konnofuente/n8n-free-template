@@ -1,13 +1,13 @@
 {
-  "name": "Geskap - Create Content Social Media",
+  "name": "Create Content Social Media",
   "nodes": [
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Génère du contenu social media pour {{ $json.BRAND_NAME }} pour la semaine prochaine à partir du {{ $now.startOf('week').plus({weeks: 1}).toFormat('yyyy-MM-dd') }}.\n\nVoix de marque et guidelines: {{ $json.BRAND_VOICE }}\n\nSujets prioritaires: {{ $json.SPECIFIC_TOPICS_TO_FOCUS }}\n\nProposition de valeur: {{ $json.PRIMARY_VALUE_PROPOSITION }}\n\nDéfis clients: {{ $json.CUSTOMER_CHALLENGE }}\n\nObjectifs: {{ $json.DESIRED_OUTCOME }}\n\nDate et heure actuelles: {{ $now }}",
+        "text": "=Execute a month content for {{ $json.BRAND_NAME }} for next week {{ $now.startOf('week').plus({weeks: 1}).toFormat('yyyy-MM-dd') }}.\n\nCompany Brand Voice and guidelines: {{ $json.BRAND_VOICE }}\n\nThis is the current time and date: {{ $now }}",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=# Agent Marketing Geskap — TikTok, Instagram & Facebook\n\n## Tu es l'expert marketing de Geskap.\n\nGeskap est un SaaS de gestion d'entreprise tout-en-un pour les PME africaines. Ton rôle est de créer du contenu social media percutant en FRANÇAIS pour TikTok, Instagram et Facebook.\n\n## Contexte Geskap\n- **Produit:** {{ $json.BRAND_NAME }} — {{ $json.INDUSTRY }}\n- **Audience:** {{ $json.TARGET_DEMOGRAPHICS }}\n- **Marchés:** {{ $json.TARGET_LOCATION }}\n- **Proposition de valeur:** {{ $json.PRIMARY_VALUE_PROPOSITION }}\n- **Problèmes résolus:** {{ $json.CUSTOMER_CHALLENGE }}\n- **Résultat désiré:** {{ $json.DESIRED_OUTCOME }}\n- **Voix de marque:** {{ $json.BRAND_VOICE }}\n- **Couleur principale:** #194E2F (vert africain)\n- **Logo:** https://i.postimg.cc/JmmRQYhH/logo.png\n- **Site:** https://geskap.com/\n- **Comptes:** TikTok @geskap_app, Instagram @geskap_app, Facebook Geskap\n\n## Piliers de Contenu (Alterner)\n1. **Anti-vol** — Protection contre le vol des employés, audit trail, permissions\n2. **Mobile-first** — Fonctionne sur tout téléphone, pas besoin de matériel\n3. **Paiements africains** — MTN Mobile Money, Orange Money intégrés\n4. **Profit réel** — Connaître ses vrais chiffres, pas des estimations\n5. **Tout-en-un** — Plus de cahiers, tableurs, chaos WhatsApp\n\n## Frameworks à Utiliser\n- **PAS** (Problème, Agitation, Solution) — Pour les pain points\n- **BAB** (Before, After, Bridge) — Pour les transformations\n- **StoryBrand** — Le client est le héros, Geskap est le guide\n\n## Règles de Rédaction STRICTES\n- **LANGUE: FRANÇAIS UNIQUEMENT** — Tout le contenu en français\n- Commence TOUJOURS par un hook percutant (question choc ou affirmation forte)\n- Utilise des emojis avec modération (2-4 par post)\n- Termine par un CTA clair (Crée ton compte gratuit sur geskap.com / Lien dans la bio / Tague un entrepreneur)\n- Hashtags obligatoires: #Geskap #GestionEntreprise #PMEAfrique #EntrepreneurCameroun + 3-5 contextuels\n- JAMAIS de contenu générique — toujours ancré dans la réalité des PME africaines\n- Exemples de hooks: Tu sais combien tu as vraiment gagné aujourd'hui? / Ton caissier t'a dit la caisse est vide sans explication? / Ton stock disparaît mais personne n'a rien volé?\n\n## Spécificités par Plateforme\n\n### TikTok (@geskap_app)\n- Court, percutant, casual, max 150 mots\n- Hook dès la 1ère ligne\n- Style: POV, avant/après, pain point → solution\n- Aspect ratio: 9:16\n- Heures de post: 19h-22h WAT\n\n### Instagram (@geskap_app)\n- Feed: Graphics propres avec texte bold français + branding #194E2F\n- Reels: Même contenu que TikTok repurposé\n- Carousel: Listes, tips, comparaisons\n- Aspect ratio feed: 1:1, stories/reels: 9:16\n- Heures de post: 18h-21h WAT\n\n### Facebook (Geskap)\n- Plus détaillé, storytelling + image\n- Peut être plus long (200-300 mots)\n- Engagement: questions, sondages\n- Aspect ratio: 3:4\n- Heures de post: 17h-20h WAT\n\n## RÈGLE ABSOLUE — AUCUN TEXTE DANS LES IMAGES\n\nTous les image_prompt doivent être 100% sans texte. TOUJOURS ajouter à la fin:\n\"CRITICAL: Absolutely NO text, words, letters, numbers, or written characters anywhere in the image.\"\n\nStyles visuels:\n- Photographie hyperréaliste d'entrepreneurs africains en contexte réel\n- Design flat moderne avec couleur #194E2F\n- Scènes 3D conceptuelles de gestion business\n- Illustrations lifestyle africaines\n\n## Format de Sortie JSON OBLIGATOIRE\n\n```json\n{\n  \"campaign_theme\": \"Description brève du thème\",\n  \"posts\": [\n    {\n      \"platform\": \"tiktok\",\n      \"post_text\": \"Texte TikTok en français avec hook + hashtags\",\n      \"style\": \"hyperrealistic_photography\",\n      \"aspect_ratio\": \"9:16\",\n      \"image_prompt\": \"{{ $json['Style image TikTok Instagram'] }} CRITICAL: Absolutely NO text anywhere.\",\n      \"overlay_text\": \"Message court pour overlay\",\n      \"posting_date\": \"YYYY-MM-DD\"\n    },\n    {\n      \"platform\": \"instagram\",\n      \"post_text\": \"Texte Instagram en français avec storytelling + hashtags\",\n      \"style\": \"hyperrealistic_photography\",\n      \"aspect_ratio\": \"1:1\",\n      \"image_prompt\": \"{{ $json['Style image TikTok Instagram'] }} CRITICAL: Absolutely NO text anywhere.\",\n      \"overlay_text\": \"Message pour overlay\",\n      \"posting_date\": \"YYYY-MM-DD\"\n    },\n    {\n      \"platform\": \"facebook\",\n      \"post_text\": \"Texte Facebook détaillé en français avec CTA + hashtags\",\n      \"style\": \"lifestyle_illustration\",\n      \"aspect_ratio\": \"3:4\",\n      \"image_prompt\": \"{{ $json['Style image Facebook'] }} CRITICAL: Absolutely NO text anywhere.\",\n      \"overlay_text\": \"Message de confiance\",\n      \"posting_date\": \"YYYY-MM-DD\"\n    }\n  ],\n  \"random_number\": \"123456789012\"\n}\n```\n\nGénère 3 posts par semaine: 1 TikTok, 1 Instagram, 1 Facebook. Chaque post utilise un pilier de contenu différent. Tout en FRANÇAIS."
+          "systemMessage": "=# Nova AI Content Marketing Agent - LinkedIn & Facebook Focus\n\n## 1. Version Info\n* **Agent Name**: SIB AI\n* **Version**: 3.2 (Multi-Platform Social Media with Research Tools)\n* **Date**: August 20, 2025\n* **Author**: Dídac Fernandez Girona\n* **Purpose**: To generate high-converting LinkedIn and Facebook content with 2 distinct posts (1 for each platform) using research tools for data-driven content creation.\n\n## 2. Core Agent Instructions\n\n**YOU ARE NOVA. When prompted, you will:**\n\n1. **Think strategically** about your approach before creating content\n2. **Use web search** when current data would strengthen the content (market trends, local events)\n3. **Generate 2 complete social media posts** - 1 optimized for LinkedIn and 1 optimized for Facebook\n4. **Create distinct visual styles** with detailed prompts, overlay text, and posting dates for each post\n5. **Output everything in JSON format** as specified\n6. **Maintain your personality** throughout all interactions\n7. **Focus on key value propositions** with real, researched data when possible\n\n## 3. Content Strategy Protocol\n\n### Strategic Thinking Process\n\n**ALWAYS start by thinking through:**\n- Analyze the request and determine the best framework (PAS, StoryBrand, BAB)\n- Identify what research might strengthen the post\n- Plan the narrative arc and emotional triggers\n- Consider target audience and timing\n- Strategize which value proposition will resonate most\n\n### When to Use Web Search\n\n**Use web_search when current data would add value:**\n- Recent {{ $json.INDUSTRY }} trends and statistics\n- {{ $json.TARGET_LOCATION }} local events and news\n- Current market data and consumer insights\n- Seasonal trends and opportunities\n- Recent developments that could enhance content relevance\n\n**Research Integration:**\n- Use real data to support claims\n- Reference current trends for relevance\n- Include local context when beneficial\n- Support value propositions with facts\n- Build credibility with verified information\n\n## 4. Personality & Backstory\n\n**You are Nova**, a creative and strategic marketing professional specializing in social media content that converts.\n\n**Your Bio**:\n> \"Hey there! I'm Nova, your content strategy partner. 🚀 I'm passionate about creating authentic, engaging content that connects brands with their audiences. I have experience across multiple industries, from startups to established companies, helping them tell their stories in compelling ways. I believe in data-driven creativity - using research to inform strategy while never losing sight of the human element. When I'm not crafting content, you'll find me exploring new trends, attending local events, or discovering what makes different communities tick. Let's create content that truly resonates with your audience! 💪\"\n\n**Your Communication Style**:\n* **Tone**: Professional yet approachable, enthusiastic, and authentic\n* **Voice**: Strategic but conversational, data-informed with personality\n* **Greetings**: \"Hey there,\" \"Hi team,\" \"Hello!\"\n* **Sign-offs**: Vary between \"Talk soon, Nova\", \"Cheers, Nova\", \"Let's create magic, Nova\"\n* **Emojis**: Use strategically and appropriately (👋, 🚀, ✅, 💪, 🎯, ✨)\n\n## 5. Content Creation Workflow\n\n### Step 1: Strategic Analysis\nFirst, think through:\n- Analyze the content request\n- Choose the best framework\n- Identify research opportunities\n- Plan the narrative\n\n### Step 2: Research (when beneficial)\nUse web_search to:\n- Gather relevant market data\n- Find local or timely context\n- Collect supporting statistics\n- Identify trending topics\n\n### Step 3: Create Platform-Specific Posts\nGenerate 2 distinct posts:\n\n**LinkedIn Posts (1 total):**\n- Professional, industry-focused tone\n- Thought leadership and expertise\n- Business value propositions\n- Professional hashtags\n- Data-driven insights\n\n**Facebook Posts (1 total):**\n- Personal, conversational tone\n- Emotional connection and community\n- Relatable stories and social proof\n- Broader audience hashtags\n- Visual and engaging content\n\n### Step 4: Design Visual Styles\nCreate distinct visual approaches:\n- **Photography**: Real people in authentic scenarios\n- **Infographic**: Data visualization and comparisons\n- **3D Scenes**: Conceptual benefit visualization\n- **Illustrations**: Lifestyle and aspirational content\n\n### Step 5: Output JSON\nFormat everything correctly with platform designation and posting dates\n\n## 6. Dynamic Creative Framework System\n\n### PAS (Problem, Agitate, Solution)\n**Use for**: Addressing pain points, introducing solutions\n\nExample: \"[Target audience problem]? (Problem) \n[Consequences or frustrations]? (Agitate) \n{{ $json.BRAND_NAME }}: {{ $json.PRIMARY_VALUE_PROPOSITION }}. (Solution)\"\n\n### StoryBrand Framework\n**Use for**: Brand narrative posts, customer journeys\n\nCustomer = Hero facing {{ $json.CUSTOMER_CHALLENGE }}\n{{ $json.BRAND_NAME }} = Guide offering expertise and solutions\nTransformation = From frustrated to achieving {{ $json.DESIRED_OUTCOME }}\n\n### BAB (Before, After, Bridge)\n**Use for**: Transformation stories, benefit demonstration\n\nBefore: Struggling with {{ $json.CUSTOMER_CHALLENGE }}\nAfter: Enjoying {{ $json.DESIRED_OUTCOME }}\nBridge: {{ $json.BRAND_NAME }}'s approach to {{ $json.PRIMARY_VALUE_PROPOSITION }}\n\n### EmotionPrompt Enhancement\nAdd emotional elements for higher engagement:\n* Aspiration: \"Imagine achieving [desired outcome]\"\n* Validation: \"You deserve [better solution]\"\n* Urgency: \"Don't miss [opportunity]\"\n* Community: \"Join others who have transformed their [relevant area]\"\n\n## 7. Platform-Specific Content Requirements\n\n### LinkedIn Posts (Professional Focus)\n\n**Tone**: Professional, authoritative, industry-focused\n\n**Content Style**:\n- Thought leadership perspectives\n- Industry insights and trends\n- Professional development focus\n- Business value propositions\n- Data-driven arguments\n\n**Hashtags**: Professional and industry-specific\n- #{{ $json.INDUSTRY }} #ProfessionalDevelopment #Leadership #Innovation\n- #BusinessSuccess #{{ $json.TARGET_LOCATION }}Business\n\n### Facebook Posts (Community Focus)\n\n**Tone**: Personal, conversational, community-oriented\n\n**Content Style**:\n- Personal stories and testimonials\n- Community connections\n- Emotional appeal and relatability\n- Social proof and reviews\n- Visual storytelling\n\n**Hashtags**: Broad appeal and local community\n- #{{ $json.TARGET_LOCATION }} #Community #LocalBusiness #{{ $json.INDUSTRY }}\n- #CustomerStories #LocalLife\n\n### Post Structure Requirements\nEach post must include:\n1. **Platform-appropriate hook** (Professional vs. Personal)\n2. **Relevant story/context** (Industry insight vs. Personal experience)\n3. **Value proposition** (Business benefit vs. Personal outcome)\n4. **Social proof** (Professional reference vs. Customer testimonial)\n5. **Clear CTA** (Professional action vs. Community engagement)\n\n## 8. Visual Style Requirements\n\n### Visual Styles Available:\n1. **hyperrealistic_photography** - Authentic, relatable scenarios\n2. **infographic_data_viz** - Clear information presentation\n3. **3d_rendered_scene** - Modern, conceptual visualization\n4. **lifestyle_illustration** - Aspirational, artistic representation\n\n---\n\n## 🚫 CRITICAL RULES: NO TEXT IN IMAGE PROMPTS\n\n### **RÈGLE ABSOLUE - AUCUN TEXTE DANS LES IMAGES GÉNÉRÉES**\n\n**INTERDIT dans tous les image_prompt:**\n\n❌ **JAMAIS de texte, mots, lettres, chiffres ou caractères visibles**\n❌ **JAMAIS de panneaux, enseignes, affiches avec du texte**\n❌ **JAMAIS de livres ouverts, journaux, magazines avec texte lisible**\n❌ **JAMAIS d'écrans d'ordinateur/téléphone avec texte**\n❌ **JAMAIS de citations, slogans ou messages écrits**\n❌ **JAMAIS de logos avec lettres ou texte**\n❌ **JAMAIS de graphiques avec labels textuels**\n❌ **JAMAIS d'infographies avec mots ou descriptions**\n\n### **Formulations INTERDITES dans image_prompt:**\n\n**NE JAMAIS ÉCRIRE:**\n- \"with text saying...\"\n- \"sign that reads...\"\n- \"words visible...\"\n- \"displaying the message...\"\n- \"text overlay...\"\n- \"written on...\"\n- \"labeled as...\"\n- \"caption that says...\"\n- \"title showing...\"\n- \"quote reading...\"\n- \"slogan...\"\n- Toute référence à du texte, des mots ou des caractères écrits\n\n### **Formulations OBLIGATOIRES:**\n\n**TOUJOURS AJOUTER à chaque image_prompt:**\n\n**\"CRITICAL: Absolutely NO text, words, letters, numbers, or written characters anywhere in the image. No signs, labels, captions, or readable text of any kind. Pure visual content only.\"**\n\n### **Exemples de Remplacement:**\n\n❌ **MAUVAIS**: \"Professional holding a sign that says 'Success'\"\n✅ **BON**: \"Professional holding a blank presentation board, gesturing confidently, CRITICAL: NO text visible\"\n\n❌ **MAUVAIS**: \"Infographic showing statistics with labels\"\n✅ **BON**: \"Clean data visualization using colored bars and icons only, CRITICAL: NO text, numbers, or labels\"\n\n❌ **MAUVAIS**: \"Computer screen displaying analytics dashboard\"\n✅ **BON**: \"Computer screen showing abstract colorful graphs and charts without any text, CRITICAL: NO readable text\"\n\n❌ **MAUVAIS**: \"Book cover with title visible\"\n✅ **BON**: \"Closed book with abstract design on cover, CRITICAL: NO text or letters visible\"\n\n---\n\n**Style 1: Hyperrealistic Photography**\n\nMUST INCLUDE:\n- Real people in authentic situations\n- Natural settings relevant to {{ $json.BRAND_NAME }} and message\n- Diverse representation of {{ $json.TARGET_DEMOGRAPHICS }}\n- Professional quality lighting\n- Settings that could be in {{ $json.TARGET_LOCATION }}\n- Aspect ratios: Facebook always 3:4, Linkedin always 1:1\n- **CRITICAL: NO text, words, signs, or readable characters anywhere in the image**\n\n**Style 2: Infographic/Data Visualization**\n\nMUST INCLUDE:\n- Clear visual information hierarchy using shapes and colors ONLY\n- Professional brand colors appropriate for industry\n- Icons and abstract graphics supporting the main message\n- Clean, minimalist design\n- Visual data representation using bars, circles, arrows WITHOUT text labels\n- Aspect ratios: Facebook always 3:4, Linkedin always 1:1\n- **CRITICAL: NO text, numbers, labels, or written content. Use color coding and visual symbols only**\n\n**Style 3: 3D Rendered Scene**\n\nMUST INCLUDE:\n- Conceptual 3D visualization of key benefits\n- Modern aesthetic with professional lighting\n- Professional color integration\n- Symbolic elements related to transformation\n- High-quality rendering showing progress\n- Aspect ratios: Facebook always 3:4, Linkedin always 1:1\n- **CRITICAL: NO text, labels, or written elements in the 3D scene**\n\n**Style 4: Lifestyle Illustration**\n\nMUST INCLUDE:\n- Illustrated scene showing {{ $json.DESIRED_OUTCOME }}\n- Warm, inviting artistic style\n- Representation of {{ $json.TARGET_DEMOGRAPHICS }}\n- Settings appropriate for {{ $json.TARGET_LOCATION }}\n- Aspect ratios: Facebook always 3:4, Linkedin always 1:1\n- **CRITICAL: NO text, speech bubbles with words, or written elements in the illustration**\n\n## 9. Output Format Requirements\n\n### REQUIRED JSON Structure\n\n```json\n{\n  \"campaign_theme\": \"Brief description of the content theme\",\n  \"posts\": [\n    {\n      \"platform\": \"linkedin\",\n      \"post_text\": \"LinkedIn-optimized post copy with thought leadership\",\n      \"style\": \"3d_rendered_scene\", \n      \"aspect_ratio\": \"1:1\",\n      \"image_prompt\": \"{{ $json['Style image Linkedin'] }} CRITICAL: Absolutely NO text, words, letters, numbers, or written characters anywhere in the image.\",\n      \"overlay_text\": \"Innovation message\",\n      \"posting_date\": \"YYYY-MM-DD\"\n    },\n    {\n      \"platform\": \"facebook\",\n      \"post_text\": \"Facebook-optimized post copy with social proof\",\n      \"style\": \"infographic_data_viz\",\n      \"aspect_ratio\": \"3:4\",\n      \"image_prompt\": \"{{ $json['Style image Facebook'] }} CRITICAL: Absolutely NO text, words, letters, numbers, or written characters anywhere in the image.\",\n      \"overlay_text\": \"Trust-building message\",\n      \"posting_date\": \"YYYY-MM-DD\"\n    }\n  ],\n  \"random_number\": \"123456789012\"\n}\n```\n\n### **VALIDATION CHECKLIST avant génération du JSON:**\n\nAvant de finaliser chaque image_prompt, VÉRIFIER:\n\n✅ Le prompt décrit UNIQUEMENT des éléments visuels (personnes, objets, couleurs, compositions)\n✅ AUCUNE référence à du texte, mots, lettres, chiffres ou caractères écrits\n✅ La phrase \"CRITICAL: Absolutely NO text...\" est présente à la fin\n✅ Aucun panneau, enseigne, livre ouvert, écran avec texte n'est mentionné\n✅ Les infographies utilisent UNIQUEMENT des formes, couleurs et icônes\n✅ Aucun logo avec texte n'est décrit\n\n## 10. Configuration Summary\n\n### This agent uses these core variables:\n1. **{{ $json.BRAND_NAME }}**: Your company/business name\n2. **{{ $json.INDUSTRY }}**: Your business category or industry\n3. **{{ $json.TARGET_DEMOGRAPHICS }}**: Your primary customer demographics\n4. **{{ $json.TARGET_LOCATION }}**: Your geographic market or service area\n5. **{{ $json.PRIMARY_VALUE_PROPOSITION }}**: Your main value proposition\n6. **{{ $json.CUSTOMER_CHALLENGE }}**: The main problem you solve for customers\n7. **{{ $json.DESIRED_OUTCOME }}**: The result customers want to achieve\n8. **{{ $json.BRAND_VOICE }}**: Brand voice and communication guidelines\n\n## 11. Success Metrics Framework\n\n### Content Quality Indicators\n- Clear {{ $json.PRIMARY_VALUE_PROPOSITION }} communication\n- Authentic brand voice representation\n- Platform-appropriate messaging\n- Strategic research integration\n- Compelling call-to-action inclusion\n\n### Performance Tracking\n- Engagement rates by platform and content type\n- Click-through rates on CTAs\n- Reach metrics within {{ $json.TARGET_LOCATION }}\n- Audience growth indicators\n- Conversion attribution to business goals\n\n## 12. Your Mission as Nova\n\nYou are a strategic content creator focused on building authentic connections between brands and their audiences across LinkedIn and Facebook. Every campaign should:\n\n- **Inform** with valuable, researched insights relevant to {{ $json.INDUSTRY }}\n- **Engage** through platform-appropriate storytelling that resonates with {{ $json.TARGET_DEMOGRAPHICS }}\n- **Inspire** action toward {{ $json.DESIRED_OUTCOME }}\n- **Reflect** the brand's authentic personality through {{ $json.BRAND_VOICE }}\n- **Connect** with customer needs by addressing {{ $json.CUSTOMER_CHALLENGE }}\n\nYour capabilities empower you to create content that resonates:\n- **Strategic Thinking** = Foundation for effective content\n- **Web Research** = Current, credible insights\n- **Creative Execution** = Platform-optimized, conversion-focused content\n\n**REMEMBER: All image prompts must be 100% text-free. Visual storytelling through imagery, colors, composition, and symbols ONLY.**\n\nLet's create content that builds lasting relationships between {{ $json.BRAND_NAME }} and {{ $json.TARGET_DEMOGRAPHICS }} in {{ $json.TARGET_LOCATION }}! ✨"
         }
       },
       "id": "9eb713e5-be6c-4231-ba9d-db96d7be0143",
@@ -21,7 +21,7 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\n  \"campaign_theme\": \"Anti-vol et contrôle business en temps réel\",\n  \"posts\": [\n    {\n      \"platform\": \"tiktok\",\n      \"post_text\": \"Ton caissier te dit que la caisse est vide? 🤔 Avec Geskap, chaque vente est enregistrée en temps réel. Tu sais EXACTEMENT combien tu as gagné aujourd'hui. Crée ton compte gratuit sur geskap.com 🔗 #Geskap #GestionEntreprise #PMEAfrique #EntrepreneurCameroun #AntiVol\",\n      \"style\": \"hyperrealistic_photography\",\n      \"aspect_ratio\": \"9:16\",\n      \"image_prompt\": \"Young African entrepreneur woman checking her smartphone in a small boutique in Douala Cameroon, deep green #194E2F color accents, modern clean style, warm lighting, authentic African business setting. CRITICAL: Absolutely NO text, words, letters, numbers, or written characters anywhere in the image.\",\n      \"overlay_text\": \"Tu sais combien tu as gagné?\",\n      \"posting_date\": \"2026-03-17\"\n    },\n    {\n      \"platform\": \"instagram\",\n      \"post_text\": \"Avant Geskap: cahiers, calculatrice, stress. 📒\\nAprès Geskap: tout sur un seul écran. 📱\\n\\nStock, ventes, profits — en temps réel.\\nPlus besoin de deviner combien tu gagnes.\\n\\nCrée ton compte gratuit 👉 lien dans la bio\\n\\n#Geskap #GestionEntreprise #PMEAfrique #EntrepreneurCameroun #MobileMoney #GestionStock\",\n      \"style\": \"hyperrealistic_photography\",\n      \"aspect_ratio\": \"1:1\",\n      \"image_prompt\": \"African business owner man in a modern shop looking at smartphone showing business dashboard, brand color deep green #194E2F, professional warm lighting, authentic West African market context. CRITICAL: Absolutely NO text, words, letters, numbers, or written characters anywhere in the image.\",\n      \"overlay_text\": \"Tout sur un seul écran\",\n      \"posting_date\": \"2026-03-19\"\n    },\n    {\n      \"platform\": \"facebook\",\n      \"post_text\": \"Tu gères 2 boutiques mais tu ne peux pas être partout? 🏪🏪\\n\\nAvec Geskap, tu surveilles toutes tes boutiques depuis ton téléphone:\\n✅ Ventes en temps réel\\n✅ Stock synchronisé\\n✅ Permissions employés\\n✅ Mobile Money intégré\\n\\nPlus besoin de courir entre tes boutiques. Geskap te montre tout depuis un seul écran.\\n\\n👉 Crée ton compte gratuit sur geskap.com\\n\\nTague un entrepreneur qui gère plusieurs boutiques! 🏷️\\n\\n#Geskap #GestionEntreprise #PMEAfrique #EntrepreneurCameroun #MultiBoutique #MobileMoney #GestionStock\",\n      \"style\": \"lifestyle_illustration\",\n      \"aspect_ratio\": \"3:4\",\n      \"image_prompt\": \"Split screen showing two African boutiques connected by a smartphone in the center, deep green #194E2F brand color, warm professional lighting, Cameroonian business context, modern flat design elements. CRITICAL: Absolutely NO text, words, letters, numbers, or written characters anywhere in the image.\",\n      \"overlay_text\": \"Surveille toutes tes boutiques\",\n      \"posting_date\": \"2026-03-21\"\n    }\n  ],\n  \"random_number\": \"847291038529\"\n}",
+        "jsonSchemaExample": "{\n  \"campaign_theme\": \"Seasonal wellness support and personalized healthcare\",\n  \"posts\": [\n    {\n      \"platform\": \"linkedin\",\n      \"post_text\": \"As healthcare professionals, we're seeing increased demand for personalized wellness solutions this season. Our holistic approach addresses the growing gap in patient-centered care. Industry data shows 73% of patients feel unheard in traditional settings - we're changing that narrative. How is your organization adapting to patient-centered care demands? #HolisticHealthcare #HealthcareInnovation #PatientCare #AustinHealthcare\",\n      \"style\": \"infographic_data_viz\",\n      \"aspect_ratio\": \"1:1\",\n      \"image_prompt\": \"Professional healthcare infographic showing patient satisfaction statistics, holistic care approach workflow, clean medical design with calming blues and healing greens, modern typography, professional medical icons, data visualization showing improved outcomes with personalized care\",\n      \"overlay_text\": \"73% want personalized care\",\n      \"posting_date\": \"2025-08-20\"\n    },\n    {\n      \"platform\": \"linkedin\", \n      \"post_text\": \"The future of healthcare is personalized. At our clinic, we're seeing remarkable outcomes when patients feel truly heard and understood. Our approach treats the whole person, not just symptoms - resulting in better health outcomes and patient satisfaction. What does personalized healthcare mean for your practice? #HealthcareLeadership #PersonalizedMedicine #AustinBusiness #HealthcareInnovation\",\n      \"style\": \"hyperrealistic_photography\",\n      \"aspect_ratio\": \"1:1\", \n      \"image_prompt\": \"Professional healthcare consultation scene, diverse healthcare provider and patient in modern Austin clinic, natural lighting, both looking engaged and confident, medical charts visible, professional atmosphere showing active listening and care\",\n      \"overlay_text\": \"Future of personalized care\",\n      \"posting_date\": \"2025-08-22\"\n    },\n    {\n      \"platform\": \"linkedin\",\n      \"post_text\": \"Transforming healthcare through personalized approaches isn't just a trend - it's essential. We've developed a comprehensive model that addresses feeling unheard in traditional healthcare settings while delivering optimal health through personalized care. The evidence speaks for itself: patients thrive when they feel heard. #HealthcareTransformation #HolisticHealthcare #PatientOutcomes #ProfessionalDevelopment\",\n      \"style\": \"3d_rendered_scene\",\n      \"aspect_ratio\": \"1:1\",\n      \"image_prompt\": \"3D rendered healthcare transformation concept, abstract human figure evolving from stressed to healthy, surrounded by holistic care elements (wellness symbols, medical icons), professional calming color palette, modern medical aesthetic\",\n      \"overlay_text\": \"Healthcare transformation\",\n      \"posting_date\": \"2025-08-24\"\n    },\n    {\n      \"platform\": \"facebook\",\n      \"post_text\": \"Feeling unheard in traditional healthcare settings? You're not alone. 🌱 We believe every person deserves to be truly listened to. Our personalized approach means your unique health journey gets the attention it deserves. 'I finally found healthcare that listens!' - Sarah M., Austin Ready for care that puts YOU first? #Austin #PersonalizedCare #HolisticHealth #Community #ListenFirst\",\n      \"style\": \"lifestyle_illustration\",\n      \"aspect_ratio\": \"3:4\", \n      \"image_prompt\": \"Warm illustrated scene of diverse people in Austin feeling heard and cared for, showing various ages including health-conscious adults 25-55, community clinic setting, soft healing colors, people looking relieved and happy, welcoming atmosphere\",\n      \"overlay_text\": \"You deserve to be heard\",\n      \"posting_date\": \"2025-08-26\"\n    },\n    {\n      \"platform\": \"facebook\",\n      \"post_text\": \"When Maria walked into our clinic, she was frustrated with feeling like 'just another number' in healthcare. Six months later: 'I have energy I haven't felt in years!' 💪 That's the power of personalized healthcare that treats the whole person. Your story matters. Your health matters. You matter. Book your consultation today! #AustinHealth #CustomerStories #PersonalizedCare #CommunityHealth #YourStoryMatters\",\n      \"style\": \"hyperrealistic_photography\", \n      \"aspect_ratio\": \"3:4\",\n      \"image_prompt\": \"Genuine photo of happy patient Maria (Hispanic woman, 40s) at wellness clinic, natural smile, holding consultation paperwork, Austin clinic background, authentic joy and relief in expression, professional but warm setting\",\n      \"overlay_text\": \"Your story matters\",\n      \"posting_date\": \"2025-08-28\"\n    },\n    {\n      \"platform\": \"facebook\",\n      \"post_text\": \"The numbers don't lie - but your experience matters more 📊 While 73% of people feel unheard in traditional healthcare, 96% of our patients report feeling truly listened to. Join the families in Austin who chose personalized care over one-size-fits-all medicine. Because you're not average - you're unique! #CommunityHealth #PersonalizedCare #Austin #HealthcareYouDeserve #NotJustANumber\",\n      \"style\": \"infographic_data_viz\",\n      \"aspect_ratio\": \"3:4\",\n      \"image_prompt\": \"Friendly infographic comparing traditional vs personalized healthcare, happy faces representing satisfied patients, community-focused design with Austin elements, warm colors, accessible data presentation, family-friendly aesthetic\",\n      \"overlay_text\": \"96% feel truly heard\",\n      \"posting_date\": \"2025-08-30\"\n    }\n  ],\n  \"random_number\": \"847291038529\"\n}",
         "autoFix": true
       },
       "id": "6df10726-71b8-4c7d-b0e2-61bfe02932f5",
@@ -82,66 +82,66 @@
               "id": "5e8ccfc2-9e83-45da-bc06-b79cf101fe65",
               "name": "BRAND_NAME",
               "type": "string",
-              "value": "=Geskap"
+              "value": "=Camairetech"
             },
             {
               "id": "9cb5c8f3-6748-42c2-b443-cfe98c40b31d",
               "name": "INDUSTRY",
               "type": "string",
-              "value": "SaaS de gestion d'entreprise tout-en-un pour les PME africaines. Fonctionnalités: facturation, gestion de stock, comptabilité, tableau de bord, POS, commandes WhatsApp, Mobile Money (MTN/Orange), gestion multi-boutiques, contrôle des employés, catalogue en ligne."
+              "value": "A digital agency that provide marketing and software development for companies that seek for this services"
             },
             {
               "id": "25b7463d-32c6-4780-9c4f-80011b6b96e8",
               "name": "TARGET_DEMOGRAPHICS",
               "type": "string",
-              "value": "=Entrepreneurs et gérants de PME africains, 25-45 ans, 55% femmes / 45% hommes, mobile-first, actifs sur WhatsApp/Facebook/TikTok/Instagram. Profils prioritaires: propriétaires de boutiques inquiets du vol, restaurateurs gérant des commandes WhatsApp, fabricants/artisans, grossistes, gérants multi-boutiques."
+              "value": "=24 a 45"
             },
             {
               "id": "9fec2287-55c0-48a9-9547-68991bcdf1e6",
               "name": "TARGET_LOCATION",
               "type": "string",
-              "value": "=Cameroun (27.8% - Douala & Yaoundé), RDC (9.5%), Côte d'Ivoire (4.9%), Togo (4.7%), Burkina Faso (3%), Bénin (2.9%), Sénégal (2%), Gabon (1.7%), Afrique francophone"
+              "value": "=france, canada , cameroon"
             },
             {
               "id": "26aee9c2-3e1c-4b0e-b689-87266ac0956e",
               "name": "PRIMARY_VALUE_PROPOSITION",
               "type": "string",
-              "value": "=Gérez toute votre entreprise depuis un seul écran — facturation, stock, comptabilité, employés, Mobile Money. Zéro matériel requis, juste votre téléphone. Surveillez votre caisse en temps réel, même depuis chez vous."
+              "value": "={{ $json.output[0].PROPOSITION_DE_VALEUR_PRINCIPALE }}"
             },
             {
               "id": "5fa1582d-b29d-49e4-a6ba-621426c728db",
               "name": "CUSTOMER_CHALLENGE",
               "type": "string",
-              "value": "=Vol par les employés sans traçabilité, gestion manuelle avec cahiers et Excel, aucune visibilité sur les profits réels, chaos des commandes WhatsApp, stock qui disparaît sans explication, impossibilité de surveiller plusieurs boutiques à distance."
+              "value": "={{ $json.output[0].DEFI_CLIENT }}"
             },
             {
               "id": "36f2ab45-b8fc-4f69-adea-1f29ea27ae97",
               "name": "DESIRED_OUTCOME",
               "type": "string",
-              "value": "=Contrôle total de son business depuis son téléphone, savoir exactement combien on gagne chaque jour, empêcher le vol, gérer stock et ventes automatiquement, accepter Mobile Money, avoir un catalogue en ligne partageable sur WhatsApp."
+              "value": "={{ $json.output[0].OBJECTIF_RECHERCHE }}"
             },
             {
               "id": "7c1f5ea6-3fdd-40b3-9fe4-beb6680b400c",
               "name": "BRAND_VOICE",
               "type": "string",
-              "value": "=Direct, pas de blabla. Pratique — toujours montrer le bénéfice réel, pas les fonctionnalités. African-first — écrit par des Africains, pour des Africains. Jamais générique. Empowering — on croit en l'entrepreneur africain. Langue: Français. Toujours dire: gérez votre business, en temps réel, depuis un seul écran, pour les entrepreneurs africains. Jamais dire: synergy, leverage, solution, world-class, cutting-edge, disruptive."
+              "value": "={{ $json.output[0].MARQUE_VOIX }}"
             },
             {
               "id": "8ec063e2-3c74-4602-a688-95d3ab97f3ac",
               "name": "SPECIFIC_TOPICS_TO_FOCUS",
               "type": "string",
-              "value": "=Anti-vol (protection contre le vol des employés, audit trail, permissions). Mobile-first (fonctionne sur tout téléphone, pas besoin d'internet). Paiements africains (MTN Mobile Money, Orange Money intégrés). Profit réel (connaître ses vrais chiffres, pas des estimations). Tout-en-un (plus de cahiers, tableurs, chaos WhatsApp). Logo: https://i.postimg.cc/JmmRQYhH/logo.png. Couleur: #194E2F. Police: Aclonica. Site: https://geskap.com/. CTA: Crée ton compte gratuit sur geskap.com"
+              "value": "={{ $json.output[0].SUJETS_SPECIFIQUES_A_METTRE_EN_AVANT }}"
             },
             {
               "id": "9769c3fd-6a81-4817-98b6-3e1d949fc69b",
               "name": "Style image Facebook",
-              "value": "=Hyperrealistic photography of African entrepreneurs in authentic business settings (boutiques, restaurants, markets) in Cameroon or West Africa. Brand colors: deep green #194E2F and white. Clean, professional, warm lighting. Diverse African representation. Mobile phone visible showing business management. Aspect ratio 3:4.",
+              "value": "={{ $json.output[0].STYLE_IMAGE_FACEBOOK }}",
               "type": "string"
             },
             {
               "id": "abcca4c1-ba74-460e-9aa4-86fdd4a4af0b",
-              "name": "Style image TikTok Instagram",
-              "value": "=Modern flat design or hyperrealistic photography. African business context (shops, markets, mobile payments). Brand color #194E2F deep green with white accents. Bold, eye-catching, vertical composition 9:16. Young African entrepreneurs using smartphones. Clean typography with Aclonica font style. No stock photos of non-African people.",
+              "name": "Style image Linkedin",
+              "value": "={{ $json.output[0].STYLE_IMAGE_LINKEDIN }}",
               "type": "string"
             }
           ]
@@ -174,7 +174,7 @@
     },
     {
       "parameters": {
-        "content": "## Geskap - Agent Marketing IA\n\nContenu social media automatisé pour TikTok, Instagram et Facebook.\n\nPiliers: Anti-vol, Mobile-first, Paiements africains, Profit réel, Tout-en-un.\nFrameworks: PAS, BAB, StoryBrand.\nLangue: Français uniquement.\n\nRésultat: 3 posts/semaine (1 TikTok 9:16, 1 Instagram 1:1, 1 Facebook 3:4).",
+        "content": "## Nova - AI Content Marketing Agent\n\n🚀 AI-POWERED CONTENT CREATION\n\nNova transforms your brand variables into high-converting social media content with 4 visual variations.\n\n📊 WHAT NOVA CREATES:\n- Compelling post copy with emojis & hashtags\n- 4 distinct image styles (photo, infographic, 3D, illustration)  \n- Strategic overlay text for each image\n- Posting dates for scheduling\n- Ready-to-use JSON output\n\n🧠 HOW IT WORKS:\n1. Analyzes your brand variables\n2. Applies proven frameworks (PAS, StoryBrand, BAB)\n3. Researches current trends (when needed)\n4. Generates cohesive campaign content\n5. Outputs structured data for automation\n\n⚡ RESULT: Complete social media campaign ready for posting!",
         "height": 1024,
         "width": 864,
         "color": 3
@@ -270,7 +270,7 @@
     },
     {
       "parameters": {
-        "content": "## Switch between TikTok, Instagram and Facebook\n",
+        "content": "## Switch between LinkedIn and Facebook/Instagram\n",
         "height": 880,
         "width": 272,
         "color": 4
@@ -305,12 +305,12 @@
                       "operation": "equals"
                     },
                     "leftValue": "={{ $json['output.posts'].platform }}",
-                    "rightValue": "tiktok"
+                    "rightValue": "facebook"
                   }
                 ]
               },
               "renameOutput": true,
-              "outputKey": "tiktok"
+              "outputKey": "facebook"
             },
             {
               "conditions": {
@@ -325,40 +325,17 @@
                   {
                     "id": "e6aa506c-4049-4041-9862-fdd7498b56b9",
                     "operator": {
+                      "name": "filter.operator.equals",
                       "type": "string",
                       "operation": "equals"
                     },
                     "leftValue": "={{ $json['output.posts'].platform }}",
-                    "rightValue": "instagram"
+                    "rightValue": "linkedin"
                   }
                 ]
               },
               "renameOutput": true,
-              "outputKey": "instagram"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "version": 2,
-                  "leftValue": "",
-                  "caseSensitive": true,
-                  "typeValidation": "strict"
-                },
-                "combinator": "and",
-                "conditions": [
-                  {
-                    "id": "f1aa506c-4049-4041-9862-fdd7498b56b0",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "leftValue": "={{ $json['output.posts'].platform }}",
-                    "rightValue": "facebook"
-                  }
-                ]
-              },
-              "renameOutput": true,
-              "outputKey": "facebook"
+              "outputKey": "linkedin"
             }
           ]
         },
@@ -624,50 +601,37 @@
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "geskap-logo-1",
-              "name": "Logo",
-              "type": "string",
-              "value": "[{\"url\": \"https://i.postimg.cc/JmmRQYhH/logo.png\"}, {\"url\": \"https://i.postimg.cc/JmmRQYhH/logo.png\"}, {\"url\": \"https://i.postimg.cc/JmmRQYhH/logo.png\"}]"
-            },
-            {
-              "id": "geskap-name-1",
-              "name": "Nom de l'entreprise",
-              "type": "string",
-              "value": "Geskap"
-            },
-            {
-              "id": "geskap-phone-1",
-              "name": "Téléphone",
-              "type": "string",
-              "value": ""
-            },
-            {
-              "id": "geskap-mail-1",
-              "name": "Mail",
-              "type": "string",
-              "value": "contact@geskap.com"
-            },
-            {
-              "id": "geskap-web-1",
-              "name": "Site Web",
-              "type": "string",
-              "value": "https://geskap.com/"
-            }
-          ]
+        "base": {
+          "__rl": true,
+          "value": "appTi4v32T5OK9vin",
+          "mode": "list",
+          "cachedResultName": "CAMAIRETECH",
+          "cachedResultUrl": "https://airtable.com/appTi4v32T5OK9vin"
         },
+        "table": {
+          "__rl": true,
+          "value": "tblfntdYSTf03aeJ3",
+          "mode": "list",
+          "cachedResultName": "Info_Entreprise",
+          "cachedResultUrl": "https://airtable.com/appTi4v32T5OK9vin/tblfntdYSTf03aeJ3"
+        },
+        "id": "recB8YzDjjc3eXfy1",
         "options": {}
       },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
       "position": [
         -384,
         1248
       ],
       "id": "fef086a9-3340-42cd-a6b7-9f018bdc2b37",
-      "name": "Get a record"
+      "name": "Get a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "BfYJv5bOr5u9rg06",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
     },
     {
       "parameters": {
@@ -957,50 +921,37 @@
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "geskap-logo-2",
-              "name": "Logo",
-              "type": "string",
-              "value": "[{\"url\": \"https://i.postimg.cc/JmmRQYhH/logo.png\"}, {\"url\": \"https://i.postimg.cc/JmmRQYhH/logo.png\"}, {\"url\": \"https://i.postimg.cc/JmmRQYhH/logo.png\"}]"
-            },
-            {
-              "id": "geskap-name-2",
-              "name": "Nom de l'entreprise",
-              "type": "string",
-              "value": "Geskap"
-            },
-            {
-              "id": "geskap-phone-2",
-              "name": "Téléphone",
-              "type": "string",
-              "value": ""
-            },
-            {
-              "id": "geskap-mail-2",
-              "name": "Mail",
-              "type": "string",
-              "value": "contact@geskap.com"
-            },
-            {
-              "id": "geskap-web-2",
-              "name": "Site Web",
-              "type": "string",
-              "value": "https://geskap.com/"
-            }
-          ]
+        "base": {
+          "__rl": true,
+          "value": "appwUV3yoTPVFNe4L",
+          "mode": "list",
+          "cachedResultName": "Scrapper Youtube & Insta ( SIB FLOW)) ",
+          "cachedResultUrl": "https://airtable.com/appwUV3yoTPVFNe4L"
         },
+        "table": {
+          "__rl": true,
+          "value": "tblfntdYSTf03aeJ3",
+          "mode": "list",
+          "cachedResultName": "Info_Entreprise",
+          "cachedResultUrl": "https://airtable.com/appwUV3yoTPVFNe4L/tblfntdYSTf03aeJ3"
+        },
+        "id": "recB8YzDjjc3eXfy1",
         "options": {}
       },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
       "position": [
         16,
         1712
       ],
       "id": "eca5d6bc-9c64-4cff-a333-81a684aab4f4",
-      "name": "Get a record1"
+      "name": "Get a record1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "BfYJv5bOr5u9rg06",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
     },
     {
       "parameters": {
@@ -1812,8 +1763,7 @@
       ],
       "id": "c0d7986d-ca70-46e3-a012-6d8e9713e87b",
       "name": "HL_THREADS",
-      "onError": "continueRegularOutput",
-      "disabled": true
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -1849,8 +1799,7 @@
       ],
       "id": "07ba92ea-5cf1-40f7-b18d-d5654616b5d8",
       "name": "HL_BLUESKY",
-      "onError": "continueRegularOutput",
-      "disabled": true
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -2149,8 +2098,7 @@
       ],
       "id": "55e7d042-74c4-497f-9822-efb6d182a681",
       "name": "HL_LinkedIn",
-      "onError": "continueRegularOutput",
-      "disabled": true
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -2186,8 +2134,7 @@
       ],
       "id": "e07f75af-e1bd-42a5-98da-11e0656cc941",
       "name": "HL_Pinterest",
-      "onError": "continueRegularOutput",
-      "disabled": true
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -2212,7 +2159,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"accountIds\": [\n    \"{{ $json.Google }}\"\n  ],\n  \"summary\": \"{{ $('Edit Fields').item.json.PRIMARY_VALUE_PROPOSITION }}\",\n  \"media\": [\n    {\n      \"url\": \"{{ $json.img }}\",\n      \"type\": \"image/png\"\n    }\n  ],\n  \"status\": \"scheduled\",\n  \"scheduleDate\": \"{{ $json.formatted_date }}\",\n  \"type\": \"post\",\n  \"scheduleTimeUpdated\": true,\n  \"gmbPostDetails\": {\n    \"gmbEventType\": \"STANDARD\",\n    \"url\": \"https://geskap.com/\",\n    \"actionType\": \"learn_more\"\n  },\n  \"userId\": \"{{ $json.userID }}\"\n}",
+        "jsonBody": "={\n  \"accountIds\": [\n    \"{{ $json.Google }}\"\n  ],\n  \"summary\": \"{{ $('Edit Fields').item.json.PRIMARY_VALUE_PROPOSITION }}\",\n  \"media\": [\n    {\n      \"url\": \"{{ $json.img }}\",\n      \"type\": \"image/png\"\n    }\n  ],\n  \"status\": \"scheduled\",\n  \"scheduleDate\": \"{{ $json.formatted_date }}\",\n  \"type\": \"post\",\n  \"scheduleTimeUpdated\": true,\n  \"gmbPostDetails\": {\n    \"gmbEventType\": \"STANDARD\",\n    \"url\": \"https://sibflow.com/\",\n    \"actionType\": \"learn_more\"\n  },\n  \"userId\": \"{{ $json.userID }}\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -2223,8 +2170,7 @@
       ],
       "id": "f8e20142-4d38-41d1-8052-6c07ae681837",
       "name": "HL_GMB",
-      "onError": "continueRegularOutput",
-      "disabled": true
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -2260,8 +2206,7 @@
       ],
       "id": "84aa8989-2314-42d3-8aae-0b367af93552",
       "name": "HL_THREADS1",
-      "onError": "continueRegularOutput",
-      "disabled": true
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -2297,8 +2242,7 @@
       ],
       "id": "3e17b25b-91a3-4438-9210-6b1051f1f8ed",
       "name": "HL_BLUESKY1",
-      "onError": "continueRegularOutput",
-      "disabled": true
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -2478,8 +2422,7 @@
       ],
       "id": "94b925da-7ad7-416e-8e2b-4b593ff8d6aa",
       "name": "HL_LinkedIn2",
-      "onError": "continueRegularOutput",
-      "disabled": true
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -2515,8 +2458,7 @@
       ],
       "id": "682ad517-8585-4c18-b998-7dd7071fb86b",
       "name": "HL_Pinterest2",
-      "onError": "continueRegularOutput",
-      "disabled": true
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -2541,7 +2483,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"accountIds\": [\n    \"{{ $json.Google }}\"\n  ],\n  \"summary\": \"{{ $('Edit Fields').item.json.PRIMARY_VALUE_PROPOSITION }}\",\n  \"media\": [\n    {\n      \"url\": \"{{ $json.img }}\",\n      \"type\": \"image/png\"\n    }\n  ],\n  \"status\": \"scheduled\",\n  \"scheduleDate\": \"{{ $json.formatted_date }}\",\n  \"type\": \"post\",\n  \"scheduleTimeUpdated\": true,\n  \"gmbPostDetails\": {\n    \"gmbEventType\": \"STANDARD\",\n    \"url\": \"https://geskap.com/\",\n    \"actionType\": \"learn_more\"\n  },\n  \"userId\": \"{{ $json.userID }}\"\n}",
+        "jsonBody": "={\n  \"accountIds\": [\n    \"{{ $json.Google }}\"\n  ],\n  \"summary\": \"{{ $('Edit Fields').item.json.PRIMARY_VALUE_PROPOSITION }}\",\n  \"media\": [\n    {\n      \"url\": \"{{ $json.img }}\",\n      \"type\": \"image/png\"\n    }\n  ],\n  \"status\": \"scheduled\",\n  \"scheduleDate\": \"{{ $json.formatted_date }}\",\n  \"type\": \"post\",\n  \"scheduleTimeUpdated\": true,\n  \"gmbPostDetails\": {\n    \"gmbEventType\": \"STANDARD\",\n    \"url\": \"https://sibflow.com/\",\n    \"actionType\": \"learn_more\"\n  },\n  \"userId\": \"{{ $json.userID }}\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -2552,8 +2494,7 @@
       ],
       "id": "d8d5e639-0781-4cb2-95df-1c4eef74b31a",
       "name": "HL_GMB2",
-      "onError": "continueRegularOutput",
-      "disabled": true
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -2644,7 +2585,7 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\n  \"campaign_theme\": \"Anti-vol et contrôle business en temps réel\",\n  \"posts\": [\n    {\n      \"platform\": \"tiktok\",\n      \"post_text\": \"Ton caissier te dit que la caisse est vide? 🤔 Avec Geskap, chaque vente est enregistrée en temps réel. Tu sais EXACTEMENT combien tu as gagné aujourd'hui. Crée ton compte gratuit sur geskap.com 🔗 #Geskap #GestionEntreprise #PMEAfrique #EntrepreneurCameroun #AntiVol\",\n      \"style\": \"hyperrealistic_photography\",\n      \"aspect_ratio\": \"9:16\",\n      \"image_prompt\": \"Young African entrepreneur woman checking her smartphone in a small boutique in Douala Cameroon, deep green #194E2F color accents, modern clean style, warm lighting, authentic African business setting. CRITICAL: Absolutely NO text anywhere.\",\n      \"overlay_text\": \"Tu sais combien tu as gagné?\",\n      \"posting_date\": \"2026-03-17\"\n    },\n    {\n      \"platform\": \"instagram\",\n      \"post_text\": \"Avant Geskap: cahiers, calculatrice, stress. 📒\\nAprès Geskap: tout sur un seul écran. 📱\\n\\nCrée ton compte gratuit 👉 lien dans la bio\\n\\n#Geskap #GestionEntreprise #PMEAfrique #EntrepreneurCameroun #MobileMoney\",\n      \"style\": \"hyperrealistic_photography\",\n      \"aspect_ratio\": \"1:1\",\n      \"image_prompt\": \"African business owner in a modern shop looking at smartphone, brand color deep green #194E2F, professional warm lighting, West African market context. CRITICAL: Absolutely NO text anywhere.\",\n      \"overlay_text\": \"Tout sur un seul écran\",\n      \"posting_date\": \"2026-03-19\"\n    },\n    {\n      \"platform\": \"facebook\",\n      \"post_text\": \"Tu gères 2 boutiques mais tu ne peux pas être partout? 🏪🏪\\n\\nAvec Geskap, tu surveilles toutes tes boutiques depuis ton téléphone.\\n\\n👉 Crée ton compte gratuit sur geskap.com\\n\\n#Geskap #GestionEntreprise #PMEAfrique #EntrepreneurCameroun #MultiBoutique\",\n      \"style\": \"lifestyle_illustration\",\n      \"aspect_ratio\": \"3:4\",\n      \"image_prompt\": \"Split screen showing two African boutiques connected by a smartphone, deep green #194E2F brand color, Cameroonian business context. CRITICAL: Absolutely NO text anywhere.\",\n      \"overlay_text\": \"Surveille toutes tes boutiques\",\n      \"posting_date\": \"2026-03-21\"\n    }\n  ],\n  \"random_number\": \"847291038529\"\n}"
+        "jsonSchemaExample": "{\n  \"campaign_theme\": \"Seasonal wellness support and personalized healthcare\",\n  \"posts\": [\n    {\n      \"platform\": \"linkedin\",\n      \"post_text\": \"As healthcare professionals, we're seeing increased demand for personalized wellness solutions this season. Our holistic approach addresses the growing gap in patient-centered care. Industry data shows 73% of patients feel unheard in traditional settings - we're changing that narrative. How is your organization adapting to patient-centered care demands? #HolisticHealthcare #HealthcareInnovation #PatientCare #AustinHealthcare\",\n      \"style\": \"infographic_data_viz\",\n      \"aspect_ratio\": \"1:1\",\n      \"image_prompt\": \"Professional healthcare infographic showing patient satisfaction statistics, holistic care approach workflow, clean medical design with calming blues and healing greens, modern typography, professional medical icons, data visualization showing improved outcomes with personalized care\",\n      \"overlay_text\": \"73% want personalized care\",\n      \"posting_date\": \"2025-08-20\"\n    },\n    {\n      \"platform\": \"linkedin\", \n      \"post_text\": \"The future of healthcare is personalized. At our clinic, we're seeing remarkable outcomes when patients feel truly heard and understood. Our approach treats the whole person, not just symptoms - resulting in better health outcomes and patient satisfaction. What does personalized healthcare mean for your practice? #HealthcareLeadership #PersonalizedMedicine #AustinBusiness #HealthcareInnovation\",\n      \"style\": \"hyperrealistic_photography\",\n      \"aspect_ratio\": \"1:1\", \n      \"image_prompt\": \"Professional healthcare consultation scene, diverse healthcare provider and patient in modern Austin clinic, natural lighting, both looking engaged and confident, medical charts visible, professional atmosphere showing active listening and care\",\n      \"overlay_text\": \"Future of personalized care\",\n      \"posting_date\": \"2025-08-22\"\n    },\n    {\n      \"platform\": \"linkedin\",\n      \"post_text\": \"Transforming healthcare through personalized approaches isn't just a trend - it's essential. We've developed a comprehensive model that addresses feeling unheard in traditional healthcare settings while delivering optimal health through personalized care. The evidence speaks for itself: patients thrive when they feel heard. #HealthcareTransformation #HolisticHealthcare #PatientOutcomes #ProfessionalDevelopment\",\n      \"style\": \"3d_rendered_scene\",\n      \"aspect_ratio\": \"1:1\",\n      \"image_prompt\": \"3D rendered healthcare transformation concept, abstract human figure evolving from stressed to healthy, surrounded by holistic care elements (wellness symbols, medical icons), professional calming color palette, modern medical aesthetic\",\n      \"overlay_text\": \"Healthcare transformation\",\n      \"posting_date\": \"2025-08-24\"\n    },\n    {\n      \"platform\": \"facebook\",\n      \"post_text\": \"Feeling unheard in traditional healthcare settings? You're not alone. 🌱 We believe every person deserves to be truly listened to. Our personalized approach means your unique health journey gets the attention it deserves. 'I finally found healthcare that listens!' - Sarah M., Austin Ready for care that puts YOU first? #Austin #PersonalizedCare #HolisticHealth #Community #ListenFirst\",\n      \"style\": \"lifestyle_illustration\",\n      \"aspect_ratio\": \"3:4\", \n      \"image_prompt\": \"Warm illustrated scene of diverse people in Austin feeling heard and cared for, showing various ages including health-conscious adults 25-55, community clinic setting, soft healing colors, people looking relieved and happy, welcoming atmosphere\",\n      \"overlay_text\": \"You deserve to be heard\",\n      \"posting_date\": \"2025-08-26\"\n    },\n    {\n      \"platform\": \"facebook\",\n      \"post_text\": \"When Maria walked into our clinic, she was frustrated with feeling like 'just another number' in healthcare. Six months later: 'I have energy I haven't felt in years!' 💪 That's the power of personalized healthcare that treats the whole person. Your story matters. Your health matters. You matter. Book your consultation today! #AustinHealth #CustomerStories #PersonalizedCare #CommunityHealth #YourStoryMatters\",\n      \"style\": \"hyperrealistic_photography\", \n      \"aspect_ratio\": \"3:4\",\n      \"image_prompt\": \"Genuine photo of happy patient Maria (Hispanic woman, 40s) at wellness clinic, natural smile, holding consultation paperwork, Austin clinic background, authentic joy and relief in expression, professional but warm setting\",\n      \"overlay_text\": \"Your story matters\",\n      \"posting_date\": \"2025-08-28\"\n    },\n    {\n      \"platform\": \"facebook\",\n      \"post_text\": \"The numbers don't lie - but your experience matters more 📊 While 73% of people feel unheard in traditional healthcare, 96% of our patients report feeling truly listened to. Join the families in Austin who chose personalized care over one-size-fits-all medicine. Because you're not average - you're unique! #CommunityHealth #PersonalizedCare #Austin #HealthcareYouDeserve #NotJustANumber\",\n      \"style\": \"infographic_data_viz\",\n      \"aspect_ratio\": \"3:4\",\n      \"image_prompt\": \"Friendly infographic comparing traditional vs personalized healthcare, happy faces representing satisfied patients, community-focused design with Austin elements, warm colors, accessible data presentation, family-friendly aesthetic\",\n      \"overlay_text\": \"96% feel truly heard\",\n      \"posting_date\": \"2025-08-30\"\n    }\n  ],\n  \"random_number\": \"847291038529\"\n}"
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
@@ -2709,7 +2650,7 @@
             {
               "id": "f0cb50b0-950a-4490-a682-0a3ca5f2d9df",
               "name": "fileName",
-              "value": "=geskap-{{ $now.toFormat('yyyy-MM-dd-HHmmss') }}.png",
+              "value": "=camairtech-{{ $now.toFormat('yyyy-MM-dd-HHmmss') }}.png",
               "type": "string"
             }
           ]
@@ -2724,76 +2665,6 @@
       ],
       "id": "a868cb55-f4ed-45cb-9abd-898669d45f65",
       "name": "Edit Fields1"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.telegram.org/bot7924063118:AAFqGOXKI2bBo5q6oeaozliXPuPvX-lyXL4/sendPhoto",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"chat_id\": \"6455594531\",\n  \"photo\": \"{{ $json.img }}\",\n  \"caption\": \"📋 **APPROBATION REQUISE**\\n\\n🎯 Plateforme: {{ $('Split Out3').item.json['output.posts'].platform }}\\n📅 Date: {{ $json.formatted_date }}\\n\\n📝 **Texte du post:**\\n{{ $json.Caption }}\\n\\n✅ Approuver ou ❌ Rejeter?\",\n  \"parse_mode\": \"Markdown\",\n  \"reply_markup\": {\n    \"inline_keyboard\": [\n      [\n        {\"text\": \"✅ Approuver\", \"callback_data\": \"approve\"},\n        {\"text\": \"❌ Rejeter\", \"callback_data\": \"reject\"}\n      ]\n    ]\n  }\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        3280,
-        1008
-      ],
-      "id": "tg-approval-1",
-      "name": "Telegram Approval"
-    },
-    {
-      "parameters": {
-        "resume": "webhook",
-        "options": {
-          "webhookSuffix": "=approval-{{ $json.formatted_date }}"
-        }
-      },
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        3440,
-        1008
-      ],
-      "id": "wait-approval-1",
-      "name": "Wait for Approval",
-      "webhookId": "geskap-approval-1"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.telegram.org/bot7924063118:AAFqGOXKI2bBo5q6oeaozliXPuPvX-lyXL4/sendPhoto",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"chat_id\": \"6455594531\",\n  \"photo\": \"{{ $json.img }}\",\n  \"caption\": \"📋 **APPROBATION REQUISE**\\n\\n🎯 Plateforme: {{ $('Split Out3').item.json['output.posts'].platform }}\\n📅 Date: {{ $json.formatted_date }}\\n\\n📝 **Texte du post:**\\n{{ $json.Caption }}\\n\\n✅ Approuver ou ❌ Rejeter?\",\n  \"parse_mode\": \"Markdown\",\n  \"reply_markup\": {\n    \"inline_keyboard\": [\n      [\n        {\"text\": \"✅ Approuver\", \"callback_data\": \"approve\"},\n        {\"text\": \"❌ Rejeter\", \"callback_data\": \"reject\"}\n      ]\n    ]\n  }\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        3120,
-        2032
-      ],
-      "id": "tg-approval-2",
-      "name": "Telegram Approval1"
-    },
-    {
-      "parameters": {
-        "resume": "webhook",
-        "options": {
-          "webhookSuffix": "=approval2-{{ $json.formatted_date }}"
-        }
-      },
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        3280,
-        2032
-      ],
-      "id": "wait-approval-2",
-      "name": "Wait for Approval1",
-      "webhookId": "geskap-approval-2"
     }
   ],
   "pinData": {},
@@ -3331,29 +3202,22 @@
       "main": [
         [
           {
-            "node": "Telegram Approval1",
+            "node": "HL_GMB2",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Telegram Approval1": {
-      "main": [
-        [
+          },
           {
-            "node": "Wait for Approval1",
+            "node": "HL_LinkedIn2",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Wait for Approval1": {
-      "main": [
-        [
+          },
           {
             "node": "HL_Facebook_Post1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HL_Pinterest2",
             "type": "main",
             "index": 0
           },
@@ -3364,6 +3228,16 @@
           },
           {
             "node": "HL_Instagram_Story",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HL_THREADS1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HL_BLUESKY1",
             "type": "main",
             "index": 0
           },
@@ -3379,27 +3253,15 @@
       "main": [
         [
           {
-            "node": "Telegram Approval",
+            "node": "HL_Facebook_Story1",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Telegram Approval": {
-      "main": [
-        [
+          },
           {
-            "node": "Wait for Approval",
+            "node": "HL_Instagram_Story1",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Wait for Approval": {
-      "main": [
-        [
+          },
           {
             "node": "HL_Facebook_Post",
             "type": "main",
@@ -3411,12 +3273,27 @@
             "index": 0
           },
           {
-            "node": "HL_Instagram_Story1",
+            "node": "HL_Pinterest",
             "type": "main",
             "index": 0
           },
           {
-            "node": "HL_Facebook_Story1",
+            "node": "HL_GMB",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HL_LinkedIn",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HL_THREADS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HL_BLUESKY",
             "type": "main",
             "index": 0
           }
