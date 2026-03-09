@@ -1,0 +1,563 @@
+{
+  "updatedAt": "2026-03-08T22:54:51.823Z",
+  "createdAt": "2026-03-08T22:54:51.823Z",
+  "id": "1ksWslx5uDSZftUP",
+  "name": "Github Restore",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "github-restore",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1000001-0000-0000-0000-000000000001",
+      "name": "GitHub Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        200,
+        300
+      ],
+      "webhookId": "github-restore-webhook",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {}
+      },
+      "id": "a1000002-0000-0000-0000-000000000002",
+      "name": "Respond to GitHub",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        420,
+        420
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract all .json files added or modified in this push\n// Handle both payload structures: $json.body (webhook v2) and $json directly\nconst raw = $input.item.json;\nconst payload = raw.body || raw;\n\n// Debug: log what we received so we can inspect in execution\nconst debugInfo = {\n  hasBody: !!raw.body,\n  payloadKeys: Object.keys(payload),\n  commitsCount: (payload.commits || []).length,\n  hasHeadCommit: !!payload.head_commit\n};\n\nconst commits = payload.commits || [];\nconst changedFiles = new Set();\n\n// Method 1: Check commits array\nfor (const commit of commits) {\n  for (const file of [...(commit.added || []), ...(commit.modified || [])]) {\n    if (file.endsWith('.json')) {\n      changedFiles.add(file);\n    }\n  }\n}\n\n// Method 2: Fallback to head_commit if commits array was empty\nif (changedFiles.size === 0 && payload.head_commit) {\n  const hc = payload.head_commit;\n  for (const file of [...(hc.added || []), ...(hc.modified || [])]) {\n    if (file.endsWith('.json')) {\n      changedFiles.add(file);\n    }\n  }\n}\n\nif (changedFiles.size === 0) {\n  return [{ json: { skipped: true, reason: 'No .json files changed', debug: debugInfo } }];\n}\n\n// Pass ref (commit SHA) so we fetch the exact version pushed\nconst ref = payload.after || 'main';\nconst pusher = payload.pusher ? payload.pusher.name : 'unknown';\nconst repoFullName = payload.repository ? payload.repository.full_name : 'konnofuente/n8n-free-template';\n\nreturn [...changedFiles].map(filePath => ({\n  json: { filePath, ref, pusher, repoFullName, debug: debugInfo }\n}));"
+      },
+      "id": "a1000003-0000-0000-0000-000000000003",
+      "name": "Extract changed files",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        420,
+        300
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.skipped }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "a1000004-0000-0000-0000-000000000004",
+      "name": "Any JSON files changed?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        640,
+        300
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/{{ $json.repoFullName }}/contents/{{ encodeURIComponent($json.filePath) }}?ref={{ $json.ref }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "a1000005-0000-0000-0000-000000000005",
+      "name": "Get file from GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        860,
+        220
+      ],
+      "typeVersion": 4.3,
+      "continueOnFail": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "z8h44D4OqbDOXai8",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Decode base64 content from GitHub and extract workflow data\nconst item = $input.item.json;\n\n// GitHub returns content with newlines in the base64 — strip them\nconst raw = (item.content || '').replace(/\\n/g, '');\nif (!raw) {\n  return [{ json: { skipped: true, reason: 'No content', file: item.name } }];\n}\n\nlet workflow;\ntry {\n  const decoded = Buffer.from(raw, 'base64').toString('utf8');\n  workflow = JSON.parse(decoded);\n} catch (e) {\n  return [{ json: { skipped: true, reason: 'Invalid JSON', file: item.name } }];\n}\n\n// Check if this looks like an n8n workflow (must have name and nodes)\nif (!workflow.name || !workflow.nodes) {\n  return [{ json: { skipped: true, reason: 'Not an n8n workflow (missing name or nodes)', file: item.name } }];\n}\n\n// Determine if this is a new workflow (no id) or existing (has id)\nconst isNew = !workflow.id;\n\nreturn [{\n  json: {\n    skipped: false,\n    isNew: isNew,\n    workflowId: workflow.id || null,\n    workflowName: workflow.name,\n    workflowData: workflow,\n    filePath: item.path\n  }\n}];"
+      },
+      "id": "a1000006-0000-0000-0000-000000000006",
+      "name": "Decode & extract workflow",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1080,
+        220
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.skipped }}",
+              "value2": false
+            }
+          ]
+        }
+      },
+      "id": "a1000015-0000-0000-0000-000000000015",
+      "name": "Valid workflow?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1300,
+        220
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.isNew }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "a1000018-0000-0000-0000-000000000018",
+      "name": "Is new workflow?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1520,
+        220
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.srv842116.hstgr.cloud/api/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ name: $json.workflowData.name, nodes: $json.workflowData.nodes, connections: $json.workflowData.connections, settings: $json.workflowData.settings || { executionOrder: 'v1' } }) }}",
+        "options": {}
+      },
+      "id": "a1000019-0000-0000-0000-000000000019",
+      "name": "Create workflow via API",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1740,
+        140
+      ],
+      "typeVersion": 4.3,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6TWR9qstns4hczRL",
+          "name": "N8N_Credentials"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://n8n.srv842116.hstgr.cloud/api/v1/workflows/{{ $json.workflowId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.workflowData) }}",
+        "options": {}
+      },
+      "id": "a1000007-0000-0000-0000-000000000007",
+      "name": "Update workflow via API",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1740,
+        300
+      ],
+      "typeVersion": 4.3,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6TWR9qstns4hczRL",
+          "name": "N8N_Credentials"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if the API call succeeded or failed\n// Works for both Create and Update responses\nconst item = $input.item.json;\nconst decodeData = $('Decode & extract workflow').item.json;\n\nconst hasError = item.error || item.message === 'Not Found' || (item.code && item.code >= 400);\n\nif (hasError) {\n  return [{\n    json: {\n      success: false,\n      workflowName: decodeData.workflowName,\n      filePath: decodeData.filePath,\n      isNew: decodeData.isNew,\n      error: item.error?.message || item.message || JSON.stringify(item).substring(0, 300)\n    }\n  }];\n}\n\n// Success — extract the new ID if this was a create\nconst newId = item.id || decodeData.workflowId;\n\nreturn [{\n  json: {\n    success: true,\n    workflowName: item.name || decodeData.workflowName,\n    workflowId: newId,\n    filePath: decodeData.filePath,\n    isNew: decodeData.isNew,\n    action: decodeData.isNew ? 'CREATED' : 'UPDATED'\n  }\n}];"
+      },
+      "id": "a1000020-0000-0000-0000-000000000020",
+      "name": "Check result",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1960,
+        220
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.success }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "a1000021-0000-0000-0000-000000000021",
+      "name": "Did it succeed?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2180,
+        220
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chatId": "REPLACE_WITH_YOUR_TELEGRAM_CHAT_ID",
+        "text": "=❌ *n8n Restore ERROR*\n\nFailed to {{ $json.isNew ? 'create' : 'update' }} workflow from GitHub.\n\n📁 *File:* {{ $json.filePath || 'unknown' }}\n📛 *Workflow:* {{ $json.workflowName || 'unknown' }}\n🔴 *Error:* {{ $json.error }}\n\n🕐 *Time:* {{ $now.format('dd-MM-yyyy HH:mm') }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "a1000017-0000-0000-0000-000000000017",
+      "name": "Telegram error alert",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2400,
+        320
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "Zc5UMtLg91RaTekA",
+          "name": "Telegram account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build a clean Telegram summary message\nconst items = $input.all();\nconst created = items.filter(i => i.json.isNew);\nconst updated = items.filter(i => !i.json.isNew);\n\nconst lines = [\n  '🔄 *n8n Sync Complete*',\n  ''\n];\n\nif (created.length > 0) {\n  lines.push('🆕 *New workflows created:*');\n  for (const item of created) {\n    lines.push(`  • ${item.json.workflowName} (ID: ${item.json.workflowId})`);\n  }\n  lines.push('');\n}\n\nif (updated.length > 0) {\n  lines.push('✅ *Workflows updated:*');\n  for (const item of updated) {\n    lines.push(`  • ${item.json.workflowName}`);\n  }\n  lines.push('');\n}\n\nconst now = new Date().toLocaleString('en-GB', {\n  timeZone: 'Africa/Douala',\n  day: '2-digit', month: '2-digit', year: 'numeric',\n  hour: '2-digit', minute: '2-digit'\n});\n\nlines.push(`🕐 *Time:* ${now}`);\nlines.push('');\nlines.push('🔗 Source: github.com/konnofuente/n8n-free-template');\n\nreturn [{ json: { message: lines.join('\\n') } }];"
+      },
+      "id": "a1000009-0000-0000-0000-000000000009",
+      "name": "Build Telegram message",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2400,
+        140
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "chatId": "REPLACE_WITH_YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "a1000010-0000-0000-0000-000000000010",
+      "name": "Telegram notification",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2620,
+        140
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "Zc5UMtLg91RaTekA",
+          "name": "Telegram account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## ① GitHub Webhook\nRegister this URL in your GitHub repo:\n**Settings → Webhooks → Add webhook**\n\n- **Payload URL**: `https://n8n.srv842116.hstgr.cloud/webhook/github-restore`\n- **Content type**: `application/json`\n- **Events**: Just the push event\n\nResponds with 200 OK immediately so GitHub doesn't time out.",
+        "height": 260,
+        "width": 420,
+        "color": 5
+      },
+      "id": "a1000011-0000-0000-0000-000000000011",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        170,
+        560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## ② Detect changes\nParses the push payload to find `.json` files that were **added** or **modified**.\nSkips if no workflow files changed.\n\nPasses the commit SHA (`ref`) so we fetch the exact version pushed.",
+        "height": 260,
+        "width": 420,
+        "color": 3
+      },
+      "id": "a1000012-0000-0000-0000-000000000012",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        610,
+        560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## ③ Fetch & import\n1. Gets each file content from GitHub API\n2. Decodes base64 → parses JSON\n3. **Has `id`?** → PUT update existing workflow\n4. **No `id`?** → POST create new workflow\n\nThis handles both backup restores AND new workflows pushed from local dev.",
+        "height": 260,
+        "width": 620,
+        "color": 4
+      },
+      "id": "a1000013-0000-0000-0000-000000000013",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1050,
+        560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## ④ Result & notification\nChecks API response for success/failure.\n\n✅ Success → Telegram summary with created/updated counts\n❌ Failure → Telegram error alert with details\n\n🆕 New workflows show their assigned n8n ID in the notification.",
+        "height": 260,
+        "width": 460,
+        "color": 7
+      },
+      "id": "a1000014-0000-0000-0000-000000000014",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1930,
+        560
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "GitHub Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract changed files",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract changed files": {
+      "main": [
+        [
+          {
+            "node": "Any JSON files changed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any JSON files changed?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get file from GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get file from GitHub": {
+      "main": [
+        [
+          {
+            "node": "Decode & extract workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decode & extract workflow": {
+      "main": [
+        [
+          {
+            "node": "Valid workflow?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid workflow?": {
+      "main": [
+        [
+          {
+            "node": "Is new workflow?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Is new workflow?": {
+      "main": [
+        [
+          {
+            "node": "Create workflow via API",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update workflow via API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create workflow via API": {
+      "main": [
+        [
+          {
+            "node": "Check result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update workflow via API": {
+      "main": [
+        [
+          {
+            "node": "Check result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check result": {
+      "main": [
+        [
+          {
+            "node": "Did it succeed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Did it succeed?": {
+      "main": [
+        [
+          {
+            "node": "Build Telegram message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram error alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Telegram message": {
+      "main": [
+        [
+          {
+            "node": "Telegram notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "b69b911e-4ab4-4c10-97f8-0ac0f1d9c593",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-03-08T22:54:51.826Z",
+      "createdAt": "2026-03-08T22:54:51.826Z",
+      "role": "workflow:owner",
+      "workflowId": "1ksWslx5uDSZftUP",
+      "projectId": "ene3OLMtB0nh9ppE"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
