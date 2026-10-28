@@ -1,0 +1,1360 @@
+{
+  "name": "Leads 2 · Machine à leads multi-sources",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## La machine à leads multi-sources\n\n**4 sources, une seule liste, zéro doublon.**\n· **Google Maps** et **OpenStreetMap** : sans clé, actives par défaut\n· **Facebook** et **Web** : une clé **Serper** gratuite (2 500 recherches offertes), à activer dans Config\n\nLa même entreprise trouvée sur Maps **et** sur Facebook devient **une seule ligne** qui réunit tout : téléphone de Maps, abonnés de Facebook, email de son site.\nEnsuite n8n **ouvre les sites** pour trouver les emails, donne **un score**, écrit **le message** (Gemini gratuit si tu l'actives) et t'envoie tout : **Excel, Google Sheet, Telegram**. Chaque matin à 8h une fois activé, **sans jamais renvoyer un lead déjà envoyé**.",
+        "height": 466,
+        "width": 1140,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        -624
+      ],
+      "id": "1a85097c-b382-4864-93f3-3b1ba42dd34f",
+      "name": "Titre"
+    },
+    {
+      "parameters": {
+        "content": "### ① Réglages\n· `activites`, `zones` (séparées par **;**)\n· `sourceGoogleMaps` `sourceOpenStreetMap` `sourceFacebook` `sourceWeb` : true / false\n· `ouvrirLesSites` : chercher les emails sur les sites\n· `utiliserIA` : messages écrits par Gemini\n· `scoreMinimum` : ne garder que les meilleurs",
+        "height": 640,
+        "width": 520
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        0
+      ],
+      "id": "e068aca6-1a48-48bc-b4d2-f4e5bba58f24",
+      "name": "S-config"
+    },
+    {
+      "parameters": {
+        "content": "### ② Les 4 sources, en parallèle\nChaque tâche part vers sa source. Une source en panne (OpenStreetMap est parfois surchargé) **n'arrête pas** les autres.\n**Facebook / Web** : identifiant **Header Auth** · Name `X-API-KEY` · ta clé serper.dev, à choisir dans les 2 nodes Serper.",
+        "height": 924,
+        "width": 1140,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -48
+      ],
+      "id": "d9cb7845-045b-4398-b837-b71f554aa281",
+      "name": "S-sources"
+    },
+    {
+      "parameters": {
+        "content": "### ③ Fusionner, puis lire les sites\nMême téléphone, même site, même page Facebook, même email ou même nom dans la même zone = **la même entreprise**.\nPuis on ouvre les sites (40 max) pour l'email et l'audit : site en panne, pas mobile, pas de WhatsApp.",
+        "height": 1008,
+        "width": 900,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        -144
+      ],
+      "id": "217bbe00-4b4f-42ef-86ae-9394677b7701",
+      "name": "S-fusion"
+    },
+    {
+      "parameters": {
+        "content": "### ④ Le score, puis l'IA (optionnelle)\nGoogle : non revendiqué +30 · pas de site +30 · peu d'avis +15… Site : en panne +25 · pas mobile +15 · pas de WhatsApp +10. Bonus : 2 sources ou plus, 300 à 20 000 abonnés.\n**Gemini** (clé gratuite sur aistudio.google.com/apikey, identifiant **Google Gemini(PaLM) Api**) réécrit les messages des 25 meilleurs **en un seul appel**. Il ne voit que des infos publiques d'entreprises.",
+        "height": 640,
+        "width": 1228,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        -48
+      ],
+      "id": "f453ddd1-b70c-41c4-b2b5-6c148f312728",
+      "name": "S-ia"
+    },
+    {
+      "parameters": {
+        "content": "### ⑤ Sorties\n**Excel** toujours · **Google Sheet** si `googleSheetUrl` · **Telegram** (fichier + 5 plus chauds) si `telegramChatId`.",
+        "height": 720,
+        "width": 1212,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3904,
+        -64
+      ],
+      "id": "1d32bc5c-0ff5-4bf6-8a3e-ffae28c92dbe",
+      "name": "S-sorties"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        272
+      ],
+      "id": "a636e2ff-4053-481f-b1f8-1b3227571b4a",
+      "name": "Lancer maintenant"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -224,
+        464
+      ],
+      "id": "7edf4fb5-bb1d-4f69-8769-7bd503404df8",
+      "name": "Chaque jour à 8h"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2a313462-b891-4dd9-a6ec-4c9c74ec3c9a",
+              "name": "activites",
+              "value": "cabinet d'avocats; avocat; étude d'avocats; avocat d'affaires; cabinet juridique",
+              "type": "string"
+            },
+            {
+              "id": "4dbe00ee-6c82-4747-9e88-2c027d9470a8",
+              "name": "zones",
+              "value": "Monrovia, Freetown, Niamey, Conakry, Ouagadougou; Bobo-Dioulasso, Bamako,Lomé, Abidjan; Yamoussoukro, Dakar; Thiès, Accra; Kumasi,Cotonou; Porto-Novo, ",
+              "type": "string"
+            },
+            {
+              "id": "8e828314-505d-4148-b431-2657d741d3e1",
+              "name": "pays",
+              "value": "Liberia, Côte d'Ivoire,Sénégal, Ghana, Bénin,  Togo ,Mali , Burkina Faso, Guinée ,Sierra Leone, ",
+              "type": "string"
+            },
+            {
+              "id": "1c11b002-4c20-4907-a229-5fd740d7da1e",
+              "name": "codePays",
+              "value": "cm,ci,sn,gh,n,bi,tg,ml,bf,gn,ne,si,lr",
+              "type": "string"
+            },
+            {
+              "id": "776462be-4f2c-420f-8eea-d727c8594084",
+              "name": "indicatif",
+              "value": "237,225,221,233,234,229,228,223,226,224,227,232,231",
+              "type": "string"
+            },
+            {
+              "id": "2922ad77-24e4-4d20-8d48-53c02612d40c",
+              "name": "langue",
+              "value": "fr",
+              "type": "string"
+            },
+            {
+              "id": "1f8b6192-552a-41c2-8e3a-a35c02962f13",
+              "name": "sourceGoogleMaps",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "555ccd88-d9c8-471c-a97d-f7df2609722d",
+              "name": "sourceOpenStreetMap",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "9c9adad8-8e36-4445-bc57-4aca3581f92d",
+              "name": "sourceFacebook",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "89a74dc0-c0c9-44ce-90f0-c75fa4edb061",
+              "name": "sourceWeb",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "2abc4299-3db0-4e45-9309-e4659df07bbb",
+              "name": "resultatsParRecherche",
+              "value": 40,
+              "type": "number"
+            },
+            {
+              "id": "4db88ff1-31a5-4c29-82be-efe6266ddb05",
+              "name": "exclure",
+              "value": "facebook.com; instagram.com; linkedin.com; tiktok.com; youtube.com; twitter.com; x.com; wikipedia.org; tripadvisor; goafricaonline.com; pagesjaunes; yelp; google.; jumia; booking.com; expedia; glovo; airbnb; waze.com; mapcarta; cybo.com; annuaire",
+              "type": "string"
+            },
+            {
+              "id": "68269d84-bd3f-4b51-9e69-ffeb7e5ba57b",
+              "name": "ouvrirLesSites",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "bc6f7c64-073b-487d-9b30-2cc44656abf4",
+              "name": "maxSitesAOuvrir",
+              "value": 40,
+              "type": "number"
+            },
+            {
+              "id": "4d22dcb6-fefb-4aeb-8354-f2b6bd1bac2b",
+              "name": "utiliserIA",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "0e9013e4-a9f4-44f4-a539-eca5fa9f5501",
+              "name": "modeleIA",
+              "value": "gemini-2.5-flash",
+              "type": "string"
+            },
+            {
+              "id": "c8205224-0682-4075-8dc3-f7371d9c8d9a",
+              "name": "maxLeadsIA",
+              "value": 25,
+              "type": "number"
+            },
+            {
+              "id": "ae1259fc-332d-4b6b-99c4-21f1362168fd",
+              "name": "offresIA",
+              "value": "site web, profil Google Maps, WhatsApp automatisé, publicité Facebook",
+              "type": "string"
+            },
+            {
+              "id": "c47ca4a3-e213-4a24-8d1e-6b64fc0417c2",
+              "name": "seuilAvis",
+              "value": 20,
+              "type": "number"
+            },
+            {
+              "id": "efdeaaf6-2d4b-44d0-8daa-7b3b5d713348",
+              "name": "scoreMinimum",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "3a9b3e76-9790-4131-b643-0f8e733656cc",
+              "name": "maxLeads",
+              "value": 500,
+              "type": "number"
+            },
+            {
+              "id": "de127b67-c54c-4d6c-9e85-ef0daa994fa1",
+              "name": "seulementNouveaux",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "8ced0187-46f5-44d3-9279-0ae9c5ad6008",
+              "name": "signature",
+              "value": "Konno de CamaireTech",
+              "type": "string"
+            },
+            {
+              "id": "f98eb43e-7a6a-4026-af17-064da7a4b03a",
+              "name": "message",
+              "value": "Bonjour {nom}, je suis {signature}. En cherchant « {activite} » à {zone}, je suis tombé sur votre entreprise et j'ai remarqué que {raison}. Ce sont souvent des clients perdus. Je peux vous montrer en 2 minutes comment corriger ça ?",
+              "type": "string"
+            },
+            {
+              "id": "213dbed2-fb21-4bfc-a507-a991fd43fd4f",
+              "name": "googleSheetUrl",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "1f3544cb-4f35-4207-a803-014098869eff",
+              "name": "telegramChatId",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        368
+      ],
+      "id": "d43c065d-4c8d-49a5-8a09-7bb49ab22c0c",
+      "name": "Config"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Une ligne par zone à situer sur la carte ─────────────────────────────────\nconst c = $('Config').first().json;\nconst liste = (s) => String(s ?? '').split(/[;\\n]/).map((x) => x.trim()).filter(Boolean);\nconst zones = liste(c.zones);\nif (!zones.length || !liste(c.activites).length) {\n  throw new Error('Remplis au moins une activité et une zone dans Config (séparées par des « ; »).');\n}\nreturn zones.map((zone) => ({ json: { zone, recherche: `${zone}, ${c.pays}` } }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        368
+      ],
+      "id": "2ed20eb2-cef1-4cda-bdb1-acea0df0ab89",
+      "name": "Liste des zones"
+    },
+    {
+      "parameters": {
+        "url": "=https://nominatim.openstreetmap.org/search?format=json&limit=1&q={{ encodeURIComponent($json.recherche) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "n8n-lead-connector/1.0 (template CamaireTech)"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 1100
+            }
+          },
+          "allowUnauthorizedCerts": true,
+          "redirect": {
+            "redirect": {
+              "maxRedirects": 5
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 20000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        704,
+        368
+      ],
+      "id": "19b7c505-22f8-4232-a58e-81246f2f80cb",
+      "name": "Situer la zone (OpenStreetMap)",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────────────────────────────────\n// Fonctions communes aux 5 templates « Lead Connector ».\n// Le builder colle ce fichier EN TÊTE de chaque node Code qui en a besoin :\n// n8n n'a pas d'import entre nodes, chaque node doit être autonome.\n// ─────────────────────────────────────────────────────────────────────────────\n\n// Lit a[i][j][k]… sans planter si une case manque (le JSON de Google Maps est un\n// tableau de tableaux sans noms de champs : une case absente = null).\nconst lire = (a, ...chemin) => {\n  for (const k of chemin) {\n    if (a === null || a === undefined) return null;\n    a = a[k];\n  }\n  return a === undefined ? null : a;\n};\n\nconst nettoyer = (s) => String(s ?? '').replace(/\\s+/g, ' ').trim();\n\n// Décode les entités HTML les plus courantes (Brave, sites web).\nconst decoderHtml = (s) => nettoyer(String(s ?? '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&#x27;|&#39;|&apos;/g, \"'\")\n  .replace(/&quot;/g, '\"')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16))));\n\n// Les réseaux sociaux et agrégateurs ne comptent pas comme un « vrai » site web.\nconst RESEAUX = /(facebook\\.com|fb\\.com|instagram\\.com|tiktok\\.com|linktr\\.ee|wa\\.me|whatsapp\\.com|twitter\\.com|x\\.com|linkedin\\.com|youtube\\.com|beacons\\.ai|taplink|business\\.site|sites\\.google\\.com)/i;\n\nconst estUnVraiSite = (url) => !!url && !RESEAUX.test(url);\n\n// Nom de domaine sans « www. » (sans `new URL()`, absent du bac à sable n8n).\nconst domaine = (url) => ((String(url ?? '').match(/^https?:\\/\\/([^/?#:]+)/i) || [])[1] || '').replace(/^www\\./i, '').toLowerCase();\n\n// Garde seulement les chiffres d'un numéro au format international.\n// « +237 6 71 03 33 33 » → « 237671033333 »\nconst chiffres = (tel) => String(tel ?? '').replace(/\\D/g, '');\n\n// Cameroun : les mobiles commencent par 6 (WhatsApp), les fixes par 2.\n// Pour les autres pays on ne sait pas : on suppose que c'est un mobile.\nconst estMobile = (internat) => {\n  if (internat.startsWith('237')) return internat.charAt(3) === '6';\n  return internat.length >= 10;\n};\n\n// Remplace {nom}, {ville}, … dans un modèle de message.\nconst remplir = (modele, valeurs) =>\n  String(modele ?? '').replace(/\\{(\\w+)\\}/g, (m, cle) => (valeurs[cle] ?? '') === '' ? m : String(valeurs[cle]));\n\nconst lienWhatsApp = (internat, message) =>\n  internat ? `https://wa.me/${internat}${message ? '?text=' + encodeURIComponent(message) : ''}` : '';\n\n// « PHARMACIE OLEZOA, Yaoundé » → « PHARMACIE OLEZOA » (pour un message qui sonne humain).\n// On enlève le dernier morceau après une virgule ou un tiret s'il contient la ville.\nconst sansAccents = (s) => String(s ?? '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\nconst nomCourt = (nom, ...villes) => {\n  const n = nettoyer(nom);\n  const vs = villes.filter(Boolean).map((v) => sansAccents(String(v).split(',')[0].trim())).filter(Boolean);\n  const m = n.match(/^(.*\\S)\\s*[,|–-]\\s*([^,|–-]+)$/);\n  if (m && vs.some((v) => sansAccents(m[2]).includes(v))) return m[1].trim();\n  return n;\n};\n\nconst aujourdhui = () => new Date().toISOString().slice(0, 10);\n\n// Emails : on enlève les faux positifs classiques (images, exemples, trackers).\nconst extraireEmails = (texte) => [...new Set(\n  (String(texte ?? '').match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g) || [])\n    .map((e) => e.toLowerCase().replace(/^(?:u003e|x3e|mailto:)/, ''))\n    .filter((e) => !/\\.(png|jpe?g|gif|webp|svg|css|js)$/.test(e))\n    .filter((e) => !/(example\\.|domain\\.com|sentry|wixpress|yourname|votre|email\\.com$|@2x|godaddy)/.test(e))\n)];\n\n// Téléphones écrits dans un texte libre (extrait Facebook, page contact…).\n// Format international : gardé seulement s'il commence par l'indicatif du pays visé\n// (sinon on attrape des numéros de commande, des identifiants…). Pour le Cameroun,\n// on reconnaît aussi les numéros locaux à 9 chiffres qui commencent par 6 ou 2.\nconst extraireTelephones = (texte, indicatif = '237') => {\n  const t = String(texte ?? '');\n  const trouves = new Set();\n  for (const m of t.match(/\\+\\d[\\d\\s.\\-()]{7,16}\\d/g) || []) {\n    const c = chiffres(m);\n    if (c.length >= 10 && c.length <= 15 && (!indicatif || c.startsWith(indicatif))) trouves.add(c);\n  }\n  if (indicatif === '237') {\n    for (const m of t.match(/(?<![\\d+])(?:237[\\s.]?)?[62](?:[\\s.\\-]?\\d){8}(?!\\d)/g) || []) {\n      let c = chiffres(m);\n      if (c.length === 9) c = '237' + c;\n      if (c.length === 12) trouves.add(c);\n    }\n  }\n  return [...trouves];\n};\n\n// Range les emails : ceux du domaine du site d'abord, puis gmail/yahoo…, puis les autres\n// (souvent l'agence qui a fait le site, en bas de page).\nconst classerEmails = (emails, domaineSite) => {\n  const gratuit = /@(gmail|yahoo|hotmail|outlook|live|icloud|aol|ymail)\\./i;\n  const rang = (e) => (domaineSite && e.endsWith('@' + domaineSite) || (domaineSite && e.split('@')[1]?.endsWith('.' + domaineSite)) ? 0 : gratuit.test(e) ? 1 : 2);\n  return [...emails].sort((a, b) => rang(a) - rang(b));\n};\n\nconst formaterTel = (internat) => (internat ? '+' + internat : '');\n\n// « 7,688 followers » / « 5 197 J'aime » / « 1,2 K abonnés » → nombre\nconst lireNombre = (s) => {\n  if (!s) return null;\n  let t = String(s).replace(/\\s/g, '').replace(/,(?=\\d{3}\\b)/g, '').replace(',', '.');\n  const k = /k$/i.test(t) ? 1000 : /m$/i.test(t) ? 1000000 : 1;\n  const n = parseFloat(t);\n  return Number.isFinite(n) ? Math.round(n * k) : null;\n};\n\n// Priorité lisible à partir du score.\nconst priorite = (score) => (score >= 60 ? 'Chaud' : score >= 35 ? 'Tiède' : 'Froid');\n\n// ─────────────────────────────────────────────────────────────────────────────\n// Format commun d'un lead, quelle que soit la source, et fusion des doublons.\n// Deux leads sont la même entreprise s'ils partagent : le même téléphone, le même site,\n// la même page Facebook, le même email, la même fiche Google, ou le même nom dans la même zone.\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst nouveauLead = (champs) => ({\n  nom: '', activite: '', zone: '', sources: [], telephones: [], emails: [],\n  siteWeb: '', facebook: '', fbCle: '', instagram: '', adresse: '', categorie: '',\n  placeId: '', lienMaps: '', note: null, avis: null, revendique: null, horaires: null,\n  abonnes: null, latitude: null, longitude: null, extrait: '',\n  ...champs,\n});\n\nconst clesDuLead = (l) => {\n  const cles = [];\n  if (l.placeId) cles.push('p:' + l.placeId);\n  for (const t of l.telephones) if (t.length >= 11) cles.push('t:' + t);\n  if (estUnVraiSite(l.siteWeb)) cles.push('d:' + domaine(l.siteWeb));\n  if (l.fbCle) cles.push('f:' + l.fbCle);\n  for (const e of l.emails) cles.push('e:' + e);\n  const n = sansAccents(nomCourt(l.nom, l.zone)).replace(/[^a-z0-9]/g, '');\n  if (n.length >= 4) cles.push('n:' + n + '|' + sansAccents(l.zone));\n  return cles;\n};\n\n// Union-find : chaque groupe de leads qui partagent une clé devient UNE entreprise.\nconst fusionner = (leads) => {\n  const parent = leads.map((_, i) => i);\n  const racine = (i) => (parent[i] === i ? i : (parent[i] = racine(parent[i])));\n  const vu = new Map();\n  leads.forEach((l, i) => {\n    for (const k of clesDuLead(l)) {\n      if (vu.has(k)) parent[racine(i)] = racine(vu.get(k)); else vu.set(k, i);\n    }\n  });\n  const groupes = new Map();\n  leads.forEach((l, i) => { const r = racine(i); if (!groupes.has(r)) groupes.set(r, []); groupes.get(r).push(l); });\n\n  const ORDRE_NOM = ['Google Maps', 'OpenStreetMap', 'Facebook', 'Web'];\n  return [...groupes.values()].map((g) => {\n    g.sort((a, b) => ORDRE_NOM.indexOf(a.sources[0]) - ORDRE_NOM.indexOf(b.sources[0]));\n    const m = nouveauLead({ ...g[0] });\n    m.sources = [...new Set(g.flatMap((l) => l.sources))];\n    m.telephones = [...new Set(g.flatMap((l) => l.telephones))];\n    m.emails = [...new Set(g.flatMap((l) => l.emails))];\n    m.siteWeb = (g.find((l) => estUnVraiSite(l.siteWeb)) || g.find((l) => l.siteWeb) || {}).siteWeb || '';\n    for (const champ of ['facebook', 'fbCle', 'instagram', 'adresse', 'categorie', 'placeId', 'lienMaps', 'extrait']) {\n      m[champ] = (g.find((l) => l[champ]) || {})[champ] || '';\n    }\n    for (const champ of ['note', 'avis', 'revendique', 'horaires', 'abonnes', 'latitude', 'longitude']) {\n      const x = g.find((l) => l[champ] !== null && l[champ] !== undefined && l[champ] !== '');\n      m[champ] = x ? x[champ] : null;\n    }\n    m.id = m.placeId ? 'p:' + m.placeId : m.fbCle ? 'f:' + m.fbCle : estUnVraiSite(m.siteWeb) ? 'd:' + domaine(m.siteWeb)\n      : m.telephones[0] ? 't:' + m.telephones[0] : 'n:' + sansAccents(m.nom).replace(/[^a-z0-9]/g, '') + '|' + sansAccents(m.zone);\n    return m;\n  });\n};\n\n// Correspondance activité (en français) → étiquettes OpenStreetMap. Complète la liste si besoin.\nconst TAGS_OSM = {\n  pharmacie: ['amenity=pharmacy'], restaurant: ['amenity=restaurant', 'amenity=fast_food'],\n  'salon de coiffure': ['shop=hairdresser', 'shop=beauty'], coiffure: ['shop=hairdresser'], beaute: ['shop=beauty', 'shop=cosmetics'],\n  boulangerie: ['shop=bakery'], patisserie: ['shop=pastry', 'shop=bakery'], hotel: ['tourism=hotel', 'tourism=guest_house'],\n  supermarche: ['shop=supermarket'], quincaillerie: ['shop=hardware', 'shop=doityourself'], clinique: ['amenity=clinic', 'amenity=hospital'],\n  ecole: ['amenity=school'], garage: ['shop=car_repair'], bar: ['amenity=bar', 'amenity=pub'], cafe: ['amenity=cafe'],\n  boutique: ['shop=clothes', 'shop=boutique'], vetements: ['shop=clothes'], librairie: ['shop=books', 'shop=stationery'],\n  telephone: ['shop=mobile_phone'], banque: ['amenity=bank'], 'agence immobiliere': ['office=estate_agent'],\n};\nconst requeteOsm = (activite, bbox) => {\n  const a = sansAccents(activite);\n  const tags = Object.entries(TAGS_OSM).filter(([k]) => a.includes(k)).flatMap(([, v]) => v);\n  const zone = bbox.join(',');\n  const mot = activite.replace(/[\"\\\\]/g, '');\n  const lignes = [...new Set(tags)].map((t) => { const [k, v] = t.split('='); return `nwr[\"${k}\"=\"${v}\"](${zone});`; });\n  lignes.push(`nwr[\"name\"~\"${mot}\",i](${zone});`);\n  return `[out:json][timeout:60];(${lignes.join('')});out center tags 400;`;\n};\n\n// ── Une tâche par source × activité × zone (seulement pour les sources activées) ─\nconst c = $('Config').first().json;\nconst oui = (v) => v === true || v === 'true';\nconst liste = (s) => String(s ?? '').split(/[;\\n]/).map((x) => x.trim()).filter(Boolean);\nconst nb = Math.min(Number(c.resultatsParRecherche) || 40, 100);\nconst taches = [];\n$input.all().forEach((item, i) => {\n  const zone = $('Liste des zones').itemMatching(i).json.zone;\n  let geo = null;\n  try { geo = JSON.parse(item.json.data || '[]')[0] || null; } catch (e) { geo = null; }\n  const lat = geo ? Number(geo.lat) : null, lng = geo ? Number(geo.lon) : null;\n  const [s, n, w, e] = geo ? (geo.boundingbox || []).map(Number) : [];\n  const rayon = geo && Number.isFinite(s) ? Math.round(Math.min(60000, Math.max(3000, (n - s) * 111000))) : 30000;\n  for (const activite of liste(c.activites)) {\n    const base = { activite, zone };\n    if (oui(c.sourceGoogleMaps)) taches.push({ ...base, source: 'maps',\n      q: geo ? activite : `${activite} ${zone} ${c.pays}`,\n      pb: geo ? `!4m8!1m3!1d${rayon}!2d${lng}!3d${lat}!3m2!1i1024!2i768!4f13.1!7i${nb}!8i0!10b1`\n              : `!4m8!1m3!1d3000000!2d0!3d0!3m2!1i1024!2i768!4f13.1!7i${nb}!8i0!10b1` });\n    if (oui(c.sourceFacebook)) taches.push({ ...base, source: 'facebook',\n      corpsSerper: { q: `site:facebook.com ${activite} ${zone}`, gl: c.codePays, hl: c.langue } });\n    if (oui(c.sourceWeb)) taches.push({ ...base, source: 'web',\n      corpsSerper: { q: `${activite} ${zone}`, gl: c.codePays, hl: c.langue } });\n    if (oui(c.sourceOpenStreetMap) && geo && Number.isFinite(s)) taches.push({ ...base, source: 'osm',\n      requeteOsm: requeteOsm(activite, [s, w, n, e]) });\n  }\n});\nif (!taches.length) throw new Error('Aucune source activée, ou aucune activité/zone dans Config.');\nreturn taches.map((json) => ({ json }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        368
+      ],
+      "id": "feeac283-3d54-4c9c-bac2-2fbf28cc6bb8",
+      "name": "Plan des sources"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "eecdf39e-6d54-4370-9ea4-07d5e2830ea3",
+                    "leftValue": "={{ $json.source }}",
+                    "rightValue": "maps",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Google Maps"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "55f8babd-490b-48be-ac47-ed52d27f65c7",
+                    "leftValue": "={{ $json.source }}",
+                    "rightValue": "facebook",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Facebook"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "eae566a5-ca3d-4808-bfd9-c89e8f7f7ac1",
+                    "leftValue": "={{ $json.source }}",
+                    "rightValue": "web",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Web"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "00118880-4d36-4e6b-a340-f0ef9a29857d",
+                    "leftValue": "={{ $json.source }}",
+                    "rightValue": "osm",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "OpenStreetMap"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        352
+      ],
+      "id": "cc612d72-8e1c-4c91-9023-b1b81c6ac3c4",
+      "name": "Router par source"
+    },
+    {
+      "parameters": {
+        "url": "https://www.google.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "tbm",
+              "value": "map"
+            },
+            {
+              "name": "authuser",
+              "value": "0"
+            },
+            {
+              "name": "hl",
+              "value": "={{ $('Config').first().json.langue }}"
+            },
+            {
+              "name": "gl",
+              "value": "={{ $('Config').first().json.codePays }}"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json.q }}"
+            },
+            {
+              "name": "pb",
+              "value": "={{ $json.pb }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "fr-FR,fr;q=0.9,en;q=0.8"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 2500
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1344,
+        64
+      ],
+      "id": "4d661778-a072-4a4e-87d9-d473094b7e03",
+      "name": "Chercher sur Google Maps",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────────────────────────────────\n// Fonctions communes aux 5 templates « Lead Connector ».\n// Le builder colle ce fichier EN TÊTE de chaque node Code qui en a besoin :\n// n8n n'a pas d'import entre nodes, chaque node doit être autonome.\n// ─────────────────────────────────────────────────────────────────────────────\n\n// Lit a[i][j][k]… sans planter si une case manque (le JSON de Google Maps est un\n// tableau de tableaux sans noms de champs : une case absente = null).\nconst lire = (a, ...chemin) => {\n  for (const k of chemin) {\n    if (a === null || a === undefined) return null;\n    a = a[k];\n  }\n  return a === undefined ? null : a;\n};\n\nconst nettoyer = (s) => String(s ?? '').replace(/\\s+/g, ' ').trim();\n\n// Décode les entités HTML les plus courantes (Brave, sites web).\nconst decoderHtml = (s) => nettoyer(String(s ?? '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&#x27;|&#39;|&apos;/g, \"'\")\n  .replace(/&quot;/g, '\"')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16))));\n\n// Les réseaux sociaux et agrégateurs ne comptent pas comme un « vrai » site web.\nconst RESEAUX = /(facebook\\.com|fb\\.com|instagram\\.com|tiktok\\.com|linktr\\.ee|wa\\.me|whatsapp\\.com|twitter\\.com|x\\.com|linkedin\\.com|youtube\\.com|beacons\\.ai|taplink|business\\.site|sites\\.google\\.com)/i;\n\nconst estUnVraiSite = (url) => !!url && !RESEAUX.test(url);\n\n// Nom de domaine sans « www. » (sans `new URL()`, absent du bac à sable n8n).\nconst domaine = (url) => ((String(url ?? '').match(/^https?:\\/\\/([^/?#:]+)/i) || [])[1] || '').replace(/^www\\./i, '').toLowerCase();\n\n// Garde seulement les chiffres d'un numéro au format international.\n// « +237 6 71 03 33 33 » → « 237671033333 »\nconst chiffres = (tel) => String(tel ?? '').replace(/\\D/g, '');\n\n// Cameroun : les mobiles commencent par 6 (WhatsApp), les fixes par 2.\n// Pour les autres pays on ne sait pas : on suppose que c'est un mobile.\nconst estMobile = (internat) => {\n  if (internat.startsWith('237')) return internat.charAt(3) === '6';\n  return internat.length >= 10;\n};\n\n// Remplace {nom}, {ville}, … dans un modèle de message.\nconst remplir = (modele, valeurs) =>\n  String(modele ?? '').replace(/\\{(\\w+)\\}/g, (m, cle) => (valeurs[cle] ?? '') === '' ? m : String(valeurs[cle]));\n\nconst lienWhatsApp = (internat, message) =>\n  internat ? `https://wa.me/${internat}${message ? '?text=' + encodeURIComponent(message) : ''}` : '';\n\n// « PHARMACIE OLEZOA, Yaoundé » → « PHARMACIE OLEZOA » (pour un message qui sonne humain).\n// On enlève le dernier morceau après une virgule ou un tiret s'il contient la ville.\nconst sansAccents = (s) => String(s ?? '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\nconst nomCourt = (nom, ...villes) => {\n  const n = nettoyer(nom);\n  const vs = villes.filter(Boolean).map((v) => sansAccents(String(v).split(',')[0].trim())).filter(Boolean);\n  const m = n.match(/^(.*\\S)\\s*[,|–-]\\s*([^,|–-]+)$/);\n  if (m && vs.some((v) => sansAccents(m[2]).includes(v))) return m[1].trim();\n  return n;\n};\n\nconst aujourdhui = () => new Date().toISOString().slice(0, 10);\n\n// Emails : on enlève les faux positifs classiques (images, exemples, trackers).\nconst extraireEmails = (texte) => [...new Set(\n  (String(texte ?? '').match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g) || [])\n    .map((e) => e.toLowerCase().replace(/^(?:u003e|x3e|mailto:)/, ''))\n    .filter((e) => !/\\.(png|jpe?g|gif|webp|svg|css|js)$/.test(e))\n    .filter((e) => !/(example\\.|domain\\.com|sentry|wixpress|yourname|votre|email\\.com$|@2x|godaddy)/.test(e))\n)];\n\n// Téléphones écrits dans un texte libre (extrait Facebook, page contact…).\n// Format international : gardé seulement s'il commence par l'indicatif du pays visé\n// (sinon on attrape des numéros de commande, des identifiants…). Pour le Cameroun,\n// on reconnaît aussi les numéros locaux à 9 chiffres qui commencent par 6 ou 2.\nconst extraireTelephones = (texte, indicatif = '237') => {\n  const t = String(texte ?? '');\n  const trouves = new Set();\n  for (const m of t.match(/\\+\\d[\\d\\s.\\-()]{7,16}\\d/g) || []) {\n    const c = chiffres(m);\n    if (c.length >= 10 && c.length <= 15 && (!indicatif || c.startsWith(indicatif))) trouves.add(c);\n  }\n  if (indicatif === '237') {\n    for (const m of t.match(/(?<![\\d+])(?:237[\\s.]?)?[62](?:[\\s.\\-]?\\d){8}(?!\\d)/g) || []) {\n      let c = chiffres(m);\n      if (c.length === 9) c = '237' + c;\n      if (c.length === 12) trouves.add(c);\n    }\n  }\n  return [...trouves];\n};\n\n// Range les emails : ceux du domaine du site d'abord, puis gmail/yahoo…, puis les autres\n// (souvent l'agence qui a fait le site, en bas de page).\nconst classerEmails = (emails, domaineSite) => {\n  const gratuit = /@(gmail|yahoo|hotmail|outlook|live|icloud|aol|ymail)\\./i;\n  const rang = (e) => (domaineSite && e.endsWith('@' + domaineSite) || (domaineSite && e.split('@')[1]?.endsWith('.' + domaineSite)) ? 0 : gratuit.test(e) ? 1 : 2);\n  return [...emails].sort((a, b) => rang(a) - rang(b));\n};\n\nconst formaterTel = (internat) => (internat ? '+' + internat : '');\n\n// « 7,688 followers » / « 5 197 J'aime » / « 1,2 K abonnés » → nombre\nconst lireNombre = (s) => {\n  if (!s) return null;\n  let t = String(s).replace(/\\s/g, '').replace(/,(?=\\d{3}\\b)/g, '').replace(',', '.');\n  const k = /k$/i.test(t) ? 1000 : /m$/i.test(t) ? 1000000 : 1;\n  const n = parseFloat(t);\n  return Number.isFinite(n) ? Math.round(n * k) : null;\n};\n\n// Priorité lisible à partir du score.\nconst priorite = (score) => (score >= 60 ? 'Chaud' : score >= 35 ? 'Tiède' : 'Froid');\n\n// ─────────────────────────────────────────────────────────────────────────────\n// Lecture de la réponse « tbm=map » de Google Maps (sans clé API).\n//\n// C'est la requête que la page Google Maps envoie elle-même quand on tape une\n// recherche. La réponse commence par  )]}'  puis un gros tableau JSON sans noms\n// de champs. Positions repérées le 2026-10-11 (si Google les change, c'est ici\n// qu'on corrige) :\n//   [11] nom            [39] adresse          [14] quartier     [166] ville\n//   [13] catégories     [7][0] site web       [178][0][1][1][0] téléphone intl\n//   [4][7] note         [4][8] nombre d'avis (parfois absent)  [9][2],[9][3] lat, lng\n//   [78] place_id       [49] lien « Revendiquer cet établissement » (présent =\n//   profil NON revendiqué par le propriétaire)   [203] horaires\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst lireReponseMaps = (texte) => {\n  let t = typeof texte === 'string' ? texte : JSON.stringify(texte ?? '');\n  if (t.startsWith(\")]}'\")) t = t.slice(t.indexOf('\\n') + 1);\n  let brut;\n  try { brut = JSON.parse(t); } catch (e) { return { recherche: '', lieux: [], erreur: 'réponse illisible' }; }\n  const recherche = lire(brut, 0, 0) || '';\n  const lieux = [];\n  for (const r of lire(brut, 0, 1) || []) {\n    const p = Array.isArray(r) ? r[14] : null;\n    if (!p) continue;\n    let site = lire(p, 7, 0) || '';\n    if (site.startsWith('/url?q=')) {\n      try { site = decodeURIComponent(site.slice(7).split('&')[0]); } catch (e) { /* on garde tel quel */ }\n    }\n    const telIntl = lire(p, 178, 0, 1, 1, 0) || '';\n    const placeId = lire(p, 78) || lire(p, 10) || '';\n    const nom = nettoyer(lire(p, 11));\n    lieux.push({\n      nom,\n      categorie: (lire(p, 13) || []).join(', '),\n      adresse: nettoyer(lire(p, 39) || lire(p, 18)),\n      quartier: nettoyer(lire(p, 14)),\n      ville: nettoyer(lire(p, 166)),\n      telephone: telIntl,\n      telephoneChiffres: chiffres(telIntl),\n      siteWeb: site,\n      note: lire(p, 4, 7),\n      // Google n'envoie pas toujours le nombre d'avis (constaté le 2026-10-11 : présent dans\n      // une réponse, absent de la suivante pour la même recherche). null = « on ne sait pas ».\n      avis: lire(p, 4, 8),\n      revendique: !lire(p, 49),\n      horaires: !!lire(p, 203, 0),\n      latitude: lire(p, 9, 2),\n      longitude: lire(p, 9, 3),\n      placeId,\n      lienMaps: placeId.startsWith('ChI')\n        ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(nom)}&query_place_id=${placeId}`\n        : `https://www.google.com/maps/search/${encodeURIComponent(nom + ' ' + (lire(p, 39) || ''))}`,\n    });\n  }\n  return { recherche, lieux, erreur: lieux.length ? '' : 'aucun résultat' };\n};\n\n// ─────────────────────────────────────────────────────────────────────────────\n// Format commun d'un lead, quelle que soit la source, et fusion des doublons.\n// Deux leads sont la même entreprise s'ils partagent : le même téléphone, le même site,\n// la même page Facebook, le même email, la même fiche Google, ou le même nom dans la même zone.\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst nouveauLead = (champs) => ({\n  nom: '', activite: '', zone: '', sources: [], telephones: [], emails: [],\n  siteWeb: '', facebook: '', fbCle: '', instagram: '', adresse: '', categorie: '',\n  placeId: '', lienMaps: '', note: null, avis: null, revendique: null, horaires: null,\n  abonnes: null, latitude: null, longitude: null, extrait: '',\n  ...champs,\n});\n\nconst clesDuLead = (l) => {\n  const cles = [];\n  if (l.placeId) cles.push('p:' + l.placeId);\n  for (const t of l.telephones) if (t.length >= 11) cles.push('t:' + t);\n  if (estUnVraiSite(l.siteWeb)) cles.push('d:' + domaine(l.siteWeb));\n  if (l.fbCle) cles.push('f:' + l.fbCle);\n  for (const e of l.emails) cles.push('e:' + e);\n  const n = sansAccents(nomCourt(l.nom, l.zone)).replace(/[^a-z0-9]/g, '');\n  if (n.length >= 4) cles.push('n:' + n + '|' + sansAccents(l.zone));\n  return cles;\n};\n\n// Union-find : chaque groupe de leads qui partagent une clé devient UNE entreprise.\nconst fusionner = (leads) => {\n  const parent = leads.map((_, i) => i);\n  const racine = (i) => (parent[i] === i ? i : (parent[i] = racine(parent[i])));\n  const vu = new Map();\n  leads.forEach((l, i) => {\n    for (const k of clesDuLead(l)) {\n      if (vu.has(k)) parent[racine(i)] = racine(vu.get(k)); else vu.set(k, i);\n    }\n  });\n  const groupes = new Map();\n  leads.forEach((l, i) => { const r = racine(i); if (!groupes.has(r)) groupes.set(r, []); groupes.get(r).push(l); });\n\n  const ORDRE_NOM = ['Google Maps', 'OpenStreetMap', 'Facebook', 'Web'];\n  return [...groupes.values()].map((g) => {\n    g.sort((a, b) => ORDRE_NOM.indexOf(a.sources[0]) - ORDRE_NOM.indexOf(b.sources[0]));\n    const m = nouveauLead({ ...g[0] });\n    m.sources = [...new Set(g.flatMap((l) => l.sources))];\n    m.telephones = [...new Set(g.flatMap((l) => l.telephones))];\n    m.emails = [...new Set(g.flatMap((l) => l.emails))];\n    m.siteWeb = (g.find((l) => estUnVraiSite(l.siteWeb)) || g.find((l) => l.siteWeb) || {}).siteWeb || '';\n    for (const champ of ['facebook', 'fbCle', 'instagram', 'adresse', 'categorie', 'placeId', 'lienMaps', 'extrait']) {\n      m[champ] = (g.find((l) => l[champ]) || {})[champ] || '';\n    }\n    for (const champ of ['note', 'avis', 'revendique', 'horaires', 'abonnes', 'latitude', 'longitude']) {\n      const x = g.find((l) => l[champ] !== null && l[champ] !== undefined && l[champ] !== '');\n      m[champ] = x ? x[champ] : null;\n    }\n    m.id = m.placeId ? 'p:' + m.placeId : m.fbCle ? 'f:' + m.fbCle : estUnVraiSite(m.siteWeb) ? 'd:' + domaine(m.siteWeb)\n      : m.telephones[0] ? 't:' + m.telephones[0] : 'n:' + sansAccents(m.nom).replace(/[^a-z0-9]/g, '') + '|' + sansAccents(m.zone);\n    return m;\n  });\n};\n\n// Correspondance activité (en français) → étiquettes OpenStreetMap. Complète la liste si besoin.\nconst TAGS_OSM = {\n  pharmacie: ['amenity=pharmacy'], restaurant: ['amenity=restaurant', 'amenity=fast_food'],\n  'salon de coiffure': ['shop=hairdresser', 'shop=beauty'], coiffure: ['shop=hairdresser'], beaute: ['shop=beauty', 'shop=cosmetics'],\n  boulangerie: ['shop=bakery'], patisserie: ['shop=pastry', 'shop=bakery'], hotel: ['tourism=hotel', 'tourism=guest_house'],\n  supermarche: ['shop=supermarket'], quincaillerie: ['shop=hardware', 'shop=doityourself'], clinique: ['amenity=clinic', 'amenity=hospital'],\n  ecole: ['amenity=school'], garage: ['shop=car_repair'], bar: ['amenity=bar', 'amenity=pub'], cafe: ['amenity=cafe'],\n  boutique: ['shop=clothes', 'shop=boutique'], vetements: ['shop=clothes'], librairie: ['shop=books', 'shop=stationery'],\n  telephone: ['shop=mobile_phone'], banque: ['amenity=bank'], 'agence immobiliere': ['office=estate_agent'],\n};\nconst requeteOsm = (activite, bbox) => {\n  const a = sansAccents(activite);\n  const tags = Object.entries(TAGS_OSM).filter(([k]) => a.includes(k)).flatMap(([, v]) => v);\n  const zone = bbox.join(',');\n  const mot = activite.replace(/[\"\\\\]/g, '');\n  const lignes = [...new Set(tags)].map((t) => { const [k, v] = t.split('='); return `nwr[\"${k}\"=\"${v}\"](${zone});`; });\n  lignes.push(`nwr[\"name\"~\"${mot}\",i](${zone});`);\n  return `[out:json][timeout:60];(${lignes.join('')});out center tags 400;`;\n};\n\n// ── Google Maps → leads au format commun ────────────────────────────────────\nconst out = [];\n$input.all().forEach((item, i) => {\n  const t = $('Router par source').itemMatching(i).json;\n  for (const l of lireReponseMaps(item.json.data).lieux) {\n    out.push({ json: nouveauLead({\n      nom: l.nom, activite: t.activite, zone: t.zone, sources: ['Google Maps'],\n      telephones: l.telephoneChiffres ? [l.telephoneChiffres] : [], siteWeb: l.siteWeb,\n      facebook: /facebook\\.com/i.test(l.siteWeb) ? l.siteWeb : '',\n      adresse: l.adresse, categorie: l.categorie, placeId: l.placeId, lienMaps: l.lienMaps,\n      note: l.note, avis: l.avis, revendique: l.revendique, horaires: l.horaires,\n      latitude: l.latitude, longitude: l.longitude,\n    }) });\n  }\n});\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        64
+      ],
+      "id": "6591a8f5-03a7-44c3-81dd-f1a7a21f20e7",
+      "name": "Lire Google Maps"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://google.serper.dev/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.corpsSerper) }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 500
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1376,
+        288
+      ],
+      "id": "c41a9598-1676-44eb-9082-e06730b854f5",
+      "name": "Chercher sur Facebook (Serper)",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "BfPCnmUbDenJcLY1",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────────────────────────────────\n// Fonctions communes aux 5 templates « Lead Connector ».\n// Le builder colle ce fichier EN TÊTE de chaque node Code qui en a besoin :\n// n8n n'a pas d'import entre nodes, chaque node doit être autonome.\n// ─────────────────────────────────────────────────────────────────────────────\n\n// Lit a[i][j][k]… sans planter si une case manque (le JSON de Google Maps est un\n// tableau de tableaux sans noms de champs : une case absente = null).\nconst lire = (a, ...chemin) => {\n  for (const k of chemin) {\n    if (a === null || a === undefined) return null;\n    a = a[k];\n  }\n  return a === undefined ? null : a;\n};\n\nconst nettoyer = (s) => String(s ?? '').replace(/\\s+/g, ' ').trim();\n\n// Décode les entités HTML les plus courantes (Brave, sites web).\nconst decoderHtml = (s) => nettoyer(String(s ?? '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&#x27;|&#39;|&apos;/g, \"'\")\n  .replace(/&quot;/g, '\"')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16))));\n\n// Les réseaux sociaux et agrégateurs ne comptent pas comme un « vrai » site web.\nconst RESEAUX = /(facebook\\.com|fb\\.com|instagram\\.com|tiktok\\.com|linktr\\.ee|wa\\.me|whatsapp\\.com|twitter\\.com|x\\.com|linkedin\\.com|youtube\\.com|beacons\\.ai|taplink|business\\.site|sites\\.google\\.com)/i;\n\nconst estUnVraiSite = (url) => !!url && !RESEAUX.test(url);\n\n// Nom de domaine sans « www. » (sans `new URL()`, absent du bac à sable n8n).\nconst domaine = (url) => ((String(url ?? '').match(/^https?:\\/\\/([^/?#:]+)/i) || [])[1] || '').replace(/^www\\./i, '').toLowerCase();\n\n// Garde seulement les chiffres d'un numéro au format international.\n// « +237 6 71 03 33 33 » → « 237671033333 »\nconst chiffres = (tel) => String(tel ?? '').replace(/\\D/g, '');\n\n// Cameroun : les mobiles commencent par 6 (WhatsApp), les fixes par 2.\n// Pour les autres pays on ne sait pas : on suppose que c'est un mobile.\nconst estMobile = (internat) => {\n  if (internat.startsWith('237')) return internat.charAt(3) === '6';\n  return internat.length >= 10;\n};\n\n// Remplace {nom}, {ville}, … dans un modèle de message.\nconst remplir = (modele, valeurs) =>\n  String(modele ?? '').replace(/\\{(\\w+)\\}/g, (m, cle) => (valeurs[cle] ?? '') === '' ? m : String(valeurs[cle]));\n\nconst lienWhatsApp = (internat, message) =>\n  internat ? `https://wa.me/${internat}${message ? '?text=' + encodeURIComponent(message) : ''}` : '';\n\n// « PHARMACIE OLEZOA, Yaoundé » → « PHARMACIE OLEZOA » (pour un message qui sonne humain).\n// On enlève le dernier morceau après une virgule ou un tiret s'il contient la ville.\nconst sansAccents = (s) => String(s ?? '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\nconst nomCourt = (nom, ...villes) => {\n  const n = nettoyer(nom);\n  const vs = villes.filter(Boolean).map((v) => sansAccents(String(v).split(',')[0].trim())).filter(Boolean);\n  const m = n.match(/^(.*\\S)\\s*[,|–-]\\s*([^,|–-]+)$/);\n  if (m && vs.some((v) => sansAccents(m[2]).includes(v))) return m[1].trim();\n  return n;\n};\n\nconst aujourdhui = () => new Date().toISOString().slice(0, 10);\n\n// Emails : on enlève les faux positifs classiques (images, exemples, trackers).\nconst extraireEmails = (texte) => [...new Set(\n  (String(texte ?? '').match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g) || [])\n    .map((e) => e.toLowerCase().replace(/^(?:u003e|x3e|mailto:)/, ''))\n    .filter((e) => !/\\.(png|jpe?g|gif|webp|svg|css|js)$/.test(e))\n    .filter((e) => !/(example\\.|domain\\.com|sentry|wixpress|yourname|votre|email\\.com$|@2x|godaddy)/.test(e))\n)];\n\n// Téléphones écrits dans un texte libre (extrait Facebook, page contact…).\n// Format international : gardé seulement s'il commence par l'indicatif du pays visé\n// (sinon on attrape des numéros de commande, des identifiants…). Pour le Cameroun,\n// on reconnaît aussi les numéros locaux à 9 chiffres qui commencent par 6 ou 2.\nconst extraireTelephones = (texte, indicatif = '237') => {\n  const t = String(texte ?? '');\n  const trouves = new Set();\n  for (const m of t.match(/\\+\\d[\\d\\s.\\-()]{7,16}\\d/g) || []) {\n    const c = chiffres(m);\n    if (c.length >= 10 && c.length <= 15 && (!indicatif || c.startsWith(indicatif))) trouves.add(c);\n  }\n  if (indicatif === '237') {\n    for (const m of t.match(/(?<![\\d+])(?:237[\\s.]?)?[62](?:[\\s.\\-]?\\d){8}(?!\\d)/g) || []) {\n      let c = chiffres(m);\n      if (c.length === 9) c = '237' + c;\n      if (c.length === 12) trouves.add(c);\n    }\n  }\n  return [...trouves];\n};\n\n// Range les emails : ceux du domaine du site d'abord, puis gmail/yahoo…, puis les autres\n// (souvent l'agence qui a fait le site, en bas de page).\nconst classerEmails = (emails, domaineSite) => {\n  const gratuit = /@(gmail|yahoo|hotmail|outlook|live|icloud|aol|ymail)\\./i;\n  const rang = (e) => (domaineSite && e.endsWith('@' + domaineSite) || (domaineSite && e.split('@')[1]?.endsWith('.' + domaineSite)) ? 0 : gratuit.test(e) ? 1 : 2);\n  return [...emails].sort((a, b) => rang(a) - rang(b));\n};\n\nconst formaterTel = (internat) => (internat ? '+' + internat : '');\n\n// « 7,688 followers » / « 5 197 J'aime » / « 1,2 K abonnés » → nombre\nconst lireNombre = (s) => {\n  if (!s) return null;\n  let t = String(s).replace(/\\s/g, '').replace(/,(?=\\d{3}\\b)/g, '').replace(',', '.');\n  const k = /k$/i.test(t) ? 1000 : /m$/i.test(t) ? 1000000 : 1;\n  const n = parseFloat(t);\n  return Number.isFinite(n) ? Math.round(n * k) : null;\n};\n\n// Priorité lisible à partir du score.\nconst priorite = (score) => (score >= 60 ? 'Chaud' : score >= 35 ? 'Tiède' : 'Froid');\n\n// ─────────────────────────────────────────────────────────────────────────────\n// Lecture des résultats d'un moteur de recherche → { titre, lien, extrait }.\n//  · « serper »    : API Serper.dev (résultats Google), 2 500 recherches offertes, sans carte.\n//  · « brave-api » : API officielle Brave Search, 5 $ de crédit offerts chaque mois.\n// On passe toujours par une API : la page de résultats de Brave, elle, réclame un captcha\n// dès qu'elle est appelée depuis n8n (testé le 2026-10-11).\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst lireSerper = (json) => (json?.organic || []).map((r) => ({\n  titre: nettoyer(r.title),\n  lien: r.link || '',\n  extrait: nettoyer([r.snippet, ...(r.attributes ? Object.values(r.attributes) : [])].join(' ')),\n}));\n\nconst lireBraveApi = (json) => (json?.web?.results || []).map((r) => ({\n  titre: decoderHtml(r.title),\n  lien: r.url || '',\n  extrait: decoderHtml([r.description, ...(r.extra_snippets || [])].join(' ')),\n}));\n\n// Lit la réponse quel que soit le moteur, et remonte une erreur claire si la clé est mauvaise.\nconst lireRecherche = (json) => {\n  if (!json) return [];\n  if (json.organic) return lireSerper(json);\n  if (json.web) return lireBraveApi(json);\n  const erreur = json.message || json.error?.detail || json.error?.message || (typeof json.error === 'string' ? json.error : '');\n  if (erreur) throw new Error('Moteur de recherche : ' + erreur + ' (vérifie la clé dans l\\'identifiant n8n).');\n  return [];\n};\n\n// ─────────────────────────────────────────────────────────────────────────────\n// Reconnaître une PAGE Facebook d'entreprise dans un résultat de recherche et lire\n// ce que l'extrait en dit (abonnés, mentions J'aime, téléphone, WhatsApp…).\n// ─────────────────────────────────────────────────────────────────────────────\n\n// Liens qui ne sont pas des pages : publications, groupes, vidéos, photos…\nconst PAS_UNE_PAGE = /facebook\\.com\\/(?:[^/?#]+\\/)?(?:posts|videos|photos|photo|reel|reels|events|groups|watch|story\\.php|permalink\\.php|marketplace|hashtag|share|media|notes|help|login|public|search|pg\\/[^/]+\\/(?:posts|photos))(?:[/?#]|$)/i;\n\n// Renvoie { url, cle, slug } pour une page, ou null.\n// (Pas de `new URL()` : il n'existe pas dans le bac à sable des nodes Code de n8n.)\nconst pageFacebook = (lien) => {\n  const m = String(lien ?? '').match(/^https?:\\/\\/(?:[a-z-]+\\.)?facebook\\.com(\\/[^?#]*)?(\\?[^#]*)?/i);\n  if (!m || PAS_UNE_PAGE.test(lien)) return null;\n  const chemin = m[1] || '/';\n  const requete = m[2] || '';\n  let morceaux;\n  try { morceaux = decodeURIComponent(chemin).split('/').filter(Boolean); } catch (e) { morceaux = chemin.split('/').filter(Boolean); }\n  if (chemin.startsWith('/profile.php')) {\n    const id = (requete.match(/[?&]id=(\\d+)/) || [])[1];\n    return id ? { url: `https://www.facebook.com/profile.php?id=${id}`, cle: id, slug: id } : null;\n  }\n  if (!morceaux.length) return null;\n  // facebook.com/p/Nom-De-La-Page-1000123456/  ou  facebook.com/people/Nom/1000123456/\n  if ((morceaux[0] === 'p' || morceaux[0] === 'people') && morceaux.length >= 2) {\n    const id = (morceaux.join('/').match(/(\\d{8,})/) || [])[1];\n    const cle = id || morceaux[1].toLowerCase();\n    return { url: `https://www.facebook.com/${morceaux.slice(0, morceaux[0] === 'people' ? 3 : 2).join('/')}/`, cle, slug: id || morceaux[1] };\n  }\n  if (morceaux.length > 1 && !/^(about|community|reviews|menu|services|shop)$/i.test(morceaux[1])) return null;\n  if (/^\\d+$/.test(morceaux[0]) && morceaux.length > 1) return null;\n  const slug = morceaux[0];\n  return { url: `https://www.facebook.com/${slug}/`, cle: slug.toLowerCase(), slug };\n};\n\n// « 7,688 followers · 799 talking about this · 262 were here » / « 5 197 J’aime · 12 abonnés »\nconst lireCompteurs = (texte) => {\n  const t = String(texte ?? '').replace(/ | /g, ' ');\n  const n = (re) => { const m = t.match(re); return m ? lireNombre(m[1]) : null; };\n  return {\n    abonnes: n(/([\\d][\\d.,\\s]*[KkMm]?)\\s*(?:followers|abonnés|abonné|personnes suivent)/i),\n    jaime: n(/([\\d][\\d.,\\s]*[KkMm]?)\\s*(?:likes|j[’']aime|mentions j[’']aime)/i),\n    enParlent: n(/([\\d][\\d.,\\s]*[KkMm]?)\\s*(?:talking about this|en parlent)/i),\n  };\n};\n\n// Titre Brave/Google : « La Petite Villageoise - Restaurant | Douala | Facebook »\nconst nomDepuisTitre = (titre) => {\n  const parties = String(titre ?? '').split(/\\s+\\|\\s+/).map((s) => s.trim())\n    .filter((s) => s && !/^facebook$/i.test(s) && !/^(meta|log in|connexion)/i.test(s));\n  return (parties[0] || '').replace(/\\s*[-–|]\\s*(Accueil|Home|Facebook)$/i, '').trim();\n};\n\n// ─────────────────────────────────────────────────────────────────────────────\n// Format commun d'un lead, quelle que soit la source, et fusion des doublons.\n// Deux leads sont la même entreprise s'ils partagent : le même téléphone, le même site,\n// la même page Facebook, le même email, la même fiche Google, ou le même nom dans la même zone.\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst nouveauLead = (champs) => ({\n  nom: '', activite: '', zone: '', sources: [], telephones: [], emails: [],\n  siteWeb: '', facebook: '', fbCle: '', instagram: '', adresse: '', categorie: '',\n  placeId: '', lienMaps: '', note: null, avis: null, revendique: null, horaires: null,\n  abonnes: null, latitude: null, longitude: null, extrait: '',\n  ...champs,\n});\n\nconst clesDuLead = (l) => {\n  const cles = [];\n  if (l.placeId) cles.push('p:' + l.placeId);\n  for (const t of l.telephones) if (t.length >= 11) cles.push('t:' + t);\n  if (estUnVraiSite(l.siteWeb)) cles.push('d:' + domaine(l.siteWeb));\n  if (l.fbCle) cles.push('f:' + l.fbCle);\n  for (const e of l.emails) cles.push('e:' + e);\n  const n = sansAccents(nomCourt(l.nom, l.zone)).replace(/[^a-z0-9]/g, '');\n  if (n.length >= 4) cles.push('n:' + n + '|' + sansAccents(l.zone));\n  return cles;\n};\n\n// Union-find : chaque groupe de leads qui partagent une clé devient UNE entreprise.\nconst fusionner = (leads) => {\n  const parent = leads.map((_, i) => i);\n  const racine = (i) => (parent[i] === i ? i : (parent[i] = racine(parent[i])));\n  const vu = new Map();\n  leads.forEach((l, i) => {\n    for (const k of clesDuLead(l)) {\n      if (vu.has(k)) parent[racine(i)] = racine(vu.get(k)); else vu.set(k, i);\n    }\n  });\n  const groupes = new Map();\n  leads.forEach((l, i) => { const r = racine(i); if (!groupes.has(r)) groupes.set(r, []); groupes.get(r).push(l); });\n\n  const ORDRE_NOM = ['Google Maps', 'OpenStreetMap', 'Facebook', 'Web'];\n  return [...groupes.values()].map((g) => {\n    g.sort((a, b) => ORDRE_NOM.indexOf(a.sources[0]) - ORDRE_NOM.indexOf(b.sources[0]));\n    const m = nouveauLead({ ...g[0] });\n    m.sources = [...new Set(g.flatMap((l) => l.sources))];\n    m.telephones = [...new Set(g.flatMap((l) => l.telephones))];\n    m.emails = [...new Set(g.flatMap((l) => l.emails))];\n    m.siteWeb = (g.find((l) => estUnVraiSite(l.siteWeb)) || g.find((l) => l.siteWeb) || {}).siteWeb || '';\n    for (const champ of ['facebook', 'fbCle', 'instagram', 'adresse', 'categorie', 'placeId', 'lienMaps', 'extrait']) {\n      m[champ] = (g.find((l) => l[champ]) || {})[champ] || '';\n    }\n    for (const champ of ['note', 'avis', 'revendique', 'horaires', 'abonnes', 'latitude', 'longitude']) {\n      const x = g.find((l) => l[champ] !== null && l[champ] !== undefined && l[champ] !== '');\n      m[champ] = x ? x[champ] : null;\n    }\n    m.id = m.placeId ? 'p:' + m.placeId : m.fbCle ? 'f:' + m.fbCle : estUnVraiSite(m.siteWeb) ? 'd:' + domaine(m.siteWeb)\n      : m.telephones[0] ? 't:' + m.telephones[0] : 'n:' + sansAccents(m.nom).replace(/[^a-z0-9]/g, '') + '|' + sansAccents(m.zone);\n    return m;\n  });\n};\n\n// Correspondance activité (en français) → étiquettes OpenStreetMap. Complète la liste si besoin.\nconst TAGS_OSM = {\n  pharmacie: ['amenity=pharmacy'], restaurant: ['amenity=restaurant', 'amenity=fast_food'],\n  'salon de coiffure': ['shop=hairdresser', 'shop=beauty'], coiffure: ['shop=hairdresser'], beaute: ['shop=beauty', 'shop=cosmetics'],\n  boulangerie: ['shop=bakery'], patisserie: ['shop=pastry', 'shop=bakery'], hotel: ['tourism=hotel', 'tourism=guest_house'],\n  supermarche: ['shop=supermarket'], quincaillerie: ['shop=hardware', 'shop=doityourself'], clinique: ['amenity=clinic', 'amenity=hospital'],\n  ecole: ['amenity=school'], garage: ['shop=car_repair'], bar: ['amenity=bar', 'amenity=pub'], cafe: ['amenity=cafe'],\n  boutique: ['shop=clothes', 'shop=boutique'], vetements: ['shop=clothes'], librairie: ['shop=books', 'shop=stationery'],\n  telephone: ['shop=mobile_phone'], banque: ['amenity=bank'], 'agence immobiliere': ['office=estate_agent'],\n};\nconst requeteOsm = (activite, bbox) => {\n  const a = sansAccents(activite);\n  const tags = Object.entries(TAGS_OSM).filter(([k]) => a.includes(k)).flatMap(([, v]) => v);\n  const zone = bbox.join(',');\n  const mot = activite.replace(/[\"\\\\]/g, '');\n  const lignes = [...new Set(tags)].map((t) => { const [k, v] = t.split('='); return `nwr[\"${k}\"=\"${v}\"](${zone});`; });\n  lignes.push(`nwr[\"name\"~\"${mot}\",i](${zone});`);\n  return `[out:json][timeout:60];(${lignes.join('')});out center tags 400;`;\n};\n\n// ── Résultats « site:facebook.com » → leads au format commun ───────────────\nconst c = $('Config').first().json;\nconst out = [];\n$input.all().forEach((item, i) => {\n  const t = $('Router par source').itemMatching(i).json;\n  for (const r of lireRecherche(item.json)) {\n    const p = pageFacebook(r.lien);\n    if (!p) continue;\n    const texte = `${r.titre} ${r.extrait}`;\n    if (!sansAccents(texte).includes(sansAccents(t.zone.split(',')[0]))) continue;\n    const { abonnes, jaime } = lireCompteurs(texte);\n    out.push({ json: nouveauLead({\n      nom: nomDepuisTitre(r.titre) || p.slug, activite: t.activite, zone: t.zone, sources: ['Facebook'],\n      telephones: extraireTelephones(texte, chiffres(c.indicatif)), emails: extraireEmails(texte),\n      facebook: p.url, fbCle: p.cle, abonnes: Math.max(abonnes || 0, jaime || 0) || null, extrait: r.extrait.slice(0, 300),\n    }) });\n  }\n});\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        272
+      ],
+      "id": "0715f304-6cff-4871-8fae-cdb9a4e4bcb3",
+      "name": "Lire Facebook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://google.serper.dev/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.corpsSerper) }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 500
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1344,
+        464
+      ],
+      "id": "a786ea4f-9d96-4b3b-9fc2-84af51189ada",
+      "name": "Chercher sur le Web (Serper)",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "BfPCnmUbDenJcLY1",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────────────────────────────────\n// Fonctions communes aux 5 templates « Lead Connector ».\n// Le builder colle ce fichier EN TÊTE de chaque node Code qui en a besoin :\n// n8n n'a pas d'import entre nodes, chaque node doit être autonome.\n// ─────────────────────────────────────────────────────────────────────────────\n\n// Lit a[i][j][k]… sans planter si une case manque (le JSON de Google Maps est un\n// tableau de tableaux sans noms de champs : une case absente = null).\nconst lire = (a, ...chemin) => {\n  for (const k of chemin) {\n    if (a === null || a === undefined) return null;\n    a = a[k];\n  }\n  return a === undefined ? null : a;\n};\n\nconst nettoyer = (s) => String(s ?? '').replace(/\\s+/g, ' ').trim();\n\n// Décode les entités HTML les plus courantes (Brave, sites web).\nconst decoderHtml = (s) => nettoyer(String(s ?? '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&#x27;|&#39;|&apos;/g, \"'\")\n  .replace(/&quot;/g, '\"')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16))));\n\n// Les réseaux sociaux et agrégateurs ne comptent pas comme un « vrai » site web.\nconst RESEAUX = /(facebook\\.com|fb\\.com|instagram\\.com|tiktok\\.com|linktr\\.ee|wa\\.me|whatsapp\\.com|twitter\\.com|x\\.com|linkedin\\.com|youtube\\.com|beacons\\.ai|taplink|business\\.site|sites\\.google\\.com)/i;\n\nconst estUnVraiSite = (url) => !!url && !RESEAUX.test(url);\n\n// Nom de domaine sans « www. » (sans `new URL()`, absent du bac à sable n8n).\nconst domaine = (url) => ((String(url ?? '').match(/^https?:\\/\\/([^/?#:]+)/i) || [])[1] || '').replace(/^www\\./i, '').toLowerCase();\n\n// Garde seulement les chiffres d'un numéro au format international.\n// « +237 6 71 03 33 33 » → « 237671033333 »\nconst chiffres = (tel) => String(tel ?? '').replace(/\\D/g, '');\n\n// Cameroun : les mobiles commencent par 6 (WhatsApp), les fixes par 2.\n// Pour les autres pays on ne sait pas : on suppose que c'est un mobile.\nconst estMobile = (internat) => {\n  if (internat.startsWith('237')) return internat.charAt(3) === '6';\n  return internat.length >= 10;\n};\n\n// Remplace {nom}, {ville}, … dans un modèle de message.\nconst remplir = (modele, valeurs) =>\n  String(modele ?? '').replace(/\\{(\\w+)\\}/g, (m, cle) => (valeurs[cle] ?? '') === '' ? m : String(valeurs[cle]));\n\nconst lienWhatsApp = (internat, message) =>\n  internat ? `https://wa.me/${internat}${message ? '?text=' + encodeURIComponent(message) : ''}` : '';\n\n// « PHARMACIE OLEZOA, Yaoundé » → « PHARMACIE OLEZOA » (pour un message qui sonne humain).\n// On enlève le dernier morceau après une virgule ou un tiret s'il contient la ville.\nconst sansAccents = (s) => String(s ?? '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\nconst nomCourt = (nom, ...villes) => {\n  const n = nettoyer(nom);\n  const vs = villes.filter(Boolean).map((v) => sansAccents(String(v).split(',')[0].trim())).filter(Boolean);\n  const m = n.match(/^(.*\\S)\\s*[,|–-]\\s*([^,|–-]+)$/);\n  if (m && vs.some((v) => sansAccents(m[2]).includes(v))) return m[1].trim();\n  return n;\n};\n\nconst aujourdhui = () => new Date().toISOString().slice(0, 10);\n\n// Emails : on enlève les faux positifs classiques (images, exemples, trackers).\nconst extraireEmails = (texte) => [...new Set(\n  (String(texte ?? '').match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g) || [])\n    .map((e) => e.toLowerCase().replace(/^(?:u003e|x3e|mailto:)/, ''))\n    .filter((e) => !/\\.(png|jpe?g|gif|webp|svg|css|js)$/.test(e))\n    .filter((e) => !/(example\\.|domain\\.com|sentry|wixpress|yourname|votre|email\\.com$|@2x|godaddy)/.test(e))\n)];\n\n// Téléphones écrits dans un texte libre (extrait Facebook, page contact…).\n// Format international : gardé seulement s'il commence par l'indicatif du pays visé\n// (sinon on attrape des numéros de commande, des identifiants…). Pour le Cameroun,\n// on reconnaît aussi les numéros locaux à 9 chiffres qui commencent par 6 ou 2.\nconst extraireTelephones = (texte, indicatif = '237') => {\n  const t = String(texte ?? '');\n  const trouves = new Set();\n  for (const m of t.match(/\\+\\d[\\d\\s.\\-()]{7,16}\\d/g) || []) {\n    const c = chiffres(m);\n    if (c.length >= 10 && c.length <= 15 && (!indicatif || c.startsWith(indicatif))) trouves.add(c);\n  }\n  if (indicatif === '237') {\n    for (const m of t.match(/(?<![\\d+])(?:237[\\s.]?)?[62](?:[\\s.\\-]?\\d){8}(?!\\d)/g) || []) {\n      let c = chiffres(m);\n      if (c.length === 9) c = '237' + c;\n      if (c.length === 12) trouves.add(c);\n    }\n  }\n  return [...trouves];\n};\n\n// Range les emails : ceux du domaine du site d'abord, puis gmail/yahoo…, puis les autres\n// (souvent l'agence qui a fait le site, en bas de page).\nconst classerEmails = (emails, domaineSite) => {\n  const gratuit = /@(gmail|yahoo|hotmail|outlook|live|icloud|aol|ymail)\\./i;\n  const rang = (e) => (domaineSite && e.endsWith('@' + domaineSite) || (domaineSite && e.split('@')[1]?.endsWith('.' + domaineSite)) ? 0 : gratuit.test(e) ? 1 : 2);\n  return [...emails].sort((a, b) => rang(a) - rang(b));\n};\n\nconst formaterTel = (internat) => (internat ? '+' + internat : '');\n\n// « 7,688 followers » / « 5 197 J'aime » / « 1,2 K abonnés » → nombre\nconst lireNombre = (s) => {\n  if (!s) return null;\n  let t = String(s).replace(/\\s/g, '').replace(/,(?=\\d{3}\\b)/g, '').replace(',', '.');\n  const k = /k$/i.test(t) ? 1000 : /m$/i.test(t) ? 1000000 : 1;\n  const n = parseFloat(t);\n  return Number.isFinite(n) ? Math.round(n * k) : null;\n};\n\n// Priorité lisible à partir du score.\nconst priorite = (score) => (score >= 60 ? 'Chaud' : score >= 35 ? 'Tiède' : 'Froid');\n\n// ─────────────────────────────────────────────────────────────────────────────\n// Lecture des résultats d'un moteur de recherche → { titre, lien, extrait }.\n//  · « serper »    : API Serper.dev (résultats Google), 2 500 recherches offertes, sans carte.\n//  · « brave-api » : API officielle Brave Search, 5 $ de crédit offerts chaque mois.\n// On passe toujours par une API : la page de résultats de Brave, elle, réclame un captcha\n// dès qu'elle est appelée depuis n8n (testé le 2026-10-11).\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst lireSerper = (json) => (json?.organic || []).map((r) => ({\n  titre: nettoyer(r.title),\n  lien: r.link || '',\n  extrait: nettoyer([r.snippet, ...(r.attributes ? Object.values(r.attributes) : [])].join(' ')),\n}));\n\nconst lireBraveApi = (json) => (json?.web?.results || []).map((r) => ({\n  titre: decoderHtml(r.title),\n  lien: r.url || '',\n  extrait: decoderHtml([r.description, ...(r.extra_snippets || [])].join(' ')),\n}));\n\n// Lit la réponse quel que soit le moteur, et remonte une erreur claire si la clé est mauvaise.\nconst lireRecherche = (json) => {\n  if (!json) return [];\n  if (json.organic) return lireSerper(json);\n  if (json.web) return lireBraveApi(json);\n  const erreur = json.message || json.error?.detail || json.error?.message || (typeof json.error === 'string' ? json.error : '');\n  if (erreur) throw new Error('Moteur de recherche : ' + erreur + ' (vérifie la clé dans l\\'identifiant n8n).');\n  return [];\n};\n\n// ─────────────────────────────────────────────────────────────────────────────\n// Format commun d'un lead, quelle que soit la source, et fusion des doublons.\n// Deux leads sont la même entreprise s'ils partagent : le même téléphone, le même site,\n// la même page Facebook, le même email, la même fiche Google, ou le même nom dans la même zone.\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst nouveauLead = (champs) => ({\n  nom: '', activite: '', zone: '', sources: [], telephones: [], emails: [],\n  siteWeb: '', facebook: '', fbCle: '', instagram: '', adresse: '', categorie: '',\n  placeId: '', lienMaps: '', note: null, avis: null, revendique: null, horaires: null,\n  abonnes: null, latitude: null, longitude: null, extrait: '',\n  ...champs,\n});\n\nconst clesDuLead = (l) => {\n  const cles = [];\n  if (l.placeId) cles.push('p:' + l.placeId);\n  for (const t of l.telephones) if (t.length >= 11) cles.push('t:' + t);\n  if (estUnVraiSite(l.siteWeb)) cles.push('d:' + domaine(l.siteWeb));\n  if (l.fbCle) cles.push('f:' + l.fbCle);\n  for (const e of l.emails) cles.push('e:' + e);\n  const n = sansAccents(nomCourt(l.nom, l.zone)).replace(/[^a-z0-9]/g, '');\n  if (n.length >= 4) cles.push('n:' + n + '|' + sansAccents(l.zone));\n  return cles;\n};\n\n// Union-find : chaque groupe de leads qui partagent une clé devient UNE entreprise.\nconst fusionner = (leads) => {\n  const parent = leads.map((_, i) => i);\n  const racine = (i) => (parent[i] === i ? i : (parent[i] = racine(parent[i])));\n  const vu = new Map();\n  leads.forEach((l, i) => {\n    for (const k of clesDuLead(l)) {\n      if (vu.has(k)) parent[racine(i)] = racine(vu.get(k)); else vu.set(k, i);\n    }\n  });\n  const groupes = new Map();\n  leads.forEach((l, i) => { const r = racine(i); if (!groupes.has(r)) groupes.set(r, []); groupes.get(r).push(l); });\n\n  const ORDRE_NOM = ['Google Maps', 'OpenStreetMap', 'Facebook', 'Web'];\n  return [...groupes.values()].map((g) => {\n    g.sort((a, b) => ORDRE_NOM.indexOf(a.sources[0]) - ORDRE_NOM.indexOf(b.sources[0]));\n    const m = nouveauLead({ ...g[0] });\n    m.sources = [...new Set(g.flatMap((l) => l.sources))];\n    m.telephones = [...new Set(g.flatMap((l) => l.telephones))];\n    m.emails = [...new Set(g.flatMap((l) => l.emails))];\n    m.siteWeb = (g.find((l) => estUnVraiSite(l.siteWeb)) || g.find((l) => l.siteWeb) || {}).siteWeb || '';\n    for (const champ of ['facebook', 'fbCle', 'instagram', 'adresse', 'categorie', 'placeId', 'lienMaps', 'extrait']) {\n      m[champ] = (g.find((l) => l[champ]) || {})[champ] || '';\n    }\n    for (const champ of ['note', 'avis', 'revendique', 'horaires', 'abonnes', 'latitude', 'longitude']) {\n      const x = g.find((l) => l[champ] !== null && l[champ] !== undefined && l[champ] !== '');\n      m[champ] = x ? x[champ] : null;\n    }\n    m.id = m.placeId ? 'p:' + m.placeId : m.fbCle ? 'f:' + m.fbCle : estUnVraiSite(m.siteWeb) ? 'd:' + domaine(m.siteWeb)\n      : m.telephones[0] ? 't:' + m.telephones[0] : 'n:' + sansAccents(m.nom).replace(/[^a-z0-9]/g, '') + '|' + sansAccents(m.zone);\n    return m;\n  });\n};\n\n// Correspondance activité (en français) → étiquettes OpenStreetMap. Complète la liste si besoin.\nconst TAGS_OSM = {\n  pharmacie: ['amenity=pharmacy'], restaurant: ['amenity=restaurant', 'amenity=fast_food'],\n  'salon de coiffure': ['shop=hairdresser', 'shop=beauty'], coiffure: ['shop=hairdresser'], beaute: ['shop=beauty', 'shop=cosmetics'],\n  boulangerie: ['shop=bakery'], patisserie: ['shop=pastry', 'shop=bakery'], hotel: ['tourism=hotel', 'tourism=guest_house'],\n  supermarche: ['shop=supermarket'], quincaillerie: ['shop=hardware', 'shop=doityourself'], clinique: ['amenity=clinic', 'amenity=hospital'],\n  ecole: ['amenity=school'], garage: ['shop=car_repair'], bar: ['amenity=bar', 'amenity=pub'], cafe: ['amenity=cafe'],\n  boutique: ['shop=clothes', 'shop=boutique'], vetements: ['shop=clothes'], librairie: ['shop=books', 'shop=stationery'],\n  telephone: ['shop=mobile_phone'], banque: ['amenity=bank'], 'agence immobiliere': ['office=estate_agent'],\n};\nconst requeteOsm = (activite, bbox) => {\n  const a = sansAccents(activite);\n  const tags = Object.entries(TAGS_OSM).filter(([k]) => a.includes(k)).flatMap(([, v]) => v);\n  const zone = bbox.join(',');\n  const mot = activite.replace(/[\"\\\\]/g, '');\n  const lignes = [...new Set(tags)].map((t) => { const [k, v] = t.split('='); return `nwr[\"${k}\"=\"${v}\"](${zone});`; });\n  lignes.push(`nwr[\"name\"~\"${mot}\",i](${zone});`);\n  return `[out:json][timeout:60];(${lignes.join('')});out center tags 400;`;\n};\n\n// ── Résultats web → sites d'entreprises au format commun ───────────────────\nconst c = $('Config').first().json;\nconst exclus = String(c.exclure ?? '').split(/[;\\n,]/).map((x) => x.trim().toLowerCase()).filter(Boolean);\nconst out = [];\n$input.all().forEach((item, i) => {\n  const t = $('Router par source').itemMatching(i).json;\n  for (const r of lireRecherche(item.json)) {\n    const d = domaine(r.lien);\n    if (!d || exclus.some((e) => d.includes(e)) || !estUnVraiSite(r.lien)) continue;\n    const racine = (r.lien.match(/^https?:\\/\\/[^/?#]+/i) || [''])[0] + '/';\n    out.push({ json: nouveauLead({\n      nom: r.titre.split(/\\s[|–—-]\\s/)[0].trim() || d, activite: t.activite, zone: t.zone, sources: ['Web'],\n      siteWeb: racine, telephones: extraireTelephones(r.extrait, chiffres(c.indicatif)), emails: extraireEmails(r.extrait),\n      extrait: r.extrait.slice(0, 300),\n    }) });\n  }\n});\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        464
+      ],
+      "id": "c8b2f3ef-48db-4bce-9f5c-ad9e9861dd9f",
+      "name": "Lire le Web"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://overpass.private.coffee/api/interpreter",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "n8n-lead-connector/1.0 (template CamaireTech)"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "={{ $json.requeteOsm }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 2000
+            }
+          },
+          "timeout": 90000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1344,
+        672
+      ],
+      "id": "ccb577ed-ac63-42ad-b895-61ac79fb8473",
+      "name": "Chercher sur OpenStreetMap",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────────────────────────────────\n// Fonctions communes aux 5 templates « Lead Connector ».\n// Le builder colle ce fichier EN TÊTE de chaque node Code qui en a besoin :\n// n8n n'a pas d'import entre nodes, chaque node doit être autonome.\n// ─────────────────────────────────────────────────────────────────────────────\n\n// Lit a[i][j][k]… sans planter si une case manque (le JSON de Google Maps est un\n// tableau de tableaux sans noms de champs : une case absente = null).\nconst lire = (a, ...chemin) => {\n  for (const k of chemin) {\n    if (a === null || a === undefined) return null;\n    a = a[k];\n  }\n  return a === undefined ? null : a;\n};\n\nconst nettoyer = (s) => String(s ?? '').replace(/\\s+/g, ' ').trim();\n\n// Décode les entités HTML les plus courantes (Brave, sites web).\nconst decoderHtml = (s) => nettoyer(String(s ?? '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&#x27;|&#39;|&apos;/g, \"'\")\n  .replace(/&quot;/g, '\"')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16))));\n\n// Les réseaux sociaux et agrégateurs ne comptent pas comme un « vrai » site web.\nconst RESEAUX = /(facebook\\.com|fb\\.com|instagram\\.com|tiktok\\.com|linktr\\.ee|wa\\.me|whatsapp\\.com|twitter\\.com|x\\.com|linkedin\\.com|youtube\\.com|beacons\\.ai|taplink|business\\.site|sites\\.google\\.com)/i;\n\nconst estUnVraiSite = (url) => !!url && !RESEAUX.test(url);\n\n// Nom de domaine sans « www. » (sans `new URL()`, absent du bac à sable n8n).\nconst domaine = (url) => ((String(url ?? '').match(/^https?:\\/\\/([^/?#:]+)/i) || [])[1] || '').replace(/^www\\./i, '').toLowerCase();\n\n// Garde seulement les chiffres d'un numéro au format international.\n// « +237 6 71 03 33 33 » → « 237671033333 »\nconst chiffres = (tel) => String(tel ?? '').replace(/\\D/g, '');\n\n// Cameroun : les mobiles commencent par 6 (WhatsApp), les fixes par 2.\n// Pour les autres pays on ne sait pas : on suppose que c'est un mobile.\nconst estMobile = (internat) => {\n  if (internat.startsWith('237')) return internat.charAt(3) === '6';\n  return internat.length >= 10;\n};\n\n// Remplace {nom}, {ville}, … dans un modèle de message.\nconst remplir = (modele, valeurs) =>\n  String(modele ?? '').replace(/\\{(\\w+)\\}/g, (m, cle) => (valeurs[cle] ?? '') === '' ? m : String(valeurs[cle]));\n\nconst lienWhatsApp = (internat, message) =>\n  internat ? `https://wa.me/${internat}${message ? '?text=' + encodeURIComponent(message) : ''}` : '';\n\n// « PHARMACIE OLEZOA, Yaoundé » → « PHARMACIE OLEZOA » (pour un message qui sonne humain).\n// On enlève le dernier morceau après une virgule ou un tiret s'il contient la ville.\nconst sansAccents = (s) => String(s ?? '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\nconst nomCourt = (nom, ...villes) => {\n  const n = nettoyer(nom);\n  const vs = villes.filter(Boolean).map((v) => sansAccents(String(v).split(',')[0].trim())).filter(Boolean);\n  const m = n.match(/^(.*\\S)\\s*[,|–-]\\s*([^,|–-]+)$/);\n  if (m && vs.some((v) => sansAccents(m[2]).includes(v))) return m[1].trim();\n  return n;\n};\n\nconst aujourdhui = () => new Date().toISOString().slice(0, 10);\n\n// Emails : on enlève les faux positifs classiques (images, exemples, trackers).\nconst extraireEmails = (texte) => [...new Set(\n  (String(texte ?? '').match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g) || [])\n    .map((e) => e.toLowerCase().replace(/^(?:u003e|x3e|mailto:)/, ''))\n    .filter((e) => !/\\.(png|jpe?g|gif|webp|svg|css|js)$/.test(e))\n    .filter((e) => !/(example\\.|domain\\.com|sentry|wixpress|yourname|votre|email\\.com$|@2x|godaddy)/.test(e))\n)];\n\n// Téléphones écrits dans un texte libre (extrait Facebook, page contact…).\n// Format international : gardé seulement s'il commence par l'indicatif du pays visé\n// (sinon on attrape des numéros de commande, des identifiants…). Pour le Cameroun,\n// on reconnaît aussi les numéros locaux à 9 chiffres qui commencent par 6 ou 2.\nconst extraireTelephones = (texte, indicatif = '237') => {\n  const t = String(texte ?? '');\n  const trouves = new Set();\n  for (const m of t.match(/\\+\\d[\\d\\s.\\-()]{7,16}\\d/g) || []) {\n    const c = chiffres(m);\n    if (c.length >= 10 && c.length <= 15 && (!indicatif || c.startsWith(indicatif))) trouves.add(c);\n  }\n  if (indicatif === '237') {\n    for (const m of t.match(/(?<![\\d+])(?:237[\\s.]?)?[62](?:[\\s.\\-]?\\d){8}(?!\\d)/g) || []) {\n      let c = chiffres(m);\n      if (c.length === 9) c = '237' + c;\n      if (c.length === 12) trouves.add(c);\n    }\n  }\n  return [...trouves];\n};\n\n// Range les emails : ceux du domaine du site d'abord, puis gmail/yahoo…, puis les autres\n// (souvent l'agence qui a fait le site, en bas de page).\nconst classerEmails = (emails, domaineSite) => {\n  const gratuit = /@(gmail|yahoo|hotmail|outlook|live|icloud|aol|ymail)\\./i;\n  const rang = (e) => (domaineSite && e.endsWith('@' + domaineSite) || (domaineSite && e.split('@')[1]?.endsWith('.' + domaineSite)) ? 0 : gratuit.test(e) ? 1 : 2);\n  return [...emails].sort((a, b) => rang(a) - rang(b));\n};\n\nconst formaterTel = (internat) => (internat ? '+' + internat : '');\n\n// « 7,688 followers » / « 5 197 J'aime » / « 1,2 K abonnés » → nombre\nconst lireNombre = (s) => {\n  if (!s) return null;\n  let t = String(s).replace(/\\s/g, '').replace(/,(?=\\d{3}\\b)/g, '').replace(',', '.');\n  const k = /k$/i.test(t) ? 1000 : /m$/i.test(t) ? 1000000 : 1;\n  const n = parseFloat(t);\n  return Number.isFinite(n) ? Math.round(n * k) : null;\n};\n\n// Priorité lisible à partir du score.\nconst priorite = (score) => (score >= 60 ? 'Chaud' : score >= 35 ? 'Tiède' : 'Froid');\n\n// ─────────────────────────────────────────────────────────────────────────────\n// Format commun d'un lead, quelle que soit la source, et fusion des doublons.\n// Deux leads sont la même entreprise s'ils partagent : le même téléphone, le même site,\n// la même page Facebook, le même email, la même fiche Google, ou le même nom dans la même zone.\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst nouveauLead = (champs) => ({\n  nom: '', activite: '', zone: '', sources: [], telephones: [], emails: [],\n  siteWeb: '', facebook: '', fbCle: '', instagram: '', adresse: '', categorie: '',\n  placeId: '', lienMaps: '', note: null, avis: null, revendique: null, horaires: null,\n  abonnes: null, latitude: null, longitude: null, extrait: '',\n  ...champs,\n});\n\nconst clesDuLead = (l) => {\n  const cles = [];\n  if (l.placeId) cles.push('p:' + l.placeId);\n  for (const t of l.telephones) if (t.length >= 11) cles.push('t:' + t);\n  if (estUnVraiSite(l.siteWeb)) cles.push('d:' + domaine(l.siteWeb));\n  if (l.fbCle) cles.push('f:' + l.fbCle);\n  for (const e of l.emails) cles.push('e:' + e);\n  const n = sansAccents(nomCourt(l.nom, l.zone)).replace(/[^a-z0-9]/g, '');\n  if (n.length >= 4) cles.push('n:' + n + '|' + sansAccents(l.zone));\n  return cles;\n};\n\n// Union-find : chaque groupe de leads qui partagent une clé devient UNE entreprise.\nconst fusionner = (leads) => {\n  const parent = leads.map((_, i) => i);\n  const racine = (i) => (parent[i] === i ? i : (parent[i] = racine(parent[i])));\n  const vu = new Map();\n  leads.forEach((l, i) => {\n    for (const k of clesDuLead(l)) {\n      if (vu.has(k)) parent[racine(i)] = racine(vu.get(k)); else vu.set(k, i);\n    }\n  });\n  const groupes = new Map();\n  leads.forEach((l, i) => { const r = racine(i); if (!groupes.has(r)) groupes.set(r, []); groupes.get(r).push(l); });\n\n  const ORDRE_NOM = ['Google Maps', 'OpenStreetMap', 'Facebook', 'Web'];\n  return [...groupes.values()].map((g) => {\n    g.sort((a, b) => ORDRE_NOM.indexOf(a.sources[0]) - ORDRE_NOM.indexOf(b.sources[0]));\n    const m = nouveauLead({ ...g[0] });\n    m.sources = [...new Set(g.flatMap((l) => l.sources))];\n    m.telephones = [...new Set(g.flatMap((l) => l.telephones))];\n    m.emails = [...new Set(g.flatMap((l) => l.emails))];\n    m.siteWeb = (g.find((l) => estUnVraiSite(l.siteWeb)) || g.find((l) => l.siteWeb) || {}).siteWeb || '';\n    for (const champ of ['facebook', 'fbCle', 'instagram', 'adresse', 'categorie', 'placeId', 'lienMaps', 'extrait']) {\n      m[champ] = (g.find((l) => l[champ]) || {})[champ] || '';\n    }\n    for (const champ of ['note', 'avis', 'revendique', 'horaires', 'abonnes', 'latitude', 'longitude']) {\n      const x = g.find((l) => l[champ] !== null && l[champ] !== undefined && l[champ] !== '');\n      m[champ] = x ? x[champ] : null;\n    }\n    m.id = m.placeId ? 'p:' + m.placeId : m.fbCle ? 'f:' + m.fbCle : estUnVraiSite(m.siteWeb) ? 'd:' + domaine(m.siteWeb)\n      : m.telephones[0] ? 't:' + m.telephones[0] : 'n:' + sansAccents(m.nom).replace(/[^a-z0-9]/g, '') + '|' + sansAccents(m.zone);\n    return m;\n  });\n};\n\n// Correspondance activité (en français) → étiquettes OpenStreetMap. Complète la liste si besoin.\nconst TAGS_OSM = {\n  pharmacie: ['amenity=pharmacy'], restaurant: ['amenity=restaurant', 'amenity=fast_food'],\n  'salon de coiffure': ['shop=hairdresser', 'shop=beauty'], coiffure: ['shop=hairdresser'], beaute: ['shop=beauty', 'shop=cosmetics'],\n  boulangerie: ['shop=bakery'], patisserie: ['shop=pastry', 'shop=bakery'], hotel: ['tourism=hotel', 'tourism=guest_house'],\n  supermarche: ['shop=supermarket'], quincaillerie: ['shop=hardware', 'shop=doityourself'], clinique: ['amenity=clinic', 'amenity=hospital'],\n  ecole: ['amenity=school'], garage: ['shop=car_repair'], bar: ['amenity=bar', 'amenity=pub'], cafe: ['amenity=cafe'],\n  boutique: ['shop=clothes', 'shop=boutique'], vetements: ['shop=clothes'], librairie: ['shop=books', 'shop=stationery'],\n  telephone: ['shop=mobile_phone'], banque: ['amenity=bank'], 'agence immobiliere': ['office=estate_agent'],\n};\nconst requeteOsm = (activite, bbox) => {\n  const a = sansAccents(activite);\n  const tags = Object.entries(TAGS_OSM).filter(([k]) => a.includes(k)).flatMap(([, v]) => v);\n  const zone = bbox.join(',');\n  const mot = activite.replace(/[\"\\\\]/g, '');\n  const lignes = [...new Set(tags)].map((t) => { const [k, v] = t.split('='); return `nwr[\"${k}\"=\"${v}\"](${zone});`; });\n  lignes.push(`nwr[\"name\"~\"${mot}\",i](${zone});`);\n  return `[out:json][timeout:60];(${lignes.join('')});out center tags 400;`;\n};\n\n// ── OpenStreetMap → leads au format commun (une réponse ratée n'arrête rien) ─\nconst c = $('Config').first().json;\nconst out = [];\n$input.all().forEach((item, i) => {\n  const t = $('Router par source').itemMatching(i).json;\n  for (const e of item.json.elements || []) {\n    const g = e.tags || {};\n    if (!g.name) continue;\n    const tel = [g.phone, g['contact:phone'], g['contact:mobile'], g['contact:whatsapp']].filter(Boolean).join(' ');\n    out.push({ json: nouveauLead({\n      nom: g.name, activite: t.activite, zone: t.zone, sources: ['OpenStreetMap'],\n      telephones: extraireTelephones(tel, chiffres(c.indicatif)),\n      emails: extraireEmails([g.email, g['contact:email']].join(' ')),\n      siteWeb: g.website || g['contact:website'] || '',\n      facebook: g['contact:facebook'] || '', instagram: g['contact:instagram'] || '',\n      adresse: [g['addr:housenumber'], g['addr:street'], g['addr:suburb'], g['addr:city']].filter(Boolean).join(' '),\n      categorie: g.amenity || g.shop || g.office || g.craft || g.tourism || '',\n      horaires: g.opening_hours ? true : null,\n      latitude: e.lat ?? e.center?.lat ?? null, longitude: e.lon ?? e.center?.lon ?? null,\n    }) });\n  }\n});\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        672
+      ],
+      "id": "5519e18a-fd05-48fb-8089-9304525bd026",
+      "name": "Lire OpenStreetMap"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1888,
+        352
+      ],
+      "id": "fd430902-335f-47d0-9b54-a4ac51eac482",
+      "name": "Tout réunir"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────────────────────────────────\n// Fonctions communes aux 5 templates « Lead Connector ».\n// Le builder colle ce fichier EN TÊTE de chaque node Code qui en a besoin :\n// n8n n'a pas d'import entre nodes, chaque node doit être autonome.\n// ─────────────────────────────────────────────────────────────────────────────\n\n// Lit a[i][j][k]… sans planter si une case manque (le JSON de Google Maps est un\n// tableau de tableaux sans noms de champs : une case absente = null).\nconst lire = (a, ...chemin) => {\n  for (const k of chemin) {\n    if (a === null || a === undefined) return null;\n    a = a[k];\n  }\n  return a === undefined ? null : a;\n};\n\nconst nettoyer = (s) => String(s ?? '').replace(/\\s+/g, ' ').trim();\n\n// Décode les entités HTML les plus courantes (Brave, sites web).\nconst decoderHtml = (s) => nettoyer(String(s ?? '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&#x27;|&#39;|&apos;/g, \"'\")\n  .replace(/&quot;/g, '\"')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16))));\n\n// Les réseaux sociaux et agrégateurs ne comptent pas comme un « vrai » site web.\nconst RESEAUX = /(facebook\\.com|fb\\.com|instagram\\.com|tiktok\\.com|linktr\\.ee|wa\\.me|whatsapp\\.com|twitter\\.com|x\\.com|linkedin\\.com|youtube\\.com|beacons\\.ai|taplink|business\\.site|sites\\.google\\.com)/i;\n\nconst estUnVraiSite = (url) => !!url && !RESEAUX.test(url);\n\n// Nom de domaine sans « www. » (sans `new URL()`, absent du bac à sable n8n).\nconst domaine = (url) => ((String(url ?? '').match(/^https?:\\/\\/([^/?#:]+)/i) || [])[1] || '').replace(/^www\\./i, '').toLowerCase();\n\n// Garde seulement les chiffres d'un numéro au format international.\n// « +237 6 71 03 33 33 » → « 237671033333 »\nconst chiffres = (tel) => String(tel ?? '').replace(/\\D/g, '');\n\n// Cameroun : les mobiles commencent par 6 (WhatsApp), les fixes par 2.\n// Pour les autres pays on ne sait pas : on suppose que c'est un mobile.\nconst estMobile = (internat) => {\n  if (internat.startsWith('237')) return internat.charAt(3) === '6';\n  return internat.length >= 10;\n};\n\n// Remplace {nom}, {ville}, … dans un modèle de message.\nconst remplir = (modele, valeurs) =>\n  String(modele ?? '').replace(/\\{(\\w+)\\}/g, (m, cle) => (valeurs[cle] ?? '') === '' ? m : String(valeurs[cle]));\n\nconst lienWhatsApp = (internat, message) =>\n  internat ? `https://wa.me/${internat}${message ? '?text=' + encodeURIComponent(message) : ''}` : '';\n\n// « PHARMACIE OLEZOA, Yaoundé » → « PHARMACIE OLEZOA » (pour un message qui sonne humain).\n// On enlève le dernier morceau après une virgule ou un tiret s'il contient la ville.\nconst sansAccents = (s) => String(s ?? '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\nconst nomCourt = (nom, ...villes) => {\n  const n = nettoyer(nom);\n  const vs = villes.filter(Boolean).map((v) => sansAccents(String(v).split(',')[0].trim())).filter(Boolean);\n  const m = n.match(/^(.*\\S)\\s*[,|–-]\\s*([^,|–-]+)$/);\n  if (m && vs.some((v) => sansAccents(m[2]).includes(v))) return m[1].trim();\n  return n;\n};\n\nconst aujourdhui = () => new Date().toISOString().slice(0, 10);\n\n// Emails : on enlève les faux positifs classiques (images, exemples, trackers).\nconst extraireEmails = (texte) => [...new Set(\n  (String(texte ?? '').match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g) || [])\n    .map((e) => e.toLowerCase().replace(/^(?:u003e|x3e|mailto:)/, ''))\n    .filter((e) => !/\\.(png|jpe?g|gif|webp|svg|css|js)$/.test(e))\n    .filter((e) => !/(example\\.|domain\\.com|sentry|wixpress|yourname|votre|email\\.com$|@2x|godaddy)/.test(e))\n)];\n\n// Téléphones écrits dans un texte libre (extrait Facebook, page contact…).\n// Format international : gardé seulement s'il commence par l'indicatif du pays visé\n// (sinon on attrape des numéros de commande, des identifiants…). Pour le Cameroun,\n// on reconnaît aussi les numéros locaux à 9 chiffres qui commencent par 6 ou 2.\nconst extraireTelephones = (texte, indicatif = '237') => {\n  const t = String(texte ?? '');\n  const trouves = new Set();\n  for (const m of t.match(/\\+\\d[\\d\\s.\\-()]{7,16}\\d/g) || []) {\n    const c = chiffres(m);\n    if (c.length >= 10 && c.length <= 15 && (!indicatif || c.startsWith(indicatif))) trouves.add(c);\n  }\n  if (indicatif === '237') {\n    for (const m of t.match(/(?<![\\d+])(?:237[\\s.]?)?[62](?:[\\s.\\-]?\\d){8}(?!\\d)/g) || []) {\n      let c = chiffres(m);\n      if (c.length === 9) c = '237' + c;\n      if (c.length === 12) trouves.add(c);\n    }\n  }\n  return [...trouves];\n};\n\n// Range les emails : ceux du domaine du site d'abord, puis gmail/yahoo…, puis les autres\n// (souvent l'agence qui a fait le site, en bas de page).\nconst classerEmails = (emails, domaineSite) => {\n  const gratuit = /@(gmail|yahoo|hotmail|outlook|live|icloud|aol|ymail)\\./i;\n  const rang = (e) => (domaineSite && e.endsWith('@' + domaineSite) || (domaineSite && e.split('@')[1]?.endsWith('.' + domaineSite)) ? 0 : gratuit.test(e) ? 1 : 2);\n  return [...emails].sort((a, b) => rang(a) - rang(b));\n};\n\nconst formaterTel = (internat) => (internat ? '+' + internat : '');\n\n// « 7,688 followers » / « 5 197 J'aime » / « 1,2 K abonnés » → nombre\nconst lireNombre = (s) => {\n  if (!s) return null;\n  let t = String(s).replace(/\\s/g, '').replace(/,(?=\\d{3}\\b)/g, '').replace(',', '.');\n  const k = /k$/i.test(t) ? 1000 : /m$/i.test(t) ? 1000000 : 1;\n  const n = parseFloat(t);\n  return Number.isFinite(n) ? Math.round(n * k) : null;\n};\n\n// Priorité lisible à partir du score.\nconst priorite = (score) => (score >= 60 ? 'Chaud' : score >= 35 ? 'Tiède' : 'Froid');\n\n// ─────────────────────────────────────────────────────────────────────────────\n// Format commun d'un lead, quelle que soit la source, et fusion des doublons.\n// Deux leads sont la même entreprise s'ils partagent : le même téléphone, le même site,\n// la même page Facebook, le même email, la même fiche Google, ou le même nom dans la même zone.\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst nouveauLead = (champs) => ({\n  nom: '', activite: '', zone: '', sources: [], telephones: [], emails: [],\n  siteWeb: '', facebook: '', fbCle: '', instagram: '', adresse: '', categorie: '',\n  placeId: '', lienMaps: '', note: null, avis: null, revendique: null, horaires: null,\n  abonnes: null, latitude: null, longitude: null, extrait: '',\n  ...champs,\n});\n\nconst clesDuLead = (l) => {\n  const cles = [];\n  if (l.placeId) cles.push('p:' + l.placeId);\n  for (const t of l.telephones) if (t.length >= 11) cles.push('t:' + t);\n  if (estUnVraiSite(l.siteWeb)) cles.push('d:' + domaine(l.siteWeb));\n  if (l.fbCle) cles.push('f:' + l.fbCle);\n  for (const e of l.emails) cles.push('e:' + e);\n  const n = sansAccents(nomCourt(l.nom, l.zone)).replace(/[^a-z0-9]/g, '');\n  if (n.length >= 4) cles.push('n:' + n + '|' + sansAccents(l.zone));\n  return cles;\n};\n\n// Union-find : chaque groupe de leads qui partagent une clé devient UNE entreprise.\nconst fusionner = (leads) => {\n  const parent = leads.map((_, i) => i);\n  const racine = (i) => (parent[i] === i ? i : (parent[i] = racine(parent[i])));\n  const vu = new Map();\n  leads.forEach((l, i) => {\n    for (const k of clesDuLead(l)) {\n      if (vu.has(k)) parent[racine(i)] = racine(vu.get(k)); else vu.set(k, i);\n    }\n  });\n  const groupes = new Map();\n  leads.forEach((l, i) => { const r = racine(i); if (!groupes.has(r)) groupes.set(r, []); groupes.get(r).push(l); });\n\n  const ORDRE_NOM = ['Google Maps', 'OpenStreetMap', 'Facebook', 'Web'];\n  return [...groupes.values()].map((g) => {\n    g.sort((a, b) => ORDRE_NOM.indexOf(a.sources[0]) - ORDRE_NOM.indexOf(b.sources[0]));\n    const m = nouveauLead({ ...g[0] });\n    m.sources = [...new Set(g.flatMap((l) => l.sources))];\n    m.telephones = [...new Set(g.flatMap((l) => l.telephones))];\n    m.emails = [...new Set(g.flatMap((l) => l.emails))];\n    m.siteWeb = (g.find((l) => estUnVraiSite(l.siteWeb)) || g.find((l) => l.siteWeb) || {}).siteWeb || '';\n    for (const champ of ['facebook', 'fbCle', 'instagram', 'adresse', 'categorie', 'placeId', 'lienMaps', 'extrait']) {\n      m[champ] = (g.find((l) => l[champ]) || {})[champ] || '';\n    }\n    for (const champ of ['note', 'avis', 'revendique', 'horaires', 'abonnes', 'latitude', 'longitude']) {\n      const x = g.find((l) => l[champ] !== null && l[champ] !== undefined && l[champ] !== '');\n      m[champ] = x ? x[champ] : null;\n    }\n    m.id = m.placeId ? 'p:' + m.placeId : m.fbCle ? 'f:' + m.fbCle : estUnVraiSite(m.siteWeb) ? 'd:' + domaine(m.siteWeb)\n      : m.telephones[0] ? 't:' + m.telephones[0] : 'n:' + sansAccents(m.nom).replace(/[^a-z0-9]/g, '') + '|' + sansAccents(m.zone);\n    return m;\n  });\n};\n\n// Correspondance activité (en français) → étiquettes OpenStreetMap. Complète la liste si besoin.\nconst TAGS_OSM = {\n  pharmacie: ['amenity=pharmacy'], restaurant: ['amenity=restaurant', 'amenity=fast_food'],\n  'salon de coiffure': ['shop=hairdresser', 'shop=beauty'], coiffure: ['shop=hairdresser'], beaute: ['shop=beauty', 'shop=cosmetics'],\n  boulangerie: ['shop=bakery'], patisserie: ['shop=pastry', 'shop=bakery'], hotel: ['tourism=hotel', 'tourism=guest_house'],\n  supermarche: ['shop=supermarket'], quincaillerie: ['shop=hardware', 'shop=doityourself'], clinique: ['amenity=clinic', 'amenity=hospital'],\n  ecole: ['amenity=school'], garage: ['shop=car_repair'], bar: ['amenity=bar', 'amenity=pub'], cafe: ['amenity=cafe'],\n  boutique: ['shop=clothes', 'shop=boutique'], vetements: ['shop=clothes'], librairie: ['shop=books', 'shop=stationery'],\n  telephone: ['shop=mobile_phone'], banque: ['amenity=bank'], 'agence immobiliere': ['office=estate_agent'],\n};\nconst requeteOsm = (activite, bbox) => {\n  const a = sansAccents(activite);\n  const tags = Object.entries(TAGS_OSM).filter(([k]) => a.includes(k)).flatMap(([, v]) => v);\n  const zone = bbox.join(',');\n  const mot = activite.replace(/[\"\\\\]/g, '');\n  const lignes = [...new Set(tags)].map((t) => { const [k, v] = t.split('='); return `nwr[\"${k}\"=\"${v}\"](${zone});`; });\n  lignes.push(`nwr[\"name\"~\"${mot}\",i](${zone});`);\n  return `[out:json][timeout:60];(${lignes.join('')});out center tags 400;`;\n};\n\n// ── Toutes les sources ensemble → une ligne par entreprise ──────────────────\nconst c = $('Config').first().json;\nconst bruts = $input.all().map((i) => i.json).filter((l) => l && l.nom);\nconst fusion = fusionner(bruts);\n\n// Mémoire des exécutions planifiées : on ne renvoie pas un lead déjà envoyé.\nconst memoire = $getWorkflowStaticData('global');\nmemoire.dejaEnvoyes ??= [];\nconst deja = new Set(memoire.dejaEnvoyes);\nconst nouveaux = (c.seulementNouveaux === true || c.seulementNouveaux === 'true') ? fusion.filter((l) => !deja.has(l.id)) : fusion;\n\nconst parSource = {};\nfor (const l of bruts) parSource[l.sources[0]] = (parSource[l.sources[0]] || 0) + 1;\nconst resume = { bruts: bruts.length, entreprises: fusion.length, nouvelles: nouveaux.length, parSource };\nif (!nouveaux.length) return [{ json: { info: 'Aucun nouveau lead.', resume } }];\nreturn nouveaux.map((l, i) => ({ json: i === 0 ? { ...l, _resume: resume } : l }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        352
+      ],
+      "id": "797d6968-1e94-4545-b220-724a86ab61f1",
+      "name": "Fusionner les sources"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────────────────────────────────\n// Fonctions communes aux 5 templates « Lead Connector ».\n// Le builder colle ce fichier EN TÊTE de chaque node Code qui en a besoin :\n// n8n n'a pas d'import entre nodes, chaque node doit être autonome.\n// ─────────────────────────────────────────────────────────────────────────────\n\n// Lit a[i][j][k]… sans planter si une case manque (le JSON de Google Maps est un\n// tableau de tableaux sans noms de champs : une case absente = null).\nconst lire = (a, ...chemin) => {\n  for (const k of chemin) {\n    if (a === null || a === undefined) return null;\n    a = a[k];\n  }\n  return a === undefined ? null : a;\n};\n\nconst nettoyer = (s) => String(s ?? '').replace(/\\s+/g, ' ').trim();\n\n// Décode les entités HTML les plus courantes (Brave, sites web).\nconst decoderHtml = (s) => nettoyer(String(s ?? '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&#x27;|&#39;|&apos;/g, \"'\")\n  .replace(/&quot;/g, '\"')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16))));\n\n// Les réseaux sociaux et agrégateurs ne comptent pas comme un « vrai » site web.\nconst RESEAUX = /(facebook\\.com|fb\\.com|instagram\\.com|tiktok\\.com|linktr\\.ee|wa\\.me|whatsapp\\.com|twitter\\.com|x\\.com|linkedin\\.com|youtube\\.com|beacons\\.ai|taplink|business\\.site|sites\\.google\\.com)/i;\n\nconst estUnVraiSite = (url) => !!url && !RESEAUX.test(url);\n\n// Nom de domaine sans « www. » (sans `new URL()`, absent du bac à sable n8n).\nconst domaine = (url) => ((String(url ?? '').match(/^https?:\\/\\/([^/?#:]+)/i) || [])[1] || '').replace(/^www\\./i, '').toLowerCase();\n\n// Garde seulement les chiffres d'un numéro au format international.\n// « +237 6 71 03 33 33 » → « 237671033333 »\nconst chiffres = (tel) => String(tel ?? '').replace(/\\D/g, '');\n\n// Cameroun : les mobiles commencent par 6 (WhatsApp), les fixes par 2.\n// Pour les autres pays on ne sait pas : on suppose que c'est un mobile.\nconst estMobile = (internat) => {\n  if (internat.startsWith('237')) return internat.charAt(3) === '6';\n  return internat.length >= 10;\n};\n\n// Remplace {nom}, {ville}, … dans un modèle de message.\nconst remplir = (modele, valeurs) =>\n  String(modele ?? '').replace(/\\{(\\w+)\\}/g, (m, cle) => (valeurs[cle] ?? '') === '' ? m : String(valeurs[cle]));\n\nconst lienWhatsApp = (internat, message) =>\n  internat ? `https://wa.me/${internat}${message ? '?text=' + encodeURIComponent(message) : ''}` : '';\n\n// « PHARMACIE OLEZOA, Yaoundé » → « PHARMACIE OLEZOA » (pour un message qui sonne humain).\n// On enlève le dernier morceau après une virgule ou un tiret s'il contient la ville.\nconst sansAccents = (s) => String(s ?? '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\nconst nomCourt = (nom, ...villes) => {\n  const n = nettoyer(nom);\n  const vs = villes.filter(Boolean).map((v) => sansAccents(String(v).split(',')[0].trim())).filter(Boolean);\n  const m = n.match(/^(.*\\S)\\s*[,|–-]\\s*([^,|–-]+)$/);\n  if (m && vs.some((v) => sansAccents(m[2]).includes(v))) return m[1].trim();\n  return n;\n};\n\nconst aujourdhui = () => new Date().toISOString().slice(0, 10);\n\n// Emails : on enlève les faux positifs classiques (images, exemples, trackers).\nconst extraireEmails = (texte) => [...new Set(\n  (String(texte ?? '').match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g) || [])\n    .map((e) => e.toLowerCase().replace(/^(?:u003e|x3e|mailto:)/, ''))\n    .filter((e) => !/\\.(png|jpe?g|gif|webp|svg|css|js)$/.test(e))\n    .filter((e) => !/(example\\.|domain\\.com|sentry|wixpress|yourname|votre|email\\.com$|@2x|godaddy)/.test(e))\n)];\n\n// Téléphones écrits dans un texte libre (extrait Facebook, page contact…).\n// Format international : gardé seulement s'il commence par l'indicatif du pays visé\n// (sinon on attrape des numéros de commande, des identifiants…). Pour le Cameroun,\n// on reconnaît aussi les numéros locaux à 9 chiffres qui commencent par 6 ou 2.\nconst extraireTelephones = (texte, indicatif = '237') => {\n  const t = String(texte ?? '');\n  const trouves = new Set();\n  for (const m of t.match(/\\+\\d[\\d\\s.\\-()]{7,16}\\d/g) || []) {\n    const c = chiffres(m);\n    if (c.length >= 10 && c.length <= 15 && (!indicatif || c.startsWith(indicatif))) trouves.add(c);\n  }\n  if (indicatif === '237') {\n    for (const m of t.match(/(?<![\\d+])(?:237[\\s.]?)?[62](?:[\\s.\\-]?\\d){8}(?!\\d)/g) || []) {\n      let c = chiffres(m);\n      if (c.length === 9) c = '237' + c;\n      if (c.length === 12) trouves.add(c);\n    }\n  }\n  return [...trouves];\n};\n\n// Range les emails : ceux du domaine du site d'abord, puis gmail/yahoo…, puis les autres\n// (souvent l'agence qui a fait le site, en bas de page).\nconst classerEmails = (emails, domaineSite) => {\n  const gratuit = /@(gmail|yahoo|hotmail|outlook|live|icloud|aol|ymail)\\./i;\n  const rang = (e) => (domaineSite && e.endsWith('@' + domaineSite) || (domaineSite && e.split('@')[1]?.endsWith('.' + domaineSite)) ? 0 : gratuit.test(e) ? 1 : 2);\n  return [...emails].sort((a, b) => rang(a) - rang(b));\n};\n\nconst formaterTel = (internat) => (internat ? '+' + internat : '');\n\n// « 7,688 followers » / « 5 197 J'aime » / « 1,2 K abonnés » → nombre\nconst lireNombre = (s) => {\n  if (!s) return null;\n  let t = String(s).replace(/\\s/g, '').replace(/,(?=\\d{3}\\b)/g, '').replace(',', '.');\n  const k = /k$/i.test(t) ? 1000 : /m$/i.test(t) ? 1000000 : 1;\n  const n = parseFloat(t);\n  return Number.isFinite(n) ? Math.round(n * k) : null;\n};\n\n// Priorité lisible à partir du score.\nconst priorite = (score) => (score >= 60 ? 'Chaud' : score >= 35 ? 'Tiède' : 'Froid');\n\n// ── Quels sites ouvrir ? Ceux des entreprises dont on n'a pas encore d'email ─\nconst c = $('Config').first().json;\nconst oui = (v) => v === true || v === 'true';\nif (!oui(c.ouvrirLesSites)) return [];\nconst max = Number(c.maxSitesAOuvrir) || 40;\nreturn $input.all().map((i) => i.json)\n  .filter((l) => estUnVraiSite(l.siteWeb))\n  .sort((a, b) => (a.emails.length - b.emails.length) || (b.sources.length - a.sources.length))\n  .slice(0, max)\n  .map((l) => ({ json: { id: l.id, siteWeb: l.siteWeb } }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2288,
+        352
+      ],
+      "id": "3849f36f-8757-4ee8-ba1d-b4dd19414f25",
+      "name": "Sites à ouvrir",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.siteWeb }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "fr-FR,fr;q=0.9,en;q=0.8"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 5,
+              "batchInterval": 300
+            }
+          },
+          "allowUnauthorizedCerts": true,
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2480,
+        352
+      ],
+      "id": "bb0340e1-04b0-41ea-9cc6-baaaa8d32c72",
+      "name": "Ouvrir les sites",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────────────────────────────────\n// Fonctions communes aux 5 templates « Lead Connector ».\n// Le builder colle ce fichier EN TÊTE de chaque node Code qui en a besoin :\n// n8n n'a pas d'import entre nodes, chaque node doit être autonome.\n// ─────────────────────────────────────────────────────────────────────────────\n\n// Lit a[i][j][k]… sans planter si une case manque (le JSON de Google Maps est un\n// tableau de tableaux sans noms de champs : une case absente = null).\nconst lire = (a, ...chemin) => {\n  for (const k of chemin) {\n    if (a === null || a === undefined) return null;\n    a = a[k];\n  }\n  return a === undefined ? null : a;\n};\n\nconst nettoyer = (s) => String(s ?? '').replace(/\\s+/g, ' ').trim();\n\n// Décode les entités HTML les plus courantes (Brave, sites web).\nconst decoderHtml = (s) => nettoyer(String(s ?? '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&#x27;|&#39;|&apos;/g, \"'\")\n  .replace(/&quot;/g, '\"')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16))));\n\n// Les réseaux sociaux et agrégateurs ne comptent pas comme un « vrai » site web.\nconst RESEAUX = /(facebook\\.com|fb\\.com|instagram\\.com|tiktok\\.com|linktr\\.ee|wa\\.me|whatsapp\\.com|twitter\\.com|x\\.com|linkedin\\.com|youtube\\.com|beacons\\.ai|taplink|business\\.site|sites\\.google\\.com)/i;\n\nconst estUnVraiSite = (url) => !!url && !RESEAUX.test(url);\n\n// Nom de domaine sans « www. » (sans `new URL()`, absent du bac à sable n8n).\nconst domaine = (url) => ((String(url ?? '').match(/^https?:\\/\\/([^/?#:]+)/i) || [])[1] || '').replace(/^www\\./i, '').toLowerCase();\n\n// Garde seulement les chiffres d'un numéro au format international.\n// « +237 6 71 03 33 33 » → « 237671033333 »\nconst chiffres = (tel) => String(tel ?? '').replace(/\\D/g, '');\n\n// Cameroun : les mobiles commencent par 6 (WhatsApp), les fixes par 2.\n// Pour les autres pays on ne sait pas : on suppose que c'est un mobile.\nconst estMobile = (internat) => {\n  if (internat.startsWith('237')) return internat.charAt(3) === '6';\n  return internat.length >= 10;\n};\n\n// Remplace {nom}, {ville}, … dans un modèle de message.\nconst remplir = (modele, valeurs) =>\n  String(modele ?? '').replace(/\\{(\\w+)\\}/g, (m, cle) => (valeurs[cle] ?? '') === '' ? m : String(valeurs[cle]));\n\nconst lienWhatsApp = (internat, message) =>\n  internat ? `https://wa.me/${internat}${message ? '?text=' + encodeURIComponent(message) : ''}` : '';\n\n// « PHARMACIE OLEZOA, Yaoundé » → « PHARMACIE OLEZOA » (pour un message qui sonne humain).\n// On enlève le dernier morceau après une virgule ou un tiret s'il contient la ville.\nconst sansAccents = (s) => String(s ?? '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\nconst nomCourt = (nom, ...villes) => {\n  const n = nettoyer(nom);\n  const vs = villes.filter(Boolean).map((v) => sansAccents(String(v).split(',')[0].trim())).filter(Boolean);\n  const m = n.match(/^(.*\\S)\\s*[,|–-]\\s*([^,|–-]+)$/);\n  if (m && vs.some((v) => sansAccents(m[2]).includes(v))) return m[1].trim();\n  return n;\n};\n\nconst aujourdhui = () => new Date().toISOString().slice(0, 10);\n\n// Emails : on enlève les faux positifs classiques (images, exemples, trackers).\nconst extraireEmails = (texte) => [...new Set(\n  (String(texte ?? '').match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g) || [])\n    .map((e) => e.toLowerCase().replace(/^(?:u003e|x3e|mailto:)/, ''))\n    .filter((e) => !/\\.(png|jpe?g|gif|webp|svg|css|js)$/.test(e))\n    .filter((e) => !/(example\\.|domain\\.com|sentry|wixpress|yourname|votre|email\\.com$|@2x|godaddy)/.test(e))\n)];\n\n// Téléphones écrits dans un texte libre (extrait Facebook, page contact…).\n// Format international : gardé seulement s'il commence par l'indicatif du pays visé\n// (sinon on attrape des numéros de commande, des identifiants…). Pour le Cameroun,\n// on reconnaît aussi les numéros locaux à 9 chiffres qui commencent par 6 ou 2.\nconst extraireTelephones = (texte, indicatif = '237') => {\n  const t = String(texte ?? '');\n  const trouves = new Set();\n  for (const m of t.match(/\\+\\d[\\d\\s.\\-()]{7,16}\\d/g) || []) {\n    const c = chiffres(m);\n    if (c.length >= 10 && c.length <= 15 && (!indicatif || c.startsWith(indicatif))) trouves.add(c);\n  }\n  if (indicatif === '237') {\n    for (const m of t.match(/(?<![\\d+])(?:237[\\s.]?)?[62](?:[\\s.\\-]?\\d){8}(?!\\d)/g) || []) {\n      let c = chiffres(m);\n      if (c.length === 9) c = '237' + c;\n      if (c.length === 12) trouves.add(c);\n    }\n  }\n  return [...trouves];\n};\n\n// Range les emails : ceux du domaine du site d'abord, puis gmail/yahoo…, puis les autres\n// (souvent l'agence qui a fait le site, en bas de page).\nconst classerEmails = (emails, domaineSite) => {\n  const gratuit = /@(gmail|yahoo|hotmail|outlook|live|icloud|aol|ymail)\\./i;\n  const rang = (e) => (domaineSite && e.endsWith('@' + domaineSite) || (domaineSite && e.split('@')[1]?.endsWith('.' + domaineSite)) ? 0 : gratuit.test(e) ? 1 : 2);\n  return [...emails].sort((a, b) => rang(a) - rang(b));\n};\n\nconst formaterTel = (internat) => (internat ? '+' + internat : '');\n\n// « 7,688 followers » / « 5 197 J'aime » / « 1,2 K abonnés » → nombre\nconst lireNombre = (s) => {\n  if (!s) return null;\n  let t = String(s).replace(/\\s/g, '').replace(/,(?=\\d{3}\\b)/g, '').replace(',', '.');\n  const k = /k$/i.test(t) ? 1000 : /m$/i.test(t) ? 1000000 : 1;\n  const n = parseFloat(t);\n  return Number.isFinite(n) ? Math.round(n * k) : null;\n};\n\n// Priorité lisible à partir du score.\nconst priorite = (score) => (score >= 60 ? 'Chaud' : score >= 35 ? 'Tiède' : 'Froid');\n\n// ─────────────────────────────────────────────────────────────────────────────\n// Lecture d'une page de site web : contacts + signaux d'audit.\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst RESEAUX_LIENS = {\n  facebook: /https?:\\/\\/(?:[a-z-]+\\.)?facebook\\.com\\/(?!sharer|share|plugins|tr\\?|dialog)[A-Za-z0-9.\\-_/?=]+/i,\n  instagram: /https?:\\/\\/(?:www\\.)?instagram\\.com\\/[A-Za-z0-9._]+/i,\n  linkedin: /https?:\\/\\/(?:[a-z]+\\.)?linkedin\\.com\\/(?:company|in)\\/[A-Za-z0-9\\-_%]+/i,\n  tiktok: /https?:\\/\\/(?:www\\.)?tiktok\\.com\\/@[A-Za-z0-9._]+/i,\n};\n\nconst lireSite = (html, indicatif = '237') => {\n  const h = String(html ?? '');\n  const texte = decoderHtml(h.replace(/<script[\\s\\S]*?<\\/script>|<style[\\s\\S]*?<\\/style>/gi, ' '));\n  const titre = decoderHtml((h.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i) || [])[1]);\n  const description = decoderHtml((h.match(/<meta[^>]+name=[\"']description[\"'][^>]*content=[\"']([^\"']*)/i) || [])[1]);\n  const wa = [...new Set([...h.matchAll(/(?:wa\\.me\\/|api\\.whatsapp\\.com\\/send\\/?\\?phone=|whatsapp:\\/\\/send\\?phone=)\\+?(\\d{8,15})/gi)].map((m) => m[1]))];\n  const telLiens = [...h.matchAll(/href=[\"']tel:([^\"']+)/gi)].map((m) => m[1]);\n  // Les liens tel: sont fiables (n'importe quel pays) ; le texte libre doit avoir le bon indicatif.\n  const tels = [...new Set([...extraireTelephones(telLiens.join(' '), ''), ...extraireTelephones(texte, indicatif)])];\n  const mailtos = [...h.matchAll(/mailto:([^\"'?\\s>]+)/gi)].map((m) => m[1]);\n  const emails = extraireEmails(mailtos.join(' ') + ' ' + texte);\n  const reseaux = {};\n  for (const [nom, re] of Object.entries(RESEAUX_LIENS)) { const m = h.match(re); if (m) reseaux[nom] = m[0].replace(/[\"'<>].*$/, ''); }\n  // Lien vers une page contact (on la visitera si l'accueil ne donne pas d'email).\n  const contact = (h.match(/href=[\"']([^\"'#]*(?:contact|nous-joindre|contactez|joindre|about|a-propos)[^\"']*)[\"']/i) || [])[1] || '';\n  const annees = [...texte.matchAll(/(?:©|&copy;|copyright)\\s*(?:\\d{4}\\s*[-–]\\s*)?(20\\d{2}|19\\d{2})/gi)].map((m) => Number(m[1]));\n  return {\n    titre, description, emails, tels, whatsapp: wa, reseaux, contact,\n    mobile: /<meta[^>]+name=[\"']viewport[\"']/i.test(h),\n    boutonWhatsApp: wa.length > 0 || /whatsapp/i.test(h),\n    pixel: /fbq\\(|connect\\.facebook\\.net\\/[^\"']*fbevents/i.test(h),\n    analytics: /gtag\\(|googletagmanager\\.com|google-analytics\\.com|plausible\\.io|clarity\\.ms/i.test(h),\n    cms: /wp-content|wp-includes/i.test(h) ? 'WordPress' : /wix\\.com|wixstatic/i.test(h) ? 'Wix' : /cdn\\.shopify|shopify/i.test(h) ? 'Shopify' : /squarespace/i.test(h) ? 'Squarespace' : '',\n    annee: annees.length ? Math.max(...annees) : null,\n    taille: h.length,\n  };\n};\n\n// Transforme un lien relatif de page contact en lien complet.\nconst lienComplet = (base, lien) => {\n  if (!lien) return '';\n  if (/^https?:\\/\\//i.test(lien)) return lien;\n  const racine = (String(base).match(/^https?:\\/\\/[^/]+/i) || [''])[0];\n  if (lien.startsWith('//')) return 'https:' + lien;\n  if (lien.startsWith('/')) return racine + lien;\n  return racine + '/' + lien.replace(/^\\.\\//, '');\n};\n\n// ── Ajoute à chaque entreprise ce qu'on a lu sur son site ───────────────────\nconst c = $('Config').first().json;\nconst lu = new Map();\n$input.all().forEach((item, i) => {\n  const s = $('Sites à ouvrir').itemMatching(i)?.json;\n  if (!s || !s.id) return;\n  const html = typeof item.json.data === 'string' ? item.json.data : '';\n  lu.set(s.id, html.length > 500 && !item.json.error ? lireSite(html, chiffres(c.indicatif)) : { inaccessible: true });\n});\nreturn $('Fusionner les sources').all().map(({ json: l }) => {\n  const a = lu.get(l.id);\n  if (!a) return { json: l };\n  if (a.inaccessible) return { json: { ...l, site: { inaccessible: true } } };\n  return { json: {\n    ...l,\n    emails: classerEmails(new Set([...l.emails, ...a.emails]), domaine(l.siteWeb)),\n    telephones: [...new Set([...l.telephones, ...a.whatsapp, ...a.tels])],\n    facebook: l.facebook || a.reseaux.facebook || '',\n    instagram: l.instagram || a.reseaux.instagram || '',\n    site: { inaccessible: false, mobile: a.mobile, whatsapp: a.boutonWhatsApp, suivi: a.pixel || a.analytics, annee: a.annee },\n  } };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2688,
+        352
+      ],
+      "id": "e7587e34-4bd7-4c9f-abe5-72c4bc5da344",
+      "name": "Lire les sites"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────────────────────────────────\n// Fonctions communes aux 5 templates « Lead Connector ».\n// Le builder colle ce fichier EN TÊTE de chaque node Code qui en a besoin :\n// n8n n'a pas d'import entre nodes, chaque node doit être autonome.\n// ─────────────────────────────────────────────────────────────────────────────\n\n// Lit a[i][j][k]… sans planter si une case manque (le JSON de Google Maps est un\n// tableau de tableaux sans noms de champs : une case absente = null).\nconst lire = (a, ...chemin) => {\n  for (const k of chemin) {\n    if (a === null || a === undefined) return null;\n    a = a[k];\n  }\n  return a === undefined ? null : a;\n};\n\nconst nettoyer = (s) => String(s ?? '').replace(/\\s+/g, ' ').trim();\n\n// Décode les entités HTML les plus courantes (Brave, sites web).\nconst decoderHtml = (s) => nettoyer(String(s ?? '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&#x27;|&#39;|&apos;/g, \"'\")\n  .replace(/&quot;/g, '\"')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16))));\n\n// Les réseaux sociaux et agrégateurs ne comptent pas comme un « vrai » site web.\nconst RESEAUX = /(facebook\\.com|fb\\.com|instagram\\.com|tiktok\\.com|linktr\\.ee|wa\\.me|whatsapp\\.com|twitter\\.com|x\\.com|linkedin\\.com|youtube\\.com|beacons\\.ai|taplink|business\\.site|sites\\.google\\.com)/i;\n\nconst estUnVraiSite = (url) => !!url && !RESEAUX.test(url);\n\n// Nom de domaine sans « www. » (sans `new URL()`, absent du bac à sable n8n).\nconst domaine = (url) => ((String(url ?? '').match(/^https?:\\/\\/([^/?#:]+)/i) || [])[1] || '').replace(/^www\\./i, '').toLowerCase();\n\n// Garde seulement les chiffres d'un numéro au format international.\n// « +237 6 71 03 33 33 » → « 237671033333 »\nconst chiffres = (tel) => String(tel ?? '').replace(/\\D/g, '');\n\n// Cameroun : les mobiles commencent par 6 (WhatsApp), les fixes par 2.\n// Pour les autres pays on ne sait pas : on suppose que c'est un mobile.\nconst estMobile = (internat) => {\n  if (internat.startsWith('237')) return internat.charAt(3) === '6';\n  return internat.length >= 10;\n};\n\n// Remplace {nom}, {ville}, … dans un modèle de message.\nconst remplir = (modele, valeurs) =>\n  String(modele ?? '').replace(/\\{(\\w+)\\}/g, (m, cle) => (valeurs[cle] ?? '') === '' ? m : String(valeurs[cle]));\n\nconst lienWhatsApp = (internat, message) =>\n  internat ? `https://wa.me/${internat}${message ? '?text=' + encodeURIComponent(message) : ''}` : '';\n\n// « PHARMACIE OLEZOA, Yaoundé » → « PHARMACIE OLEZOA » (pour un message qui sonne humain).\n// On enlève le dernier morceau après une virgule ou un tiret s'il contient la ville.\nconst sansAccents = (s) => String(s ?? '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\nconst nomCourt = (nom, ...villes) => {\n  const n = nettoyer(nom);\n  const vs = villes.filter(Boolean).map((v) => sansAccents(String(v).split(',')[0].trim())).filter(Boolean);\n  const m = n.match(/^(.*\\S)\\s*[,|–-]\\s*([^,|–-]+)$/);\n  if (m && vs.some((v) => sansAccents(m[2]).includes(v))) return m[1].trim();\n  return n;\n};\n\nconst aujourdhui = () => new Date().toISOString().slice(0, 10);\n\n// Emails : on enlève les faux positifs classiques (images, exemples, trackers).\nconst extraireEmails = (texte) => [...new Set(\n  (String(texte ?? '').match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g) || [])\n    .map((e) => e.toLowerCase().replace(/^(?:u003e|x3e|mailto:)/, ''))\n    .filter((e) => !/\\.(png|jpe?g|gif|webp|svg|css|js)$/.test(e))\n    .filter((e) => !/(example\\.|domain\\.com|sentry|wixpress|yourname|votre|email\\.com$|@2x|godaddy)/.test(e))\n)];\n\n// Téléphones écrits dans un texte libre (extrait Facebook, page contact…).\n// Format international : gardé seulement s'il commence par l'indicatif du pays visé\n// (sinon on attrape des numéros de commande, des identifiants…). Pour le Cameroun,\n// on reconnaît aussi les numéros locaux à 9 chiffres qui commencent par 6 ou 2.\nconst extraireTelephones = (texte, indicatif = '237') => {\n  const t = String(texte ?? '');\n  const trouves = new Set();\n  for (const m of t.match(/\\+\\d[\\d\\s.\\-()]{7,16}\\d/g) || []) {\n    const c = chiffres(m);\n    if (c.length >= 10 && c.length <= 15 && (!indicatif || c.startsWith(indicatif))) trouves.add(c);\n  }\n  if (indicatif === '237') {\n    for (const m of t.match(/(?<![\\d+])(?:237[\\s.]?)?[62](?:[\\s.\\-]?\\d){8}(?!\\d)/g) || []) {\n      let c = chiffres(m);\n      if (c.length === 9) c = '237' + c;\n      if (c.length === 12) trouves.add(c);\n    }\n  }\n  return [...trouves];\n};\n\n// Range les emails : ceux du domaine du site d'abord, puis gmail/yahoo…, puis les autres\n// (souvent l'agence qui a fait le site, en bas de page).\nconst classerEmails = (emails, domaineSite) => {\n  const gratuit = /@(gmail|yahoo|hotmail|outlook|live|icloud|aol|ymail)\\./i;\n  const rang = (e) => (domaineSite && e.endsWith('@' + domaineSite) || (domaineSite && e.split('@')[1]?.endsWith('.' + domaineSite)) ? 0 : gratuit.test(e) ? 1 : 2);\n  return [...emails].sort((a, b) => rang(a) - rang(b));\n};\n\nconst formaterTel = (internat) => (internat ? '+' + internat : '');\n\n// « 7,688 followers » / « 5 197 J'aime » / « 1,2 K abonnés » → nombre\nconst lireNombre = (s) => {\n  if (!s) return null;\n  let t = String(s).replace(/\\s/g, '').replace(/,(?=\\d{3}\\b)/g, '').replace(',', '.');\n  const k = /k$/i.test(t) ? 1000 : /m$/i.test(t) ? 1000000 : 1;\n  const n = parseFloat(t);\n  return Number.isFinite(n) ? Math.round(n * k) : null;\n};\n\n// Priorité lisible à partir du score.\nconst priorite = (score) => (score >= 60 ? 'Chaud' : score >= 35 ? 'Tiède' : 'Froid');\n\n// ─────────────────────────────────────────────────────────────────────────────\n// Audit d'une entreprise trouvée sur Google : ce qui lui manque = ce qu'on peut lui vendre.\n// Chaque « manque » rapporte des points ; le premier de la liste devient l'argument\n// principal du message. Change les points ou les phrases ici, pas ailleurs.\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst BAREME = {\n  nonRevendique: {\n    points: 30,\n    libelle: 'Profil Google non revendiqué',\n    offre: 'Revendiquer et optimiser le profil Google',\n    raison: () => \"votre établissement n'est pas encore revendiqué sur Google Maps : vous ne pouvez ni répondre aux avis ni corriger vos informations\",\n  },\n  pasDeSite: {\n    points: 30,\n    libelle: 'Pas de site web',\n    offre: 'Site vitrine',\n    raison: (l) => (l.siteWeb\n      ? \"vos clients ne trouvent qu'une page de réseau social, pas de site internet\"\n      : \"vous n'avez pas encore de site internet\"),\n  },\n  peuAvis: {\n    points: 15,\n    libelle: \"Peu d'avis\",\n    offre: \"Campagne d'avis clients\",\n    raison: (l, ctx) => `vous avez ${l.avis} avis sur Google, alors que la moitié de vos concurrents à ${ctx.zone} en ont plus de ${ctx.medianeAvis}`,\n  },\n  noteBasse: {\n    points: 10,\n    libelle: 'Note inférieure à 4',\n    offre: 'Gestion de la réputation',\n    raison: (l) => `votre note Google est de ${String(l.note).replace('.', ',')}/5`,\n  },\n  pasHoraires: {\n    points: 5,\n    libelle: 'Horaires absents',\n    offre: 'Optimisation du profil Google',\n    raison: () => \"vos horaires d'ouverture n'apparaissent pas sur Google\",\n  },\n};\n\n// Médiane du nombre d'avis d'un groupe (activité + zone), pour comparer honnêtement.\nconst mediane = (nombres) => {\n  const v = nombres.filter((n) => typeof n === 'number').sort((a, b) => a - b);\n  if (!v.length) return null;\n  const m = Math.floor(v.length / 2);\n  return v.length % 2 ? v[m] : Math.round((v[m - 1] + v[m]) / 2);\n};\n\n// l = un lieu (voir lireReponseMaps) ; ctx = { zone, activite, medianeAvis } ; cfg = Config\nconst auditer = (l, ctx, cfg) => {\n  const seuil = Number(cfg.seuilAvis) || 20;\n  const manques = [];\n  if (l.revendique === false) manques.push('nonRevendique');\n  if (!estUnVraiSite(l.siteWeb)) manques.push('pasDeSite');\n  if (typeof l.avis === 'number' && l.avis < seuil && ctx.medianeAvis !== null && ctx.medianeAvis > l.avis) manques.push('peuAvis');\n  if (l.note !== null && l.note !== '' && l.note !== undefined && Number(l.note) < 4) manques.push('noteBasse');\n  if (l.horaires === false) manques.push('pasHoraires');\n\n  const mobile = !!l.telephoneChiffres && estMobile(l.telephoneChiffres);\n  let score = manques.reduce((s, m) => s + BAREME[m].points, 0);\n  if (typeof l.avis === 'number' && l.avis >= 100) score += 10; // entreprise qui tourne : elle a un budget\n  if (mobile) score += 10;                                       // joignable sur WhatsApp\n  if (!l.telephone) score -= 25;                                 // impossible à appeler\n  score = Math.max(0, Math.min(100, score));\n\n  const principal = manques[0];\n  return {\n    score,\n    priorite: priorite(score),\n    manques,\n    pourquoi: manques.map((m) => BAREME[m].libelle).join(' · '),\n    offre: principal ? BAREME[principal].offre : 'Publicité / visibilité',\n    raison: principal ? BAREME[principal].raison(l, ctx) : 'vous êtes déjà bien présent sur Google',\n    mobile,\n  };\n};\n\n// ── Un score pour toutes les sources, l'argument principal, le message ──────\nconst c = $('Config').first().json;\nconst anneeCourante = new Date().getFullYear();\nconst SITE = {\n  siteInaccessible: { points: 25, libelle: 'Site en panne', offre: 'Réparer ou refaire le site', raison: () => \"votre site ne s'ouvre pas en ce moment\" },\n  siteMobile: { points: 15, libelle: 'Site pas adapté au téléphone', offre: 'Refonte mobile', raison: () => \"votre site n'est pas adapté aux téléphones\" },\n  siteWhatsapp: { points: 10, libelle: 'Pas de bouton WhatsApp sur le site', offre: 'Bouton WhatsApp + assistant', raison: () => \"on ne peut pas vous écrire sur WhatsApp en un clic depuis votre site\" },\n  siteVieux: { points: 10, libelle: 'Site pas mis à jour', offre: 'Mise à jour du site', raison: (l) => `votre site affiche encore ${l.site.annee}` },\n};\nconst ORDRE = ['nonRevendique', 'pasDeSite', 'siteInaccessible', 'siteMobile', 'peuAvis', 'siteWhatsapp', 'siteVieux', 'noteBasse', 'pasHoraires'];\n\nconst leads = $input.all().map((i) => i.json).filter((l) => l.nom);\nconst groupes = {};\nfor (const l of leads) (groupes[`${l.activite}|${l.zone}`] ??= []).push(l.avis);\nconst med = Object.fromEntries(Object.entries(groupes).map(([k, v]) => [k, mediane(v)]));\n\nconst out = leads.map((l) => {\n  const telMobile = l.telephones.find(estMobile) || '';\n  const tel = telMobile || l.telephones[0] || '';\n  const ctx = { zone: l.zone, activite: l.activite, medianeAvis: med[`${l.activite}|${l.zone}`] };\n  const g = auditer({ ...l, telephone: tel, telephoneChiffres: tel }, ctx, c);\n  const manques = [...g.manques];\n  let score = g.score;\n  if (l.site) {\n    const s = l.site;\n    const ajoute = (m) => { manques.push(m); score += SITE[m].points; };\n    if (s.inaccessible) ajoute('siteInaccessible');\n    else {\n      if (!s.mobile) ajoute('siteMobile');\n      if (!s.whatsapp) ajoute('siteWhatsapp');\n      if (s.annee && s.annee <= anneeCourante - 3) ajoute('siteVieux');\n    }\n  }\n  const bonus = [];\n  if (l.sources.length >= 2) { score += 5; bonus.push(`Trouvée sur ${l.sources.join(' + ')}`); }\n  if (l.abonnes >= 300 && l.abonnes <= 20000) { score += 10; bonus.push(`${l.abonnes.toLocaleString('fr-FR')} abonnés Facebook`); }\n  if (l.emails.length) { score += 5; }\n  score = Math.max(0, Math.min(100, score));\n  manques.sort((a, b) => ORDRE.indexOf(a) - ORDRE.indexOf(b));\n  const def = (m) => BAREME[m] || SITE[m];\n  const principal = manques[0];\n  const raison = principal ? def(principal).raison(l, ctx) : 'votre présence en ligne peut encore attirer plus de clients';\n  const message = remplir(c.message, { nom: nomCourt(l.nom, l.zone), zone: l.zone, activite: l.activite, raison, signature: c.signature });\n  return {\n    priorite: priorite(score),\n    score,\n    nom: l.nom,\n    activite: l.activite,\n    zone: l.zone,\n    telephone: l.telephones.slice(0, 3).map(formaterTel).join(' / '),\n    whatsapp: telMobile ? lienWhatsApp(telMobile, message) : '',\n    email: l.emails.slice(0, 3).join(', '),\n    offre: principal ? def(principal).offre : 'Publicité / visibilité',\n    pourquoi: [...manques.map((m) => def(m).libelle), ...bonus].join(' · '),\n    message,\n    messageIA: 'non',\n    siteWeb: l.siteWeb,\n    facebook: l.facebook,\n    instagram: l.instagram,\n    profilGoogle: l.revendique === false ? 'Non revendiqué' : l.revendique === true ? 'Revendiqué' : '',\n    note: l.note ?? '',\n    avis: l.avis ?? '',\n    abonnes: l.abonnes ?? '',\n    sources: l.sources.join(' + '),\n    adresse: l.adresse,\n    lienMaps: l.lienMaps,\n    extrait: l.extrait,\n    date: aujourdhui(),\n    id: l.id,\n  };\n});\nout.sort((a, b) => b.score - a.score);\nconst garder = out.filter((l) => l.score >= (Number(c.scoreMinimum) || 0)).slice(0, Number(c.maxLeads) || 500);\n\n// On mémorise ce qu'on envoie (utile seulement en mode planifié).\nconst memoire = $getWorkflowStaticData('global');\nmemoire.dejaEnvoyes = [...new Set([...(memoire.dejaEnvoyes || []), ...garder.map((l) => l.id)])].slice(-20000);\n\nif (!garder.length) return [{ json: { info: 'Aucun lead au-dessus du score minimum.' } }];\nreturn garder.map((json) => ({ json }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2880,
+        352
+      ],
+      "id": "82317909-9778-4d91-b3cc-a02ef44b80b1",
+      "name": "Noter et classer"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c2576aa2-291f-488a-a116-756b07a318d1",
+              "leftValue": "={{ $('Config').first().json.utiliserIA }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3088,
+        352
+      ],
+      "id": "75622dfb-2d77-43cf-8d92-88fa65becb0d",
+      "name": "IA activée ?"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────────────────────────────────\n// Fonctions communes aux 5 templates « Lead Connector ».\n// Le builder colle ce fichier EN TÊTE de chaque node Code qui en a besoin :\n// n8n n'a pas d'import entre nodes, chaque node doit être autonome.\n// ─────────────────────────────────────────────────────────────────────────────\n\n// Lit a[i][j][k]… sans planter si une case manque (le JSON de Google Maps est un\n// tableau de tableaux sans noms de champs : une case absente = null).\nconst lire = (a, ...chemin) => {\n  for (const k of chemin) {\n    if (a === null || a === undefined) return null;\n    a = a[k];\n  }\n  return a === undefined ? null : a;\n};\n\nconst nettoyer = (s) => String(s ?? '').replace(/\\s+/g, ' ').trim();\n\n// Décode les entités HTML les plus courantes (Brave, sites web).\nconst decoderHtml = (s) => nettoyer(String(s ?? '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&#x27;|&#39;|&apos;/g, \"'\")\n  .replace(/&quot;/g, '\"')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16))));\n\n// Les réseaux sociaux et agrégateurs ne comptent pas comme un « vrai » site web.\nconst RESEAUX = /(facebook\\.com|fb\\.com|instagram\\.com|tiktok\\.com|linktr\\.ee|wa\\.me|whatsapp\\.com|twitter\\.com|x\\.com|linkedin\\.com|youtube\\.com|beacons\\.ai|taplink|business\\.site|sites\\.google\\.com)/i;\n\nconst estUnVraiSite = (url) => !!url && !RESEAUX.test(url);\n\n// Nom de domaine sans « www. » (sans `new URL()`, absent du bac à sable n8n).\nconst domaine = (url) => ((String(url ?? '').match(/^https?:\\/\\/([^/?#:]+)/i) || [])[1] || '').replace(/^www\\./i, '').toLowerCase();\n\n// Garde seulement les chiffres d'un numéro au format international.\n// « +237 6 71 03 33 33 » → « 237671033333 »\nconst chiffres = (tel) => String(tel ?? '').replace(/\\D/g, '');\n\n// Cameroun : les mobiles commencent par 6 (WhatsApp), les fixes par 2.\n// Pour les autres pays on ne sait pas : on suppose que c'est un mobile.\nconst estMobile = (internat) => {\n  if (internat.startsWith('237')) return internat.charAt(3) === '6';\n  return internat.length >= 10;\n};\n\n// Remplace {nom}, {ville}, … dans un modèle de message.\nconst remplir = (modele, valeurs) =>\n  String(modele ?? '').replace(/\\{(\\w+)\\}/g, (m, cle) => (valeurs[cle] ?? '') === '' ? m : String(valeurs[cle]));\n\nconst lienWhatsApp = (internat, message) =>\n  internat ? `https://wa.me/${internat}${message ? '?text=' + encodeURIComponent(message) : ''}` : '';\n\n// « PHARMACIE OLEZOA, Yaoundé » → « PHARMACIE OLEZOA » (pour un message qui sonne humain).\n// On enlève le dernier morceau après une virgule ou un tiret s'il contient la ville.\nconst sansAccents = (s) => String(s ?? '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\nconst nomCourt = (nom, ...villes) => {\n  const n = nettoyer(nom);\n  const vs = villes.filter(Boolean).map((v) => sansAccents(String(v).split(',')[0].trim())).filter(Boolean);\n  const m = n.match(/^(.*\\S)\\s*[,|–-]\\s*([^,|–-]+)$/);\n  if (m && vs.some((v) => sansAccents(m[2]).includes(v))) return m[1].trim();\n  return n;\n};\n\nconst aujourdhui = () => new Date().toISOString().slice(0, 10);\n\n// Emails : on enlève les faux positifs classiques (images, exemples, trackers).\nconst extraireEmails = (texte) => [...new Set(\n  (String(texte ?? '').match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g) || [])\n    .map((e) => e.toLowerCase().replace(/^(?:u003e|x3e|mailto:)/, ''))\n    .filter((e) => !/\\.(png|jpe?g|gif|webp|svg|css|js)$/.test(e))\n    .filter((e) => !/(example\\.|domain\\.com|sentry|wixpress|yourname|votre|email\\.com$|@2x|godaddy)/.test(e))\n)];\n\n// Téléphones écrits dans un texte libre (extrait Facebook, page contact…).\n// Format international : gardé seulement s'il commence par l'indicatif du pays visé\n// (sinon on attrape des numéros de commande, des identifiants…). Pour le Cameroun,\n// on reconnaît aussi les numéros locaux à 9 chiffres qui commencent par 6 ou 2.\nconst extraireTelephones = (texte, indicatif = '237') => {\n  const t = String(texte ?? '');\n  const trouves = new Set();\n  for (const m of t.match(/\\+\\d[\\d\\s.\\-()]{7,16}\\d/g) || []) {\n    const c = chiffres(m);\n    if (c.length >= 10 && c.length <= 15 && (!indicatif || c.startsWith(indicatif))) trouves.add(c);\n  }\n  if (indicatif === '237') {\n    for (const m of t.match(/(?<![\\d+])(?:237[\\s.]?)?[62](?:[\\s.\\-]?\\d){8}(?!\\d)/g) || []) {\n      let c = chiffres(m);\n      if (c.length === 9) c = '237' + c;\n      if (c.length === 12) trouves.add(c);\n    }\n  }\n  return [...trouves];\n};\n\n// Range les emails : ceux du domaine du site d'abord, puis gmail/yahoo…, puis les autres\n// (souvent l'agence qui a fait le site, en bas de page).\nconst classerEmails = (emails, domaineSite) => {\n  const gratuit = /@(gmail|yahoo|hotmail|outlook|live|icloud|aol|ymail)\\./i;\n  const rang = (e) => (domaineSite && e.endsWith('@' + domaineSite) || (domaineSite && e.split('@')[1]?.endsWith('.' + domaineSite)) ? 0 : gratuit.test(e) ? 1 : 2);\n  return [...emails].sort((a, b) => rang(a) - rang(b));\n};\n\nconst formaterTel = (internat) => (internat ? '+' + internat : '');\n\n// « 7,688 followers » / « 5 197 J'aime » / « 1,2 K abonnés » → nombre\nconst lireNombre = (s) => {\n  if (!s) return null;\n  let t = String(s).replace(/\\s/g, '').replace(/,(?=\\d{3}\\b)/g, '').replace(',', '.');\n  const k = /k$/i.test(t) ? 1000 : /m$/i.test(t) ? 1000000 : 1;\n  const n = parseFloat(t);\n  return Number.isFinite(n) ? Math.round(n * k) : null;\n};\n\n// Priorité lisible à partir du score.\nconst priorite = (score) => (score >= 60 ? 'Chaud' : score >= 35 ? 'Tiède' : 'Froid');\n\n// ── Un seul appel à Gemini pour les N meilleurs leads (économise le quota gratuit) ─\nconst c = $('Config').first().json;\nconst n = Number(c.maxLeadsIA) || 25;\nconst lot = $input.all().map((i) => i.json).filter((l) => l.nom && (l.telephone || l.email)).slice(0, n)\n  .map((l) => ({ id: l.id, nom: nomCourt(l.nom, l.zone), activite: l.activite, zone: l.zone, problemes: l.pourquoi,\n    note: l.note, avis: l.avis, abonnes: l.abonnes, site: l.siteWeb, extrait: (l.extrait || '').slice(0, 200) }));\nconst consigne = `Tu es ${c.signature}. Tu prospectes des entreprises locales sur WhatsApp.\nPour CHAQUE entreprise ci-dessous, écris un premier message WhatsApp :\n- en français, vouvoiement, 350 caractères maximum, ton humain et direct, pas d'emoji ;\n- commence par « Bonjour » + le nom de l'entreprise, puis présente-toi en une courte phrase (« je suis ${c.signature} ») ;\n- cite UN problème concret pris dans « problemes » (n'invente rien qui n'est pas dans les données : pas de chiffre, pas d'avis, pas de concurrent inventé) ;\n- dis en une phrase ce que tu peux faire pour régler ce problème (${c.offresIA}) ;\n- pas de prix ; termine par une question simple qui appelle une réponse oui/non ;\n- n'emploie jamais le mot « fiche » : dis « profil Google » ou « votre entreprise sur Google Maps ».\nRéponds UNIQUEMENT avec un tableau JSON : [{\"id\": \"...\", \"message\": \"...\"}], un objet par entreprise, mêmes id.\n\nEntreprises :\n${JSON.stringify(lot, null, 1)}`;\nreturn [{ json: {\n  nbLeads: lot.length,\n  corps: { contents: [{ role: 'user', parts: [{ text: consigne }] }],\n    generationConfig: { responseMimeType: 'application/json', temperature: 0.7 } },\n} }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3280,
+        208
+      ],
+      "id": "3e4ab045-32a3-4479-a6d4-03ec6c4a01de",
+      "name": "Préparer le lot IA"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/{{ $('Config').first().json.modeleIA }}:generateContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googlePalmApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.corps) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3536,
+        208
+      ],
+      "id": "20e42a66-ecd4-4b94-930d-b7fcc07671c9",
+      "name": "Gemini écrit les messages",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Rdi2MzyPVTiwv9CW",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────────────────────────────────\n// Fonctions communes aux 5 templates « Lead Connector ».\n// Le builder colle ce fichier EN TÊTE de chaque node Code qui en a besoin :\n// n8n n'a pas d'import entre nodes, chaque node doit être autonome.\n// ─────────────────────────────────────────────────────────────────────────────\n\n// Lit a[i][j][k]… sans planter si une case manque (le JSON de Google Maps est un\n// tableau de tableaux sans noms de champs : une case absente = null).\nconst lire = (a, ...chemin) => {\n  for (const k of chemin) {\n    if (a === null || a === undefined) return null;\n    a = a[k];\n  }\n  return a === undefined ? null : a;\n};\n\nconst nettoyer = (s) => String(s ?? '').replace(/\\s+/g, ' ').trim();\n\n// Décode les entités HTML les plus courantes (Brave, sites web).\nconst decoderHtml = (s) => nettoyer(String(s ?? '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&#x27;|&#39;|&apos;/g, \"'\")\n  .replace(/&quot;/g, '\"')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16))));\n\n// Les réseaux sociaux et agrégateurs ne comptent pas comme un « vrai » site web.\nconst RESEAUX = /(facebook\\.com|fb\\.com|instagram\\.com|tiktok\\.com|linktr\\.ee|wa\\.me|whatsapp\\.com|twitter\\.com|x\\.com|linkedin\\.com|youtube\\.com|beacons\\.ai|taplink|business\\.site|sites\\.google\\.com)/i;\n\nconst estUnVraiSite = (url) => !!url && !RESEAUX.test(url);\n\n// Nom de domaine sans « www. » (sans `new URL()`, absent du bac à sable n8n).\nconst domaine = (url) => ((String(url ?? '').match(/^https?:\\/\\/([^/?#:]+)/i) || [])[1] || '').replace(/^www\\./i, '').toLowerCase();\n\n// Garde seulement les chiffres d'un numéro au format international.\n// « +237 6 71 03 33 33 » → « 237671033333 »\nconst chiffres = (tel) => String(tel ?? '').replace(/\\D/g, '');\n\n// Cameroun : les mobiles commencent par 6 (WhatsApp), les fixes par 2.\n// Pour les autres pays on ne sait pas : on suppose que c'est un mobile.\nconst estMobile = (internat) => {\n  if (internat.startsWith('237')) return internat.charAt(3) === '6';\n  return internat.length >= 10;\n};\n\n// Remplace {nom}, {ville}, … dans un modèle de message.\nconst remplir = (modele, valeurs) =>\n  String(modele ?? '').replace(/\\{(\\w+)\\}/g, (m, cle) => (valeurs[cle] ?? '') === '' ? m : String(valeurs[cle]));\n\nconst lienWhatsApp = (internat, message) =>\n  internat ? `https://wa.me/${internat}${message ? '?text=' + encodeURIComponent(message) : ''}` : '';\n\n// « PHARMACIE OLEZOA, Yaoundé » → « PHARMACIE OLEZOA » (pour un message qui sonne humain).\n// On enlève le dernier morceau après une virgule ou un tiret s'il contient la ville.\nconst sansAccents = (s) => String(s ?? '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\nconst nomCourt = (nom, ...villes) => {\n  const n = nettoyer(nom);\n  const vs = villes.filter(Boolean).map((v) => sansAccents(String(v).split(',')[0].trim())).filter(Boolean);\n  const m = n.match(/^(.*\\S)\\s*[,|–-]\\s*([^,|–-]+)$/);\n  if (m && vs.some((v) => sansAccents(m[2]).includes(v))) return m[1].trim();\n  return n;\n};\n\nconst aujourdhui = () => new Date().toISOString().slice(0, 10);\n\n// Emails : on enlève les faux positifs classiques (images, exemples, trackers).\nconst extraireEmails = (texte) => [...new Set(\n  (String(texte ?? '').match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g) || [])\n    .map((e) => e.toLowerCase().replace(/^(?:u003e|x3e|mailto:)/, ''))\n    .filter((e) => !/\\.(png|jpe?g|gif|webp|svg|css|js)$/.test(e))\n    .filter((e) => !/(example\\.|domain\\.com|sentry|wixpress|yourname|votre|email\\.com$|@2x|godaddy)/.test(e))\n)];\n\n// Téléphones écrits dans un texte libre (extrait Facebook, page contact…).\n// Format international : gardé seulement s'il commence par l'indicatif du pays visé\n// (sinon on attrape des numéros de commande, des identifiants…). Pour le Cameroun,\n// on reconnaît aussi les numéros locaux à 9 chiffres qui commencent par 6 ou 2.\nconst extraireTelephones = (texte, indicatif = '237') => {\n  const t = String(texte ?? '');\n  const trouves = new Set();\n  for (const m of t.match(/\\+\\d[\\d\\s.\\-()]{7,16}\\d/g) || []) {\n    const c = chiffres(m);\n    if (c.length >= 10 && c.length <= 15 && (!indicatif || c.startsWith(indicatif))) trouves.add(c);\n  }\n  if (indicatif === '237') {\n    for (const m of t.match(/(?<![\\d+])(?:237[\\s.]?)?[62](?:[\\s.\\-]?\\d){8}(?!\\d)/g) || []) {\n      let c = chiffres(m);\n      if (c.length === 9) c = '237' + c;\n      if (c.length === 12) trouves.add(c);\n    }\n  }\n  return [...trouves];\n};\n\n// Range les emails : ceux du domaine du site d'abord, puis gmail/yahoo…, puis les autres\n// (souvent l'agence qui a fait le site, en bas de page).\nconst classerEmails = (emails, domaineSite) => {\n  const gratuit = /@(gmail|yahoo|hotmail|outlook|live|icloud|aol|ymail)\\./i;\n  const rang = (e) => (domaineSite && e.endsWith('@' + domaineSite) || (domaineSite && e.split('@')[1]?.endsWith('.' + domaineSite)) ? 0 : gratuit.test(e) ? 1 : 2);\n  return [...emails].sort((a, b) => rang(a) - rang(b));\n};\n\nconst formaterTel = (internat) => (internat ? '+' + internat : '');\n\n// « 7,688 followers » / « 5 197 J'aime » / « 1,2 K abonnés » → nombre\nconst lireNombre = (s) => {\n  if (!s) return null;\n  let t = String(s).replace(/\\s/g, '').replace(/,(?=\\d{3}\\b)/g, '').replace(',', '.');\n  const k = /k$/i.test(t) ? 1000 : /m$/i.test(t) ? 1000000 : 1;\n  const n = parseFloat(t);\n  return Number.isFinite(n) ? Math.round(n * k) : null;\n};\n\n// Priorité lisible à partir du score.\nconst priorite = (score) => (score >= 60 ? 'Chaud' : score >= 35 ? 'Tiède' : 'Froid');\n\n// ── Remplace le message modèle par celui de l'IA quand il existe ────────────\nconst rep = $input.first().json;\nlet messages = [];\nlet erreur = '';\ntry {\n  if (rep.error) throw new Error(rep.error.message || JSON.stringify(rep.error));\n  const texte = rep.candidates?.[0]?.content?.parts?.map((p) => p.text).join('') || '';\n  const brut = JSON.parse(texte.replace(/^```(?:json)?\\s*|\\s*```$/g, ''));\n  messages = Array.isArray(brut) ? brut : brut.messages || [];\n} catch (e) { erreur = String(e.message || e).slice(0, 200); }\n// Filet de sécurité : l'IA dit parfois « fiche » malgré la consigne → « profil ».\nconst sansFiche = (t) => t\n  .replace(/\\b(la|cette)\\s+fiche\\b/gi, (m, d) => (d.toLowerCase() === 'la' ? 'le profil' : 'ce profil'))\n  .replace(/\\bune\\s+fiche\\b/gi, 'un profil')\n  .replace(/\\bfiches\\b/gi, 'profils')\n  .replace(/\\bfiche\\b/gi, 'profil');\nconst parId = new Map(messages.filter((m) => m && m.id && m.message).map((m) => [String(m.id), sansFiche(String(m.message).trim())]));\nreturn $('Noter et classer').all().map(({ json: l }, i) => {\n  const m = parId.get(String(l.id));\n  // Si Gemini a échoué, on garde les messages modèles et on note l'erreur sur la 1re ligne.\n  if (!m) return { json: erreur && i === 0 ? { ...l, messageIA: 'erreur : ' + erreur } : l };\n  const tel = (l.whatsapp.match(/wa\\.me\\/(\\d+)/) || [])[1];\n  return { json: { ...l, message: m, messageIA: 'oui', whatsapp: tel ? lienWhatsApp(tel, m) : l.whatsapp } };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3968,
+        208
+      ],
+      "id": "68bb6c91-e0d3-4caa-9adc-7ac0cccaf445",
+      "name": "Ajouter les messages IA"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "2upukXsUEkonmcPI",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "/projects/3PjhckNWKtXaD0TR/datatables/2upukXsUEkonmcPI"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nom": "={{ $json.nom }}",
+            "telephone": "={{ $json.telephone }}",
+            "siteWeb": "={{ $json.siteWeb }}",
+            "activite": "={{ $json.activite }}",
+            "zone": "={{ $json.zone }}",
+            "source": "={{ $json.sources }}",
+            "score": "={{ $json.note }}",
+            "message": "={{ $json.message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "nom",
+              "displayName": "nom",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "telephone",
+              "displayName": "telephone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "siteWeb",
+              "displayName": "siteWeb",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "activite",
+              "displayName": "activite",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "zone",
+              "displayName": "zone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        4208,
+        384
+      ],
+      "id": "6db02858-044f-4c4a-bfe0-4ea880da8f88",
+      "name": "Insert row"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Lancer maintenant": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chaque jour à 8h": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Liste des zones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Liste des zones": {
+      "main": [
+        [
+          {
+            "node": "Situer la zone (OpenStreetMap)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Situer la zone (OpenStreetMap)": {
+      "main": [
+        [
+          {
+            "node": "Plan des sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan des sources": {
+      "main": [
+        [
+          {
+            "node": "Router par source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router par source": {
+      "main": [
+        [
+          {
+            "node": "Chercher sur Google Maps",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chercher sur Facebook (Serper)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chercher sur le Web (Serper)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chercher sur OpenStreetMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chercher sur Google Maps": {
+      "main": [
+        [
+          {
+            "node": "Lire Google Maps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chercher sur Facebook (Serper)": {
+      "main": [
+        [
+          {
+            "node": "Lire Facebook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chercher sur le Web (Serper)": {
+      "main": [
+        [
+          {
+            "node": "Lire le Web",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chercher sur OpenStreetMap": {
+      "main": [
+        [
+          {
+            "node": "Lire OpenStreetMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire Google Maps": {
+      "main": [
+        [
+          {
+            "node": "Tout réunir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire Facebook": {
+      "main": [
+        [
+          {
+            "node": "Tout réunir",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Lire le Web": {
+      "main": [
+        [
+          {
+            "node": "Tout réunir",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Lire OpenStreetMap": {
+      "main": [
+        [
+          {
+            "node": "Tout réunir",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Tout réunir": {
+      "main": [
+        [
+          {
+            "node": "Fusionner les sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fusionner les sources": {
+      "main": [
+        [
+          {
+            "node": "Sites à ouvrir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sites à ouvrir": {
+      "main": [
+        [
+          {
+            "node": "Ouvrir les sites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ouvrir les sites": {
+      "main": [
+        [
+          {
+            "node": "Lire les sites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire les sites": {
+      "main": [
+        [
+          {
+            "node": "Noter et classer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Noter et classer": {
+      "main": [
+        [
+          {
+            "node": "IA activée ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA activée ?": {
+      "main": [
+        [
+          {
+            "node": "Préparer le lot IA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer le lot IA": {
+      "main": [
+        [
+          {
+            "node": "Gemini écrit les messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini écrit les messages": {
+      "main": [
+        [
+          {
+            "node": "Ajouter les messages IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ajouter les messages IA": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f9fa1a5a-dc45-4841-834c-5b724bef9cf2",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "ISxhZbP3BOoGkw3s",
+  "tags": []
+}
